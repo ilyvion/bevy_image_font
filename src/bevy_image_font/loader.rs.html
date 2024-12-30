@@ -206,7 +206,8 @@
 <a href="#205" id="205">205</a>
 <a href="#206" id="206">206</a>
 <a href="#207" id="207">207</a>
-<a href="#208" id="208">208</a></pre></div><pre class="rust"><code><span class="doccomment">//! Code for parsing an [`ImageFont`] off of an on-disk representation.
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a></pre></div><pre class="rust"><code><span class="doccomment">//! Code for parsing an [`ImageFont`] off of an on-disk representation.
 </span><span class="kw">use </span>std::path::PathBuf;
 
 <span class="kw">use </span>bevy::{
@@ -214,6 +215,7 @@
     prelude::<span class="kw-2">*</span>,
     utils::HashMap,
 };
+<span class="kw">use </span>bevy_image::Image;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>thiserror::Error;
 
@@ -378,11 +380,11 @@
 
     <span class="kw">type </span>Error = ImageFontLoadError;
 
-    <span class="kw">async fn </span>load&lt;<span class="lifetime">'a</span>&gt;(
-        <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>,
-        reader: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Reader&lt;<span class="lifetime">'_</span>&gt;,
-        _settings: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">Self</span>::Settings,
-        load_context: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>LoadContext&lt;<span class="lifetime">'_</span>&gt;,
+    <span class="kw">async fn </span>load(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        reader: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>Reader,
+        _settings: <span class="kw-2">&amp;</span><span class="self">Self</span>::Settings,
+        load_context: <span class="kw-2">&amp;mut </span>LoadContext&lt;<span class="lifetime">'_</span>&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Asset, <span class="self">Self</span>::Error&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>str = String::new();
         reader.read_to_string(<span class="kw-2">&amp;mut </span>str).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -396,8 +398,8 @@
             .join(disk_format.image.clone());
         <span class="kw">let </span>image = load_context
             .loader()
-            .direct()
-            .untyped()
+            .immediate()
+            .with_unknown_type()
             .load(image_path.clone())
             .<span class="kw">await</span><span class="question-mark">?
             </span>.take::&lt;Image&gt;()

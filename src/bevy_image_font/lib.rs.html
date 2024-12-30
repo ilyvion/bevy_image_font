@@ -289,10 +289,7 @@
 <a href="#288" id="288">288</a>
 <a href="#289" id="289">289</a>
 <a href="#290" id="290">290</a>
-<a href="#291" id="291">291</a>
-<a href="#292" id="292">292</a>
-<a href="#293" id="293">293</a>
-<a href="#294" id="294">294</a></pre></div><pre class="rust"><code><span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">"../README.md"</span>)]
+<a href="#291" id="291">291</a></pre></div><pre class="rust"><code><span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">"../README.md"</span>)]
 
 </span><span class="kw">pub mod </span>loader;
 
@@ -303,10 +300,10 @@
     render::{
         render_asset::RenderAssetUsages,
         render_resource::{Extent3d, TextureDimension, TextureFormat},
-        texture::ImageSampler,
     },
     utils::{HashMap, HashSet},
 };
+<span class="kw">use </span>bevy_image::{Image, ImageSampler};
 <span class="kw">use </span>derive_setters::Setters;
 <span class="kw">use </span>image::{
     imageops::{<span class="self">self</span>, FilterType},
@@ -390,26 +387,23 @@
 }
 
 <span class="doccomment">/// All the components you need to render image font text 'in the world'. If you
-/// want to use this with `bevy_ui`, use [`ImageFontUiBundle`] instead.
-</span><span class="attr">#[derive(Bundle, Default)]
-</span><span class="kw">pub struct </span>ImageFontBundle {
-    <span class="kw">pub </span>text: ImageFontText,
-    <span class="kw">pub </span>sprite: SpriteBundle,
-}
+/// want to use this with `bevy_ui`, use [`ImageFontUiText`] instead.
+</span><span class="attr">#[derive(Component, Debug, Default, Clone, Reflect)]
+#[require(ImageFontText, Sprite)]
+</span><span class="kw">pub struct </span>ImageFontSpriteText;
 
 <span class="doccomment">/// All the components you need to render image font text in the UI. If you want
-/// to display text as an entity in the world, use [`ImageFontBundle`] instead.
-</span><span class="attr">#[derive(Bundle, Default)]
+/// to display text as an entity in the world, use [`ImageFontSpriteText`]
+/// instead.
+</span><span class="attr">#[derive(Component, Debug, Default, Clone, Reflect)]
 #[cfg(feature = <span class="string">"ui"</span>)]
-</span><span class="kw">pub struct </span>ImageFontUiBundle {
-    <span class="kw">pub </span>text: ImageFontText,
-    <span class="kw">pub </span>node: ImageBundle,
-}
+#[require(ImageFontText, ImageNode)]
+</span><span class="kw">pub struct </span>ImageFontUiText;
 
 <span class="doccomment">/// System that renders each [`ImageFontText`] into the corresponding
 /// `Handle&lt;Image&gt;`. This is mainly for use with sprites.
 </span><span class="kw">pub fn </span>render_sprites(
-    <span class="kw-2">mut </span>query: Query&lt;(<span class="kw-2">&amp;</span>ImageFontText, <span class="kw-2">&amp;mut </span>Handle&lt;Image&gt;), Changed&lt;ImageFontText&gt;&gt;,
+    <span class="kw-2">mut </span>query: Query&lt;(<span class="kw-2">&amp;</span>ImageFontText, <span class="kw-2">&amp;mut </span>Sprite), Changed&lt;ImageFontText&gt;&gt;,
     image_fonts: Res&lt;Assets&lt;ImageFont&gt;&gt;,
     <span class="kw-2">mut </span>images: ResMut&lt;Assets&lt;Image&gt;&gt;,
 ) {
@@ -418,7 +412,7 @@
         <span class="comment">// don't need to clear the old image since it'll be no longer live
         </span><span class="kw">match </span>render_text(image_font_text, image_fonts.as_ref(), images.as_ref()) {
             <span class="prelude-val">Ok</span>(image) =&gt; {
-                <span class="kw-2">*</span>image_handle = images.add(image);
+                image_handle.image = images.add(image);
             }
             <span class="prelude-val">Err</span>(e) =&gt; {
                 <span class="macro">error!</span>(
@@ -434,7 +428,7 @@
 </span><span class="doccomment">/// System that renders each [`ImageFontText`] into the corresponding
 /// [`UiImage`].
 </span><span class="kw">pub fn </span>render_ui_images(
-    <span class="kw-2">mut </span>query: Query&lt;(<span class="kw-2">&amp;</span>ImageFontText, <span class="kw-2">&amp;mut </span>UiImage), Changed&lt;ImageFontText&gt;&gt;,
+    <span class="kw-2">mut </span>query: Query&lt;(<span class="kw-2">&amp;</span>ImageFontText, <span class="kw-2">&amp;mut </span>ImageNode), Changed&lt;ImageFontText&gt;&gt;,
     image_fonts: Res&lt;Assets&lt;ImageFont&gt;&gt;,
     <span class="kw-2">mut </span>images: ResMut&lt;Assets&lt;Image&gt;&gt;,
 ) {
@@ -443,7 +437,7 @@
         <span class="comment">// don't need to clear the old image since it'll be no longer live
         </span><span class="kw">match </span>render_text(image_font_text, image_fonts.as_ref(), images.as_ref()) {
             <span class="prelude-val">Ok</span>(image) =&gt; {
-                ui_image.texture = images.add(image);
+                ui_image.image = images.add(image);
             }
             <span class="prelude-val">Err</span>(e) =&gt; {
                 <span class="macro">error!</span>(
