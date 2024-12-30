@@ -22,7 +22,7 @@
 <li>Newlines are not currently supported.</li>
 </ul>
 <h3 id="how-to-use"><a class="doc-anchor" href="#how-to-use">§</a>How to use</h3>
-<p><strong>Note that for pixel-accurate rendering, locating the text at integer coordinates ‘in the world’ can cause it to be blurry.</strong> I’m not sure why. If this happens, you’ll want to offset the x/y coordinates by a small amount like 0.1. This seems to be less of an issue using this crate with bevy_ui.</p>
+<p>If your text sprites aren’t pixel-accurate, note that Bevy anchors sprites at the center by default. This causes sprites with odd pixel dimensions to land on non-integer positions, resulting in blurry rendering. To fix this, use a non-<code>Center</code> anchor like <code>Anchor::TopLeft</code> or adjust the translation of centered sprites. See <a href="https://github.com/deifactor/extol_image_font/blob/main/examples/sprite.rs">the sprite example</a> for more details.</p>
 <p>Just take any entity with a <code>Handle&lt;Image&gt;</code> or <code>UiImage</code> component, such as something created with a <code>SpriteBundle</code> or <code>ImageBundle</code>, and add a <code>ImageFontText</code> component to it.</p>
 <p>See <a href="https://github.com/deifactor/extol_image_font/blob/main/examples/bevy_ui.rs">the bevy_ui example</a> for sample usage using the <code>bevy_asset_loader</code> crate to construct handles to the texture layout and image, or <a href="https://github.com/deifactor/extol_image_font/blob/main/examples/sprite.rs">the sprite example</a> if you want to use pixel fonts ‘in the world’ (such as for flying damage text).</p>
 <p>If you’re not using <code>bevy_ui</code>, you can disable the <code>bevy_ui</code> feature (enabled by default) to avoid taking a dependency on that.</p>
