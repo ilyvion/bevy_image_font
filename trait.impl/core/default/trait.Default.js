@@ -1,0 +1,9 @@
+(function() {
+    var implementors = Object.fromEntries([["extol_image_font",[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/nightly/core/default/trait.Default.html\" title=\"trait core::default::Default\">Default</a> for <a class=\"struct\" href=\"extol_image_font/loader/struct.ImageFontLoader.html\" title=\"struct extol_image_font::loader::ImageFontLoader\">ImageFontLoader</a>"],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/nightly/core/default/trait.Default.html\" title=\"trait core::default::Default\">Default</a> for <a class=\"struct\" href=\"extol_image_font/struct.ImageFontBundle.html\" title=\"struct extol_image_font::ImageFontBundle\">ImageFontBundle</a>"],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/nightly/core/default/trait.Default.html\" title=\"trait core::default::Default\">Default</a> for <a class=\"struct\" href=\"extol_image_font/struct.ImageFontPlugin.html\" title=\"struct extol_image_font::ImageFontPlugin\">ImageFontPlugin</a>"],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/nightly/core/default/trait.Default.html\" title=\"trait core::default::Default\">Default</a> for <a class=\"struct\" href=\"extol_image_font/struct.ImageFontText.html\" title=\"struct extol_image_font::ImageFontText\">ImageFontText</a>"],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/nightly/core/default/trait.Default.html\" title=\"trait core::default::Default\">Default</a> for <a class=\"struct\" href=\"extol_image_font/struct.ImageFontUiBundle.html\" title=\"struct extol_image_font::ImageFontUiBundle\">ImageFontUiBundle</a>"]]]]);
+    if (window.register_implementors) {
+        window.register_implementors(implementors);
+    } else {
+        window.pending_implementors = implementors;
+    }
+})()
+//{"start":57,"fragment_lengths":[1552]}
