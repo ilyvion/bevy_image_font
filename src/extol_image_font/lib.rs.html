@@ -291,7 +291,8 @@
 <a href="#290" id="290">290</a>
 <a href="#291" id="291">291</a>
 <a href="#292" id="292">292</a>
-<a href="#293" id="293">293</a></pre></div><pre class="rust"><code><span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">"../README.md"</span>)]
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a></pre></div><pre class="rust"><code><span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">"../README.md"</span>)]
 
 </span><span class="kw">pub mod </span>loader;
 
@@ -399,6 +400,7 @@
 <span class="doccomment">/// All the components you need to render image font text in the UI. If you want
 /// to display text as an entity in the world, use [`ImageFontBundle`] instead.
 </span><span class="attr">#[derive(Bundle, Default)]
+#[cfg(feature = <span class="string">"ui"</span>)]
 </span><span class="kw">pub struct </span>ImageFontUiBundle {
     <span class="kw">pub </span>text: ImageFontText,
     <span class="kw">pub </span>node: ImageBundle,
