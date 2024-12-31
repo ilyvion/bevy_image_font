@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["ImageFontRenderError"],"fn":["render_text_to_image_node","render_text_to_sprite"],"struct":["ImageFontPreRenderedText","ImageFontPreRenderedUiText"]};

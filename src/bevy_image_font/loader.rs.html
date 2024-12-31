@@ -207,7 +207,12 @@
 <a href="#206" id="206">206</a>
 <a href="#207" id="207">207</a>
 <a href="#208" id="208">208</a>
-<a href="#209" id="209">209</a></pre></div><pre class="rust"><code><span class="doccomment">//! Code for parsing an [`ImageFont`] off of an on-disk representation.
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a></pre></div><pre class="rust"><code><span class="doccomment">//! Code for parsing an [`ImageFont`] off of an on-disk representation.
 </span><span class="kw">use </span>std::path::PathBuf;
 
 <span class="kw">use </span>bevy::{
@@ -286,6 +291,7 @@
 
 <span class="kw">impl </span>ImageFontLayout {
     <span class="doccomment">/// Given the image size, returns a map from each codepoint to its location.
+    </span><span class="attr">#[allow(clippy::cast_possible_truncation)]
     </span><span class="kw">fn </span>into_char_map(<span class="self">self</span>, size: UVec2) -&gt; HashMap&lt;char, URect&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             ImageFontLayout::Automatic(str) =&gt; {
@@ -341,8 +347,8 @@
     }
 }
 
-<span class="doccomment">/// On-disk representation of a ImageFont, optimized to make it easy for humans
-/// to write these. See the docs for [`ImageFontLayout`]'s variants for
+<span class="doccomment">/// On-disk representation of an [`ImageFont`], optimized to make it easy for
+/// humans to write these. See the docs for [`ImageFontLayout`]'s variants for
 /// information on how to write the syntax, or [the example font's RON asset].
 ///
 /// [the example font's RON asset](https://github.com/ilyvion/bevy_image_font/blob/main/assets/example_font.image_font.ron)
@@ -407,9 +413,13 @@
 
         <span class="kw">let </span>size = image.size();
         <span class="kw">let </span>char_map = disk_format.layout.into_char_map(size);
-        <span class="kw">let </span>image_handle = load_context.add_labeled_asset(<span class="string">"texture"</span>.into(), image);
+        <span class="kw">let </span>image_handle = load_context.add_labeled_asset(String::from(<span class="string">"texture"</span>), image);
 
-        <span class="prelude-val">Ok</span>(ImageFont::from_char_map(image_handle, size, <span class="kw-2">&amp;</span>char_map))
+        <span class="kw">let </span>(map, layout) = ImageFont::mapped_atlas_layout_from_char_map(size, <span class="kw-2">&amp;</span>char_map);
+        <span class="kw">let </span>layout_handle = load_context.add_labeled_asset(String::from(<span class="string">"layout"</span>), layout);
+
+        <span class="kw">let </span>image_font = ImageFont::from_mapped_atlas_layout(image_handle, map, layout_handle);
+        <span class="prelude-val">Ok</span>(image_font)
     }
 
     <span class="kw">fn </span>extensions(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>str] {
