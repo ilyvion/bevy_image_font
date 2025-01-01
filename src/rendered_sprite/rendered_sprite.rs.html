@@ -60,15 +60,35 @@
 <a href="#59" id="59">59</a>
 <a href="#60" id="60">60</a>
 <a href="#61" id="61">61</a>
-<a href="#62" id="62">62</a></pre></div><pre class="rust"><code><span class="doccomment">//! Demonstrates rendering image font text at both its 'native' height and a
+<a href="#62" id="62">62</a>
+<a href="#63" id="63">63</a>
+<a href="#64" id="64">64</a>
+<a href="#65" id="65">65</a>
+<a href="#66" id="66">66</a>
+<a href="#67" id="67">67</a>
+<a href="#68" id="68">68</a>
+<a href="#69" id="69">69</a>
+<a href="#70" id="70">70</a>
+<a href="#71" id="71">71</a>
+<a href="#72" id="72">72</a>
+<a href="#73" id="73">73</a>
+<a href="#74" id="74">74</a>
+<a href="#75" id="75">75</a>
+<a href="#76" id="76">76</a></pre></div><pre class="rust"><code><span class="doccomment">//! Demonstrates rendering image font text at both its 'native' height and a
 //! scaled-up height.
+
+</span><span class="attr">#![expect(
+    clippy::mod_module_files,
+    reason = <span class="string">"if present as common.rs, cargo thinks it's an example binary"
+</span>)]
 
 </span><span class="kw">use </span>bevy::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>bevy::sprite::Anchor;
-<span class="kw">use </span>bevy_asset_loader::prelude::{AssetCollection, AssetCollectionApp};
-<span class="kw">use </span>bevy_image_font::{ImageFont, ImageFontPlugin, ImageFontPreRenderedText, ImageFontText};
+<span class="kw">use </span>bevy_asset_loader::prelude::AssetCollectionApp <span class="kw">as _</span>;
+<span class="kw">use </span>bevy_image_font::rendered::ImageFontPreRenderedText;
+<span class="kw">use </span>bevy_image_font::{ImageFontPlugin, ImageFontText};
 
-<span class="kw">use </span><span class="kw">crate</span>::common::{FONT_WIDTH, TEXT};
+<span class="kw">use </span><span class="kw">crate</span>::common::{DemoAssets, FONT_WIDTH, TEXT};
 
 <span class="kw">mod </span>common;
 
@@ -81,13 +101,17 @@
         .run();
 }
 
-<span class="attr">#[derive(AssetCollection, Resource)]
-</span><span class="kw">struct </span>DemoAssets {
-    <span class="attr">#[asset(path = <span class="string">"example_font.image_font.ron"</span>)]
-    </span>image_font: Handle&lt;ImageFont&gt;,
-}
-
-<span class="kw">fn </span>spawn_text(<span class="kw-2">mut </span>commands: Commands, assets: Res&lt;DemoAssets&gt;) {
+<span class="doccomment">/// Spawns the text entities for the example.
+///
+/// This system creates two text entities:
+/// 1. A text entity rendered at a scaled-up height for demonstration purposes.
+/// 2. A text entity rendered at its native height, demonstrating pixel-perfect
+///    alignment.
+///
+/// The first entity shows how to shift the position by 0.5 pixels to align with
+/// pixel boundaries. The second demonstrates the use of an anchor to achieve
+/// proper alignment.
+</span><span class="kw">fn </span>spawn_text(<span class="kw-2">mut </span>commands: Commands, assets: Res&lt;DemoAssets&gt;) {
     commands.spawn(Camera2d);
 
     commands.spawn((
@@ -114,7 +138,11 @@
             anchor: Anchor::CenterLeft,
             ..default()
         },
-        <span class="attr">#[allow(clippy::cast_precision_loss)]
+        <span class="attr">#[expect(
+            clippy::cast_precision_loss,
+            reason = <span class="string">"the magnitude of the numbers we're working on here are too small to lose \
+            anything"
+        </span>)]
         </span>Transform::from_translation(Vec3::new(
             -((TEXT.chars().count() * FONT_WIDTH / <span class="number">2</span>) <span class="kw">as </span>f32),
             <span class="number">40.</span>,

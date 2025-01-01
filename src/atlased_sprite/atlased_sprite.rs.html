@@ -125,9 +125,42 @@
 <a href="#124" id="124">124</a>
 <a href="#125" id="125">125</a>
 <a href="#126" id="126">126</a>
-<a href="#127" id="127">127</a></pre></div><pre class="rust"><code><span class="doccomment">//! Demonstrates showing a texture atlas-based image font text at both its
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a></pre></div><pre class="rust"><code><span class="doccomment">//! Demonstrates showing a texture atlas-based image font text at both its
 //! 'native' height and a scaled-up height, also demonstrating use of its
 //! additional `color` value.
+
+</span><span class="attr">#![expect(
+    clippy::mod_module_files,
+    reason = <span class="string">"if present as common.rs, cargo thinks it's an example binary"
+</span>)]
+#![expect(clippy::expect_used, reason = <span class="string">"only used when panics can't happen"</span>)]
 
 </span><span class="kw">use </span>std::time::Duration;
 
@@ -135,10 +168,11 @@
 <span class="kw">use </span>bevy::color::ColorCurve;
 <span class="kw">use </span>bevy::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>bevy::sprite::Anchor;
-<span class="kw">use </span>bevy_asset_loader::prelude::{AssetCollection, AssetCollectionApp};
-<span class="kw">use </span>bevy_image_font::{ImageFont, ImageFontPlugin, ImageFontSpriteText, ImageFontText};
+<span class="kw">use </span>bevy_asset_loader::prelude::AssetCollectionApp <span class="kw">as _</span>;
+<span class="kw">use </span>bevy_image_font::atlas_sprites::ImageFontSpriteText;
+<span class="kw">use </span>bevy_image_font::{ImageFontPlugin, ImageFontText};
 
-<span class="kw">use </span><span class="kw">crate</span>::common::{FONT_WIDTH, RAINBOW, TEXT};
+<span class="kw">use </span><span class="kw">crate</span>::common::{DemoAssets, FONT_WIDTH, RAINBOW, TEXT};
 
 <span class="kw">mod </span>common;
 
@@ -155,23 +189,30 @@
         .run();
 }
 
-<span class="attr">#[derive(AssetCollection, Resource)]
-</span><span class="kw">struct </span>DemoAssets {
-    <span class="attr">#[asset(path = <span class="string">"example_font.image_font.ron"</span>)]
-    </span>image_font: Handle&lt;ImageFont&gt;,
-}
-
-<span class="attr">#[derive(Component)]
+<span class="doccomment">/// A component for animating text content.
+///
+/// The `&amp;'static str` field represents the text to animate, while the `usize`
+/// field tracks the current animation state, i.e. how many characters of the
+/// text is currenly being displayed.
+</span><span class="attr">#[derive(Component)]
 </span><span class="kw">struct </span>AnimateText(<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str, usize);
 
-<span class="attr">#[derive(Component)]
+<span class="doccomment">/// A component for animating the color of text.
+///
+/// The `ColorCurve` field defines the color gradient used for the animation.
+</span><span class="attr">#[derive(Component)]
 </span><span class="kw">struct </span>AnimateColor(ColorCurve&lt;Srgba&gt;);
 
-<span class="kw">fn </span>spawn_text(<span class="kw-2">mut </span>commands: Commands, assets: Res&lt;DemoAssets&gt;) {
+<span class="doccomment">/// Spawns the text entities for the example.
+///
+/// This system creates two text entities:
+/// 1. A text entity rendered at a scaled height with animated colors.
+/// 2. A text entity rendered at its native height with animated content.
+</span><span class="kw">fn </span>spawn_text(<span class="kw-2">mut </span>commands: Commands, assets: Res&lt;DemoAssets&gt;) {
     commands.spawn(Camera2d);
 
     commands.spawn((
-        AnimateColor(ColorCurve::new(RAINBOW).unwrap()),
+        AnimateColor(ColorCurve::new(RAINBOW).expect(<span class="string">"RAINBOW contains at least two colors"</span>)),
         ImageFontSpriteText::default(),
         ImageFontText::default()
             .text(TEXT)
@@ -187,7 +228,11 @@
             .color(tailwind::AMBER_500)
             .anchor(Anchor::CenterLeft),
         ImageFontText::default().font(assets.image_font.clone()),
-        <span class="attr">#[allow(clippy::cast_precision_loss)]
+        <span class="attr">#[expect(
+            clippy::cast_precision_loss,
+            reason = <span class="string">"the magnitude of the numbers we're working on here are too small to lose \
+            anything"
+        </span>)]
         </span>Transform::from_translation(Vec3::new(
             -((TEXT.chars().count() * FONT_WIDTH / <span class="number">2</span>) <span class="kw">as </span>f32),
             <span class="number">40.</span>,
@@ -196,7 +241,11 @@
     ));
 }
 
-<span class="kw">fn </span>animate_text(
+<span class="doccomment">/// Animates the text content of entities with the `AnimateText` component.
+///
+/// This system modifies the `ImageFontText` component to display an animated
+/// sequence of characters, cycling through the text content over time.
+</span><span class="kw">fn </span>animate_text(
     <span class="kw-2">mut </span>query: Query&lt;(<span class="kw-2">&amp;mut </span>AnimateText, <span class="kw-2">&amp;mut </span>ImageFontText)&gt;,
     time: Res&lt;Time&gt;,
     <span class="kw-2">mut </span>timer: Local&lt;Timer&gt;,
@@ -228,11 +277,16 @@
     }
 }
 
-<span class="attr">#[allow(
+<span class="doccomment">/// Animates the color of text entities with the `AnimateColor` component.
+///
+/// This system modifies the `color` field of the `ImageFontSpriteText`
+/// component to cycle through the colors defined in the `RAINBOW` palette.
+</span><span class="attr">#[expect(
     clippy::cast_sign_loss,
     clippy::cast_possible_truncation,
-    clippy::cast_precision_loss
-)]
+    clippy::cast_precision_loss,
+    reason = <span class="string">"the magnitude of the numbers we're working on here are too small to lose anything"
+</span>)]
 </span><span class="kw">fn </span>animate_color(<span class="kw-2">mut </span>query: Query&lt;(<span class="kw-2">&amp;</span>AnimateColor, <span class="kw-2">&amp;mut </span>ImageFontSpriteText)&gt;, time: Res&lt;Time&gt;) {
     <span class="kw">for </span>(animate_color, <span class="kw-2">mut </span>image_sprite_font_text) <span class="kw">in </span><span class="kw-2">&amp;mut </span>query {
         <span class="kw">let </span>animation_progress = time.elapsed_secs() / RAINBOW.len() <span class="kw">as </span>f32;
@@ -241,13 +295,13 @@
             image_sprite_font_text.color = animate_color
                 .<span class="number">0
                 </span>.sample(animation_progress.fract() * len)
-                .unwrap()
+                .expect(<span class="string">"fract() is [0,1) and `len` will always be within bounds"</span>)
                 .into();
         } <span class="kw">else </span>{
             image_sprite_font_text.color = animate_color
                 .<span class="number">0
                 </span>.sample(len - (animation_progress.fract() * len))
-                .unwrap()
+                .expect(<span class="string">"fract() is [0,1) and `len` will always be within bounds"</span>)
                 .into();
         }
     }

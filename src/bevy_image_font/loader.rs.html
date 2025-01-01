@@ -313,15 +313,55 @@
 <a href="#312" id="312">312</a>
 <a href="#313" id="313">313</a>
 <a href="#314" id="314">314</a>
-<a href="#315" id="315">315</a></pre></div><pre class="rust"><code><span class="doccomment">//! Code for parsing an [`ImageFont`] off of an on-disk representation.
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a></pre></div><pre class="rust"><code><span class="doccomment">//! Code for parsing an [`ImageFont`] off of an on-disk representation.
 
-</span><span class="kw">use </span>bevy::{
-    asset::{io::Reader, AssetLoader, AsyncReadExt, LoadContext, LoadDirectError},
+</span><span class="attr">#![expect(clippy::absolute_paths, reason = <span class="string">"false positives"</span>)]
+
+</span><span class="kw">use </span>std::io::Error <span class="kw">as </span>IoError;
+<span class="kw">use </span>std::path::PathBuf;
+
+<span class="kw">use </span>bevy::{
+    asset::{io::Reader, AssetLoader, AsyncReadExt <span class="kw">as _</span>, LoadContext, LoadDirectError},
     prelude::<span class="kw-2">*</span>,
     utils::HashMap,
 };
 <span class="kw">use </span>bevy_image::{Image, ImageSampler, ImageSamplerDescriptor};
 <span class="kw">use </span>camino::Utf8PathBuf;
+<span class="kw">use </span>ron::de::SpannedError;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>thiserror::Error;
 
@@ -398,7 +438,11 @@
 
 <span class="kw">impl </span>ImageFontLayout {
     <span class="doccomment">/// Given the image size, returns a map from each codepoint to its location.
-    </span><span class="attr">#[allow(clippy::cast_possible_truncation)]
+    </span><span class="attr">#[expect(
+        clippy::cast_possible_truncation,
+        reason = <span class="string">"while usize can hold more data than u32, we're working on a number here that \
+        should be substantially smaller than even u32's capacity"
+    </span>)]
     </span><span class="kw">fn </span>into_char_map(<span class="self">self</span>, size: UVec2) -&gt; HashMap&lt;char, URect&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             ImageFontLayout::Automatic(str) =&gt; {
@@ -407,10 +451,14 @@
                     .trim_start_matches([<span class="string">'\r'</span>, <span class="string">'\n'</span>])
                     .trim_end_matches([<span class="string">'\r'</span>, <span class="string">'\n'</span>]);
                 <span class="kw">let </span><span class="kw-2">mut </span>rect_map = HashMap::new();
-                <span class="kw">let </span>max_chars_per_line = str
+                <span class="attr">#[expect(
+                    clippy::expect_used,
+                    reason = <span class="string">"this intentionally panics on an empty string"
+                </span>)]
+                </span><span class="kw">let </span>max_chars_per_line = str
                     .lines()
                     <span class="comment">// important: *not* l.len()
-                    </span>.map(|l| l.chars().count())
+                    </span>.map(|line| line.chars().count())
                     .max()
                     .expect(<span class="string">"can't create character map from an empty string"</span>)
                     <span class="kw">as </span>u32;
@@ -447,7 +495,9 @@
             }
             ImageFontLayout::ManualMonospace { size, coords } =&gt; coords
                 .into_iter()
-                .map(|(c, top_left)| (c, URect::from_corners(top_left, size + top_left)))
+                .map(|(character, top_left)| {
+                    (character, URect::from_corners(top_left, size + top_left))
+                })
                 .collect(),
             ImageFontLayout::Manual(urect_map) =&gt; urect_map,
         }
@@ -493,7 +543,7 @@
     /// };
     /// assert!(settings.validate().is_ok());
     /// ```
-    </span><span class="attr">#[allow(clippy::result_large_err)]
+    </span><span class="comment">//#[allow(clippy::result_large_err)]
     </span><span class="kw">pub fn </span>validate(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ImageFontLoadError&gt; {
         <span class="kw">if </span><span class="self">self</span>.image.as_str().trim().is_empty() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(ImageFontLoadError::EmptyImagePath);
@@ -517,7 +567,7 @@
     <span class="doccomment">/// Parsing the on-disk representation of the font failed. This typically
     /// indicates a syntax or formatting error in the RON file.
     </span><span class="attr">#[error(<span class="string">"couldn't parse on-disk representation: {0}"</span>)]
-    </span>ParseFailure(<span class="attr">#[from] </span>ron::error::SpannedError),
+    </span>ParseFailure(<span class="attr">#[from] </span>SpannedError),
 
     <span class="doccomment">/// The image path provided in the settings is empty. This error occurs
     /// when no valid file path is specified for the font image.
@@ -532,18 +582,35 @@
     <span class="doccomment">/// An I/O error occurred while loading the image font. This might happen
     /// if the file cannot be accessed, is missing, or is corrupted.
     </span><span class="attr">#[error(<span class="string">"i/o error when loading image font: {0}"</span>)]
-    </span>Io(<span class="attr">#[from] </span>std::io::Error),
+    </span>Io(<span class="attr">#[from] </span>IoError),
 
     <span class="doccomment">/// Failed to load an asset directly. This is usually caused by an error
     /// in the asset pipeline or a missing dependency.
     </span><span class="attr">#[error(<span class="string">"failed to load asset: {0}"</span>)]
-    </span>LoadDirect(<span class="attr">#[from] </span>LoadDirectError),
+    </span>LoadDirect(Box&lt;LoadDirectError&gt;),
 
     <span class="doccomment">/// The path provided for the font's image was not loaded as an image. This
     /// may occur if the file is in an unsupported format or if the path is
     /// incorrect.
     </span><span class="attr">#[error(<span class="string">"Path does not point to a valid image file: {0}"</span>)]
     </span>NotAnImage(Utf8PathBuf),
+
+    <span class="doccomment">/// The path provided for the font's image was not loaded as an image. This
+    /// may occur if the file is in an unsupported format or if the path is
+    /// incorrect.
+    </span><span class="attr">#[error(<span class="string">"Path is not valid UTF-8: {0:?}"</span>)]
+    </span>InvalidPath(PathBuf),
+
+    <span class="doccomment">/// The asset path has no parent directory.
+    </span><span class="attr">#[error(<span class="string">"Asset path has no parent directory"</span>)]
+    </span>MissingParentPath,
+}
+
+<span class="kw">impl </span>From&lt;LoadDirectError&gt; <span class="kw">for </span>ImageFontLoadError {
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>from(value: LoadDirectError) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::LoadDirect(Box::new(value))
+    }
 }
 
 <span class="doccomment">/// Configuration settings for the `ImageFontLoader`.
@@ -569,10 +636,7 @@
 <span class="kw">impl </span>AssetLoader <span class="kw">for </span>ImageFontLoader {
     <span class="kw">type </span>Asset = ImageFont;
 
-    <span class="comment">// We could use ImageFontSettings, but an AssetLoader's settings has to
-    // imnplement `Default`, and there's no sensible default value for that
-    // type.
-    </span><span class="kw">type </span>Settings = ImageFontLoaderSettings;
+    <span class="kw">type </span>Settings = ImageFontLoaderSettings;
 
     <span class="kw">type </span>Error = ImageFontLoadError;
 
@@ -593,18 +657,22 @@
         </span><span class="kw">let </span>image_path = load_context
             .path()
             .parent()
-            .expect(<span class="string">"asset's parent is None?"</span>)
-            .join(disk_format.image.clone());
-        <span class="kw">let </span><span class="kw-2">mut </span>image = load_context
+            .ok_or(ImageFontLoadError::MissingParentPath)<span class="question-mark">?
+            </span>.join(disk_format.image.clone());
+        <span class="kw">let </span><span class="prelude-val">Some</span>(<span class="kw-2">mut </span>image) = load_context
             .loader()
             .immediate()
             .with_unknown_type()
             .load(image_path.clone())
             .<span class="kw">await</span><span class="question-mark">?
             </span>.take::&lt;Image&gt;()
-            .ok_or(ImageFontLoadError::NotAnImage(
-                image_path.try_into().unwrap(),
-            ))<span class="question-mark">?</span>;
+        <span class="kw">else </span>{
+            <span class="kw">let </span>path = <span class="kw">match </span>Utf8PathBuf::from_path_buf(image_path) {
+                <span class="prelude-val">Ok</span>(path) =&gt; path,
+                <span class="prelude-val">Err</span>(image_path) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(ImageFontLoadError::InvalidPath(image_path)),
+            };
+            <span class="kw">return </span><span class="prelude-val">Err</span>(ImageFontLoadError::NotAnImage(path));
+        };
 
         image.sampler = settings.image_sampler.clone();
 

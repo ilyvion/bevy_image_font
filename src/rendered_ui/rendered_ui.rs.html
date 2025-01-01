@@ -85,13 +85,50 @@
 <a href="#84" id="84">84</a>
 <a href="#85" id="85">85</a>
 <a href="#86" id="86">86</a>
-<a href="#87" id="87">87</a></pre></div><pre class="rust"><code><span class="doccomment">//! Shows use of the plugin with `bevy_ui`.
+<a href="#87" id="87">87</a>
+<a href="#88" id="88">88</a>
+<a href="#89" id="89">89</a>
+<a href="#90" id="90">90</a>
+<a href="#91" id="91">91</a>
+<a href="#92" id="92">92</a>
+<a href="#93" id="93">93</a>
+<a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a></pre></div><pre class="rust"><code><span class="doccomment">//! Shows use of the plugin with `bevy_ui`.
+
+</span><span class="attr">#![expect(
+    clippy::mod_module_files,
+    reason = <span class="string">"if present as common.rs, cargo thinks it's an example binary"
+</span>)]
 
 </span><span class="kw">use </span>bevy::{input::common_conditions::input_just_pressed, prelude::<span class="kw-2">*</span>};
-<span class="kw">use </span>bevy_asset_loader::prelude::{AssetCollection, AssetCollectionApp};
-<span class="kw">use </span>bevy_image_font::{ImageFont, ImageFontPlugin, ImageFontPreRenderedUiText, ImageFontText};
+<span class="kw">use </span>bevy_asset_loader::prelude::AssetCollectionApp <span class="kw">as _</span>;
+<span class="kw">use </span>bevy_image_font::rendered::ImageFontPreRenderedUiText;
+<span class="kw">use </span>bevy_image_font::{ImageFontPlugin, ImageFontText};
 
-<span class="attr">#[derive(Default, Debug, Resource)]
+<span class="kw">use </span><span class="kw">crate</span>::common::DemoAssets;
+
+<span class="kw">mod </span>common;
+
+<span class="doccomment">/// Tracks the number of vows judged during the application runtime.
+///
+/// This resource is updated when the user presses the SPACE key.
+</span><span class="attr">#[derive(Default, Debug, Resource)]
 </span><span class="kw">struct </span>VowsJudged(u32);
 
 <span class="kw">fn </span>main() {
@@ -112,16 +149,19 @@
         .run();
 }
 
-<span class="attr">#[derive(AssetCollection, Resource)]
-</span><span class="kw">struct </span>DemoAssets {
-    <span class="attr">#[asset(path = <span class="string">"example_font.image_font.ron"</span>)]
-    </span>image_font: Handle&lt;ImageFont&gt;,
-}
-
-<span class="attr">#[derive(Component)]
+<span class="doccomment">/// A marker component for the UI node that displays the number of vows judged.
+///
+/// Entities with this component have their text updated dynamically based
+/// on the value of the [`VowsJudged`] resource.
+</span><span class="attr">#[derive(Component)]
 </span><span class="kw">struct </span>VowsNode;
 
-<span class="kw">fn </span>spawn_ui(<span class="kw-2">mut </span>commands: Commands, assets: Res&lt;DemoAssets&gt;) {
+<span class="doccomment">/// Spawns the UI layout for the example.
+///
+/// This system creates:
+/// 1. A root node with a prompt instructing the user to press SPACE.
+/// 2. A dynamically updating node that displays the number of vows judged.
+</span><span class="kw">fn </span>spawn_ui(<span class="kw-2">mut </span>commands: Commands, assets: Res&lt;DemoAssets&gt;) {
     commands.spawn(Camera2d);
 
     <span class="comment">// root node
@@ -163,11 +203,19 @@
     ));
 }
 
-<span class="kw">fn </span>judge(<span class="kw-2">mut </span>vows: ResMut&lt;VowsJudged&gt;) {
+<span class="doccomment">/// Increments the number of vows judged.
+///
+/// This system responds to the user pressing the SPACE key and increments
+/// the `VowsJudged` resource by one.
+</span><span class="kw">fn </span>judge(<span class="kw-2">mut </span>vows: ResMut&lt;VowsJudged&gt;) {
     vows.<span class="number">0 </span>+= <span class="number">1</span>;
 }
 
-<span class="kw">fn </span>update_vows_node(vows: Res&lt;VowsJudged&gt;, <span class="kw-2">mut </span>node: Query&lt;<span class="kw-2">&amp;mut </span>ImageFontText, With&lt;VowsNode&gt;&gt;) {
+<span class="doccomment">/// Updates the text of the vows node when the number of vows judged changes.
+///
+/// This system listens for changes to the `VowsJudged` resource and updates the
+/// text displayed by the UI node marked with [`VowsNode`].
+</span><span class="kw">fn </span>update_vows_node(vows: Res&lt;VowsJudged&gt;, <span class="kw-2">mut </span>node: Query&lt;<span class="kw-2">&amp;mut </span>ImageFontText, With&lt;VowsNode&gt;&gt;) {
     <span class="kw">if </span>vows.is_changed() {
         node.single_mut().text = <span class="macro">format!</span>(<span class="string">"Vows judged: {}"</span>, vows.<span class="number">0</span>);
     }

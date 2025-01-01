@@ -187,7 +187,95 @@
 <a href="#186" id="186">186</a>
 <a href="#187" id="187">187</a>
 <a href="#188" id="188">188</a>
-<a href="#189" id="189">189</a></pre></div><pre class="rust"><code><span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">"../README.md"</span>)]
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
+<a href="#194" id="194">194</a>
+<a href="#195" id="195">195</a>
+<a href="#196" id="196">196</a>
+<a href="#197" id="197">197</a>
+<a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a>
+<a href="#224" id="224">224</a>
+<a href="#225" id="225">225</a>
+<a href="#226" id="226">226</a>
+<a href="#227" id="227">227</a>
+<a href="#228" id="228">228</a>
+<a href="#229" id="229">229</a>
+<a href="#230" id="230">230</a>
+<a href="#231" id="231">231</a>
+<a href="#232" id="232">232</a>
+<a href="#233" id="233">233</a>
+<a href="#234" id="234">234</a>
+<a href="#235" id="235">235</a>
+<a href="#236" id="236">236</a>
+<a href="#237" id="237">237</a>
+<a href="#238" id="238">238</a>
+<a href="#239" id="239">239</a>
+<a href="#240" id="240">240</a>
+<a href="#241" id="241">241</a>
+<a href="#242" id="242">242</a>
+<a href="#243" id="243">243</a>
+<a href="#244" id="244">244</a>
+<a href="#245" id="245">245</a>
+<a href="#246" id="246">246</a>
+<a href="#247" id="247">247</a>
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
+<a href="#250" id="250">250</a>
+<a href="#251" id="251">251</a>
+<a href="#252" id="252">252</a>
+<a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a></pre></div><pre class="rust"><code><span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">"../README.md"</span>)]
 </span><span class="comment">//
 // only enables the `doc_cfg` feature when
 // the `docsrs` configuration attribute is defined
@@ -207,13 +295,9 @@
 
 <span class="attr">#[cfg(feature = <span class="string">"rendered"</span>)]
 </span><span class="kw">pub mod </span>rendered;
-<span class="attr">#[cfg(feature = <span class="string">"rendered"</span>)]
-</span><span class="kw">pub use </span>rendered::<span class="kw-2">*</span>;
 
 <span class="attr">#[cfg(feature = <span class="string">"atlas_sprites"</span>)]
 </span><span class="kw">pub mod </span>atlas_sprites;
-<span class="attr">#[cfg(feature = <span class="string">"atlas_sprites"</span>)]
-</span><span class="kw">pub use </span>atlas_sprites::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// A Bevy plugin for rendering image-based fonts.
 ///
@@ -259,14 +343,17 @@
             .add_systems(PostUpdate, sync_texts_with_font_changes);
 
         <span class="attr">#[cfg(feature = <span class="string">"rendered"</span>)]
-        </span>app.add_plugins(RenderedPlugin);
+        </span>app.add_plugins(rendered::RenderedPlugin);
 
         <span class="attr">#[cfg(feature = <span class="string">"atlas_sprites"</span>)]
-        </span>app.add_plugins(AtlasSpritesPlugin);
+        </span>app.add_plugins(atlas_sprites::AtlasSpritesPlugin);
     }
 }
 
-<span class="doccomment">/// System set for systems related to [`ImageFontPlugin`].
+<span class="doccomment">/// A system set containing all systems related to the [`ImageFontPlugin`].
+///
+/// This can be used to group, disable, or reorder systems provided by
+/// the plugin.
 </span><span class="attr">#[derive(Copy, Clone, Debug, Hash, PartialEq, Eq, SystemSet)]
 </span><span class="kw">pub struct </span>ImageFontSet;
 
@@ -291,20 +378,58 @@
 }
 
 <span class="kw">impl </span>ImageFont {
-    <span class="kw">fn </span>mapped_atlas_layout_from_char_map(
+    <span class="doccomment">/// Creates a character map and a texture atlas layout from a map of
+    /// character rectangles.
+    ///
+    /// This method processes a map of characters to their bounding rectangles
+    /// within a texture and generates both:
+    /// 1. A character map (`atlas_character_map`) that maps each character to
+    ///    its index in the texture atlas.
+    /// 2. A texture atlas layout (`TextureAtlasLayout`) containing the bounding
+    ///    rectangles of all characters.
+    ///
+    /// # Parameters
+    /// - `size`: The size of the texture (width and height in pixels).
+    /// - `char_rect_map`: A map of characters to their corresponding bounding
+    ///   rectangles in the texture.
+    ///
+    /// # Returns
+    /// A tuple containing:
+    /// - `HashMap&lt;char, usize&gt;`: A map of characters to their indices in the
+    ///   atlas.
+    /// - `TextureAtlasLayout`: The texture atlas layout with the bounding
+    ///   rectangles.
+    </span><span class="kw">fn </span>mapped_atlas_layout_from_char_map(
         size: UVec2,
         char_rect_map: <span class="kw-2">&amp;</span>HashMap&lt;char, URect&gt;,
     ) -&gt; (HashMap&lt;char, usize&gt;, TextureAtlasLayout) {
         <span class="kw">let </span><span class="kw-2">mut </span>atlas_character_map = HashMap::new();
         <span class="kw">let </span><span class="kw-2">mut </span>atlas_layout = TextureAtlasLayout::new_empty(size);
-        <span class="kw">for </span>(<span class="kw-2">&amp;</span>c, <span class="kw-2">&amp;</span>rect) <span class="kw">in </span>char_rect_map {
-            atlas_character_map.insert(c, atlas_layout.add_texture(rect));
+        <span class="kw">for </span>(<span class="kw-2">&amp;</span>character, <span class="kw-2">&amp;</span>rect) <span class="kw">in </span>char_rect_map {
+            atlas_character_map.insert(character, atlas_layout.add_texture(rect));
         }
 
         (atlas_character_map, atlas_layout)
     }
 
-    <span class="kw">fn </span>from_mapped_atlas_layout(
+    <span class="doccomment">/// Constructs an `ImageFont` instance from a precomputed atlas layout and
+    /// character map.
+    ///
+    /// This function creates an `ImageFont` by combining the texture containing
+    /// the font, a character map that maps characters to indices, a precomputed
+    /// texture atlas layout, and an image sampler for scaling behavior.
+    ///
+    /// # Parameters
+    /// - `texture`: A handle to the texture containing the font glyphs.
+    /// - `atlas_character_map`: A map of characters to their indices in the
+    ///   texture atlas.
+    /// - `atlas_layout`: A handle to the texture atlas layout describing the
+    ///   glyph bounds.
+    /// - `image_sampler`: The image sampler used for scaling during rendering.
+    ///
+    /// # Returns
+    /// An `ImageFont` instance ready to be used for rendering text.
+    </span><span class="kw">fn </span>from_mapped_atlas_layout(
         texture: Handle&lt;Image&gt;,
         atlas_character_map: HashMap&lt;char, usize&gt;,
         atlas_layout: Handle&lt;TextureAtlasLayout&gt;,
@@ -318,9 +443,27 @@
         }
     }
 
-    <span class="attr">#[cfg(any(feature = <span class="string">"rendered"</span>, feature = <span class="string">"atlas_sprites"</span>))]
-    </span><span class="kw">fn </span>filter_string&lt;S: AsRef&lt;str&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, s: S) -&gt; filtered_string::FilteredString&lt;<span class="lifetime">'_</span>, S&gt; {
-        filtered_string::FilteredString::new(s, <span class="kw-2">&amp;</span><span class="self">self</span>.atlas_character_map)
+    <span class="doccomment">/// Filters a string to include only characters present in the font's
+    /// character map.
+    ///
+    /// This function returns a
+    /// [`FilteredString`](filtered_string::FilteredString) containing only the
+    /// characters from the input string that exist in the font's
+    /// `atlas_character_map`. It ensures that unsupported characters are
+    /// excluded during rendering.
+    ///
+    /// # Parameters
+    /// - `string`: The input string to filter.
+    ///
+    /// # Returns
+    /// A `FilteredString` returning only characters supported by the font.
+    ///
+    /// # Notes
+    /// This function requires either the `rendered` or `atlas_sprites` feature
+    /// to be enabled.
+    </span><span class="attr">#[cfg(any(feature = <span class="string">"rendered"</span>, feature = <span class="string">"atlas_sprites"</span>))]
+    </span><span class="kw">fn </span>filter_string&lt;S: AsRef&lt;str&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, string: S) -&gt; filtered_string::FilteredString&lt;<span class="lifetime">'_</span>, S&gt; {
+        filtered_string::FilteredString::new(string, <span class="kw-2">&amp;</span><span class="self">self</span>.atlas_character_map)
     }
 }
 
@@ -342,7 +485,10 @@
 
 <span class="doccomment">/// Marks any text where the underlying [`ImageFont`] asset has changed as
 /// changed, which will cause it to be re-rendered.
-</span><span class="attr">#[allow(private_interfaces)]
+</span><span class="attr">#[expect(
+    private_interfaces,
+    reason = <span class="string">"Systems are only `pub` for the sake of allowing dependent crates to use them for ordering"
+</span>)]
 </span><span class="kw">pub fn </span>sync_texts_with_font_changes(
     <span class="kw-2">mut </span>events: EventReader&lt;AssetEvent&lt;ImageFont&gt;&gt;,
     <span class="kw-2">mut </span>query: Query&lt;<span class="kw-2">&amp;mut </span>ImageFontText&gt;,
@@ -365,15 +511,45 @@
     </span>changed_fonts.clear();
 }
 
-<span class="comment">// Helper function to extract the relevant asset ID
+<span class="doccomment">/// Extracts the asset ID from an [`AssetEvent`] for an [`ImageFont`] asset.
+///
+/// This helper function processes asset events and retrieves the relevant
+/// asset ID if the event indicates that the asset was either modified or
+/// loaded. Other event types are ignored.
+///
+/// # Parameters
+/// - `event`: An [`AssetEvent`] for an [`ImageFont`] asset. This event
+///   represents changes to assets, such as when they are modified or loaded.
+///
+/// # Returns
+/// An [`Option`] containing the asset ID if the event type is `Modified` or
+/// `LoadedWithDependencies`; otherwise, `None`.
+///
+/// # Notes
+/// - This function is used to track changes to `ImageFont` assets in order to
+///   trigger updates in dependent components or systems.
+/// - The other events are irrelevant to our needs.
 </span><span class="attr">#[inline]
 </span><span class="kw">fn </span>extract_asset_id(event: <span class="kw-2">&amp;</span>AssetEvent&lt;ImageFont&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;AssetId&lt;ImageFont&gt;&gt; {
-    <span class="kw">match </span>event {
-        AssetEvent::Modified { id } | AssetEvent::LoadedWithDependencies { id } =&gt; <span class="prelude-val">Some</span>(<span class="kw-2">*</span>id),
-        <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
+    <span class="kw">match </span><span class="kw-2">*</span>event {
+        AssetEvent::Modified { id } | AssetEvent::LoadedWithDependencies { id } =&gt; <span class="prelude-val">Some</span>(id),
+        AssetEvent::Added { .. } | AssetEvent::Removed { .. } | AssetEvent::Unused { .. } =&gt; <span class="prelude-val">None</span>,
     }
 }
 
-<span class="attr">#[derive(Default, Deref, DerefMut)]
+<span class="doccomment">/// A cached set of asset IDs used for tracking changes to [`ImageFont`] assets.
+///
+/// This struct wraps a [`HashSet`] of asset IDs and is used  to temporarily
+/// store and manage asset IDs during a single update cycle. It serves as a way
+/// to avoid having to re-allocate a `HashSet` each time he sync function runs.
+///
+/// The cache is cleared at the end of each update cycle to ensure it does not
+/// persist between runs.
+///
+/// # Notes
+/// - This struct is primarily used in the [`sync_texts_with_font_changes`]
+///   system to keep track of `ImageFont` assets that have been modified or
+///   loaded.
+</span><span class="attr">#[derive(Default, Deref, DerefMut)]
 </span><span class="kw">struct </span>CachedHashSet(HashSet&lt;AssetId&lt;ImageFont&gt;&gt;);
 </code></pre></div></section></main></body></html>

@@ -656,7 +656,68 @@
 <a href="#655" id="655">655</a>
 <a href="#656" id="656">656</a>
 <a href="#657" id="657">657</a>
-<a href="#658" id="658">658</a></pre></div><pre class="rust"><code><span class="doccomment">//! This module provides functionality for rendering text as individual sprites
+<a href="#658" id="658">658</a>
+<a href="#659" id="659">659</a>
+<a href="#660" id="660">660</a>
+<a href="#661" id="661">661</a>
+<a href="#662" id="662">662</a>
+<a href="#663" id="663">663</a>
+<a href="#664" id="664">664</a>
+<a href="#665" id="665">665</a>
+<a href="#666" id="666">666</a>
+<a href="#667" id="667">667</a>
+<a href="#668" id="668">668</a>
+<a href="#669" id="669">669</a>
+<a href="#670" id="670">670</a>
+<a href="#671" id="671">671</a>
+<a href="#672" id="672">672</a>
+<a href="#673" id="673">673</a>
+<a href="#674" id="674">674</a>
+<a href="#675" id="675">675</a>
+<a href="#676" id="676">676</a>
+<a href="#677" id="677">677</a>
+<a href="#678" id="678">678</a>
+<a href="#679" id="679">679</a>
+<a href="#680" id="680">680</a>
+<a href="#681" id="681">681</a>
+<a href="#682" id="682">682</a>
+<a href="#683" id="683">683</a>
+<a href="#684" id="684">684</a>
+<a href="#685" id="685">685</a>
+<a href="#686" id="686">686</a>
+<a href="#687" id="687">687</a>
+<a href="#688" id="688">688</a>
+<a href="#689" id="689">689</a>
+<a href="#690" id="690">690</a>
+<a href="#691" id="691">691</a>
+<a href="#692" id="692">692</a>
+<a href="#693" id="693">693</a>
+<a href="#694" id="694">694</a>
+<a href="#695" id="695">695</a>
+<a href="#696" id="696">696</a>
+<a href="#697" id="697">697</a>
+<a href="#698" id="698">698</a>
+<a href="#699" id="699">699</a>
+<a href="#700" id="700">700</a>
+<a href="#701" id="701">701</a>
+<a href="#702" id="702">702</a>
+<a href="#703" id="703">703</a>
+<a href="#704" id="704">704</a>
+<a href="#705" id="705">705</a>
+<a href="#706" id="706">706</a>
+<a href="#707" id="707">707</a>
+<a href="#708" id="708">708</a>
+<a href="#709" id="709">709</a>
+<a href="#710" id="710">710</a>
+<a href="#711" id="711">711</a>
+<a href="#712" id="712">712</a>
+<a href="#713" id="713">713</a>
+<a href="#714" id="714">714</a>
+<a href="#715" id="715">715</a>
+<a href="#716" id="716">716</a>
+<a href="#717" id="717">717</a>
+<a href="#718" id="718">718</a>
+<a href="#719" id="719">719</a></pre></div><pre class="rust"><code><span class="doccomment">//! This module provides functionality for rendering text as individual sprites
 //! using the Bevy engine, utilizing custom image fonts.
 //!
 //! It breaks down text into individual characters and represents them as
@@ -679,9 +740,12 @@
 <span class="kw">use </span>bevy::sprite::Anchor;
 <span class="kw">use </span>derive_setters::Setters;
 
+<span class="kw">use </span><span class="kw">crate</span>::filtered_string;
 <span class="kw">use crate</span>::{sync_texts_with_font_changes, ImageFont, ImageFontSet, ImageFontText};
 
-<span class="attr">#[derive(Default)]
+<span class="doccomment">/// Internal plugin for conveniently organizing the code related to this
+/// module's feature.
+</span><span class="attr">#[derive(Default)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>AtlasSpritesPlugin;
 
 <span class="kw">impl </span>Plugin <span class="kw">for </span>AtlasSpritesPlugin {
@@ -739,8 +803,14 @@
 /// sprite gets positioned accordingly to its position in the text. This
 /// system only runs when the `ImageFontText` or [`ImageFontSpriteText`]
 /// changes.
-</span><span class="attr">#[allow(clippy::missing_panics_doc)] </span><span class="comment">// Panics should be impossible
-</span><span class="attr">#[allow(private_interfaces)]
+</span><span class="attr">#[expect(
+    clippy::missing_panics_doc,
+    reason = <span class="string">"expect() is only used on a newly created Some() value"
+</span>)]
+#[expect(
+    private_interfaces,
+    reason = <span class="string">"Systems are only `pub` for the sake of allowing dependent crates to use them for ordering"
+</span>)]
 </span><span class="kw">pub fn </span>set_up_sprites(
     <span class="kw-2">mut </span>commands: Commands,
     <span class="kw-2">mut </span>query: Query&lt;
@@ -763,7 +833,10 @@
             <span class="kw-2">&amp;mut *</span>image_font_text_data
         } <span class="kw">else </span>{
             maybe_new_image_font_text_data = <span class="prelude-val">Some</span>(ImageFontTextData::default());
-            maybe_new_image_font_text_data.as_mut().unwrap()
+            <span class="attr">#[expect(clippy::expect_used, reason = <span class="string">"newly created Some() value"</span>)]
+            </span>maybe_new_image_font_text_data
+                .as_mut()
+                .expect(<span class="string">"newly created Some() value"</span>)
         };
 
         <span class="kw">let </span><span class="prelude-val">Some</span>((image_font, layout)) =
@@ -835,11 +908,11 @@
 /// An `Option` containing a tuple `(image_font, layout)` if both assets are
 /// successfully retrieved, or `None` if any asset is missing.
 </span><span class="attr">#[inline]
-</span><span class="kw">fn </span>fetch_assets&lt;<span class="lifetime">'a</span>&gt;(
-    image_fonts: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Res&lt;Assets&lt;ImageFont&gt;&gt;,
+</span><span class="kw">fn </span>fetch_assets&lt;<span class="lifetime">'assets</span>&gt;(
+    image_fonts: <span class="kw-2">&amp;</span><span class="lifetime">'assets </span>Res&lt;Assets&lt;ImageFont&gt;&gt;,
     font_handle: <span class="kw-2">&amp;</span>Handle&lt;ImageFont&gt;,
-    texture_atlas_layouts: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Res&lt;Assets&lt;TextureAtlasLayout&gt;&gt;,
-) -&gt; <span class="prelude-ty">Option</span>&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span>ImageFont, <span class="kw-2">&amp;</span><span class="lifetime">'a </span>TextureAtlasLayout)&gt; {
+    texture_atlas_layouts: <span class="kw-2">&amp;</span><span class="lifetime">'assets </span>Res&lt;Assets&lt;TextureAtlasLayout&gt;&gt;,
+) -&gt; <span class="prelude-ty">Option</span>&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'assets </span>ImageFont, <span class="kw-2">&amp;</span><span class="lifetime">'assets </span>TextureAtlasLayout)&gt; {
     <span class="kw">let </span><span class="prelude-val">Some</span>(image_font) = image_fonts.get(font_handle) <span class="kw">else </span>{
         <span class="macro">error!</span>(<span class="string">"ImageFont asset not loaded: {:?}"</span>, font_handle);
         <span class="kw">return </span><span class="prelude-val">None</span>;
@@ -870,15 +943,15 @@
 /// A tuple `(total_width, max_height)` representing the text dimensions.
 </span><span class="attr">#[inline]
 </span><span class="kw">fn </span>calculate_text_dimensions(
-    text: <span class="kw-2">&amp;</span><span class="kw">crate</span>::filtered_string::FilteredString&lt;<span class="lifetime">'_</span>, <span class="kw">impl </span>AsRef&lt;str&gt;&gt;,
+    text: <span class="kw-2">&amp;</span>filtered_string::FilteredString&lt;<span class="lifetime">'_</span>, <span class="kw">impl </span>AsRef&lt;str&gt;&gt;,
     layout: <span class="kw-2">&amp;</span>TextureAtlasLayout,
     image_font: <span class="kw-2">&amp;</span>ImageFont,
 ) -&gt; (u32, u32) {
     <span class="kw">let </span><span class="kw-2">mut </span>total_width = <span class="number">0</span>;
     <span class="kw">let </span><span class="kw-2">mut </span>max_height = <span class="number">1</span>;
 
-    <span class="kw">for </span>c <span class="kw">in </span>text.filtered_chars() {
-        <span class="kw">let </span>rect = layout.textures[image_font.atlas_character_map[<span class="kw-2">&amp;</span>c]];
+    <span class="kw">for </span>character <span class="kw">in </span>text.filtered_chars() {
+        <span class="kw">let </span>rect = layout.textures[image_font.atlas_character_map[<span class="kw-2">&amp;</span>character]];
         total_width += rect.width();
         max_height = max_height.max(rect.height());
     }
@@ -897,7 +970,10 @@
 ///
 /// # Returns
 /// A `Vec3` representing the uniform scaling factor for text sprites.
-</span><span class="attr">#[allow(clippy::cast_precision_loss)]
+</span><span class="attr">#[expect(
+    clippy::cast_precision_loss,
+    reason = <span class="string">"`max_height` won't ever be particularly large"
+</span>)]
 #[inline]
 </span><span class="kw">fn </span>calculate_scale(font_height: <span class="prelude-ty">Option</span>&lt;f32&gt;, max_height: u32) -&gt; Vec3 {
     <span class="kw">let </span>scale = font_height.map_or(<span class="number">1.0</span>, |font_height| font_height / max_height <span class="kw">as </span>f32);
@@ -955,7 +1031,6 @@
             Anchors {
                 individual: anchor_vec_individual,
                 whole: anchor_vec_whole,
-                ..
             },
     } = <span class="kw-2">*</span>sprite_layout;
 
@@ -971,18 +1046,29 @@
 
     <span class="kw">let </span><span class="kw-2">mut </span>x_pos = <span class="number">0</span>;
 
-    <span class="kw">for </span>(sprite_entity, c) <span class="kw">in </span>image_font_text_data
+    <span class="kw">for </span>(sprite_entity, character) <span class="kw">in </span>image_font_text_data
         .sprites
         .iter()
         .copied()
         .zip(text.filtered_chars())
     {
-        <span class="kw">let </span>(<span class="kw-2">mut </span>sprite, <span class="kw-2">mut </span>transform) = child_query.get_mut(sprite_entity).unwrap();
+        <span class="kw">let </span>(<span class="kw-2">mut </span>sprite, <span class="kw-2">mut </span>transform) = <span class="kw">match </span>child_query.get_mut(sprite_entity) {
+            <span class="prelude-val">Ok</span>(result) =&gt; result,
+            <span class="prelude-val">Err</span>(error) =&gt; {
+                <span class="macro">error!</span>(<span class="string">"An ImageFontSpriteText unexpectedly failed: {error}. This will likely cause rendering bugs."</span>);
+                <span class="kw">continue</span>;
+            }
+        };
 
-        sprite.texture_atlas.as_mut().unwrap().index = image_font.atlas_character_map[<span class="kw-2">&amp;</span>c];
+        <span class="kw">let </span><span class="prelude-val">Some</span>(sprite_texture) = sprite.texture_atlas.as_mut() <span class="kw">else </span>{
+            <span class="macro">error!</span>(<span class="string">"An ImageFontSpriteText's child sprite was unexpectedly missing a `texture_atlas`. This will likely cause rendering bugs."</span>);
+            <span class="kw">continue</span>;
+        };
+
+        sprite_texture.index = image_font.atlas_character_map[<span class="kw-2">&amp;</span>character];
         sprite.color = sprite_text.color;
 
-        <span class="kw">let </span>rect = layout.textures[image_font.atlas_character_map[<span class="kw-2">&amp;</span>c]];
+        <span class="kw">let </span>rect = layout.textures[image_font.atlas_character_map[<span class="kw-2">&amp;</span>character]];
         <span class="kw">let </span>(width, <span class="kw">_</span>) = compute_dimensions(rect, font_text.font_height, max_height);
 
         <span class="kw-2">*</span>transform = compute_transform(
@@ -1001,11 +1087,38 @@
     x_pos
 }
 
-<span class="attr">#[allow(
+<span class="doccomment">/// Computes the dimensions of a glyph rectangle, scaled if a specific font
+/// height is provided.
+///
+/// This function calculates the width and height of a glyph rectangle based on
+/// its raw size (from the texture atlas) and optionally scales it to match a
+/// specified font height. If no `font_height` is provided, the raw dimensions
+/// are returned.
+///
+/// # Parameters
+/// - `rect`: The bounding rectangle of the glyph in the texture atlas. The
+///   width and height of this rectangle represent the raw glyph dimensions in
+///   pixels.
+/// - `font_height`: An optional scaling target for the height of the glyph. If
+///   provided, the glyph's dimensions are scaled proportionally to match this
+///   height.
+/// - `max_height`: The maximum glyph height in the text, used to calculate the
+///   scaling factor when `font_height` is provided.
+///
+/// # Returns
+/// A tuple `(width, height)` representing the scaled or raw dimensions of the
+/// glyph.
+///
+/// # Panics
+/// This function assumes that `max_height` is non-zero when `font_height` is
+/// provided. If `max_height` is zero, behavior is undefined and may result in a
+/// panic.
+</span><span class="attr">#[expect(
     clippy::cast_possible_truncation,
     clippy::cast_precision_loss,
-    clippy::cast_sign_loss
-)]
+    reason = <span class="string">"the magnitude of the numbers we're working on here are too small to lose anything"
+</span>)]
+#[expect(clippy::cast_sign_loss, reason = <span class="string">"we're working on unsigned values"</span>)]
 #[inline]
 </span><span class="kw">fn </span>compute_dimensions(rect: URect, font_height: <span class="prelude-ty">Option</span>&lt;f32&gt;, max_height: u32) -&gt; (u32, u32) {
     font_height.map_or((rect.width(), rect.height()), |fh| {
@@ -1033,7 +1146,10 @@
 ///
 /// # Returns
 /// A `Transform` object representing the sprite's position and scale.
-</span><span class="attr">#[allow(clippy::cast_precision_loss)]
+</span><span class="attr">#[expect(
+    clippy::cast_precision_loss,
+    reason = <span class="string">"we're working on numbers small enough not to be affected"
+</span>)]
 #[inline]
 </span><span class="kw">fn </span>compute_transform(
     x_pos: u32,
@@ -1076,14 +1192,16 @@
     sprite_layout: <span class="kw-2">&amp;</span>SpriteLayout,
     sprite_text: <span class="kw-2">&amp;</span>ImageFontSpriteText,
 ) {
+    <span class="kw">use </span>std::cmp::Ordering;
+
     <span class="kw">let </span>char_count = sprite_context.text.filtered_chars().count();
     <span class="kw">let </span>sprite_count = sprite_context.image_font_text_data.sprites.len();
 
     <span class="kw">match </span>sprite_count.cmp(<span class="kw-2">&amp;</span>char_count) {
-        std::cmp::Ordering::Greater =&gt; {
+        Ordering::Greater =&gt; {
             remove_excess_sprites(commands, sprite_context, char_count);
         }
-        std::cmp::Ordering::Less =&gt; {
+        Ordering::Less =&gt; {
             add_missing_sprites(
                 x_pos,
                 commands,
@@ -1093,7 +1211,7 @@
                 sprite_text,
             );
         }
-        std::cmp::Ordering::Equal =&gt; {}
+        Ordering::Equal =&gt; {}
     }
 }
 
@@ -1113,12 +1231,12 @@
     sprite_context: <span class="kw-2">&amp;mut </span>SpriteContext&lt;<span class="kw">impl </span>AsRef&lt;str&gt;&gt;,
     char_count: usize,
 ) {
-    <span class="kw">for </span>e <span class="kw">in </span>sprite_context
+    <span class="kw">for </span>entity <span class="kw">in </span>sprite_context
         .image_font_text_data
         .sprites
         .drain(char_count..)
     {
-        commands.entity(e).despawn();
+        commands.entity(entity).despawn();
     }
 }
 
@@ -1154,7 +1272,6 @@
             Anchors {
                 individual: anchor_vec_individual,
                 whole: anchor_vec_whole,
-                ..
             },
     } = <span class="kw-2">*</span>sprite_layout;
 
@@ -1168,14 +1285,13 @@
         entity,
         <span class="kw-2">ref mut </span>image_font_text_data,
         text,
-        ..
     } = <span class="kw-2">*</span>sprite_context;
 
     <span class="kw">let </span>current_sprite_count = image_font_text_data.sprites.len();
 
     commands.entity(entity).with_children(|parent| {
-        <span class="kw">for </span>c <span class="kw">in </span>text.filtered_chars().skip(current_sprite_count) {
-            <span class="kw">let </span>rect = layout.textures[image_font.atlas_character_map[<span class="kw-2">&amp;</span>c]];
+        <span class="kw">for </span>character <span class="kw">in </span>text.filtered_chars().skip(current_sprite_count) {
+            <span class="kw">let </span>rect = layout.textures[image_font.atlas_character_map[<span class="kw-2">&amp;</span>character]];
             <span class="kw">let </span>(width, _height) =
                 compute_dimensions(rect, image_font_text.font_height, max_height);
 
@@ -1195,7 +1311,7 @@
                 image: image_font.texture.clone_weak(),
                 texture_atlas: <span class="prelude-val">Some</span>(TextureAtlas {
                     layout: image_font.atlas_layout.clone_weak(),
-                    index: image_font.atlas_character_map[<span class="kw-2">&amp;</span>c],
+                    index: image_font.atlas_character_map[<span class="kw-2">&amp;</span>character],
                 }),
                 color: sprite_text.color,
                 ..Default::default()
@@ -1205,7 +1321,11 @@
             image_font_text_data.sprites.push(child.id());
 
             <span class="attr">#[cfg(feature = <span class="string">"gizmos"</span>)]
-            #[allow(clippy::used_underscore_binding)]
+            #[expect(
+                clippy::used_underscore_binding,
+                reason = <span class="string">"we're using an underscore binding here because it's unused when the \
+                `gizmos` feature is not enabled."
+            </span>)]
             </span>{
                 <span class="kw">let </span><span class="kw-2">mut </span>child = child;
                 child.insert(ImageFontGizmoData {
@@ -1245,26 +1365,26 @@
 ///
 /// Includes references to the texture atlas layout, font asset, and the
 /// font text component that defines the text content and font height.
-</span><span class="kw">struct </span>FontAssets&lt;<span class="lifetime">'a</span>&gt; {
+</span><span class="kw">struct </span>FontAssets&lt;<span class="lifetime">'assets</span>&gt; {
     <span class="doccomment">/// The texture atlas layout defining glyph placements.
-    </span>layout: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>TextureAtlasLayout,
+    </span>layout: <span class="kw-2">&amp;</span><span class="lifetime">'assets </span>TextureAtlasLayout,
     <span class="doccomment">/// The font asset containing glyph metadata.
-    </span>image_font: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>ImageFont,
+    </span>image_font: <span class="kw-2">&amp;</span><span class="lifetime">'assets </span>ImageFont,
     <span class="doccomment">/// The text component defining the content and font height.
-    </span>image_font_text: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>ImageFontText,
+    </span>image_font_text: <span class="kw-2">&amp;</span><span class="lifetime">'assets </span>ImageFontText,
 }
 
 <span class="doccomment">/// Represents the entity and its associated text sprites during rendering.
 ///
 /// Manages the commands for modifying the entity, its sprite data, and the
 /// filtered text to ensure the sprites match the text content.
-</span><span class="kw">struct </span>SpriteContext&lt;<span class="lifetime">'a</span>, S: AsRef&lt;str&gt;&gt; {
+</span><span class="kw">struct </span>SpriteContext&lt;<span class="lifetime">'data</span>, S: AsRef&lt;str&gt;&gt; {
     <span class="doccomment">/// The entity associated with the text sprites.
     </span>entity: Entity,
     <span class="doccomment">/// The mutable text sprite data component for the entity.
-    </span>image_font_text_data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>ImageFontTextData,
+    </span>image_font_text_data: <span class="kw-2">&amp;</span><span class="lifetime">'data </span><span class="kw-2">mut </span>ImageFontTextData,
     <span class="doccomment">/// The filtered text to be rendered as sprites.
-    </span>text: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw">crate</span>::filtered_string::FilteredString&lt;<span class="lifetime">'a</span>, S&gt;,
+    </span>text: <span class="kw-2">&amp;</span><span class="lifetime">'data </span>filtered_string::FilteredString&lt;<span class="lifetime">'data</span>, S&gt;,
 }
 
 <span class="doccomment">/// Renders gizmos for debugging `ImageFontText` and its associated glyphs in
@@ -1282,17 +1402,19 @@
 /// ### Notes
 /// This function is enabled only when the `gizmos` feature is active and
 /// leverages the Bevy gizmo system for runtime visualization.
-</span><span class="attr">#[allow(
-    clippy::cast_possible_truncation,
+</span><span class="attr">#[expect(
     clippy::cast_precision_loss,
-    clippy::cast_sign_loss
-)]
+    reason = <span class="string">"the magnitude of the numbers we're working on here are too small to lose \
+    anything"
+</span>)]
 #[cfg(feature = <span class="string">"gizmos"</span>)]
 </span><span class="kw">pub fn </span>render_sprite_gizmos(
     <span class="kw-2">mut </span>gizmos: Gizmos,
     query: Query&lt;(<span class="kw-2">&amp;</span>GlobalTransform, <span class="kw-2">&amp;</span>Children), With&lt;ImageFontText&gt;&gt;,
     child_query: Query&lt;(<span class="kw-2">&amp;</span>GlobalTransform, <span class="kw-2">&amp;</span>ImageFontGizmoData), Without&lt;ImageFontText&gt;&gt;,
 ) {
+    <span class="kw">use </span>bevy::color::palettes::css;
+
     <span class="kw">for </span>(global_transform, children) <span class="kw">in </span><span class="kw-2">&amp;</span>query {
         <span class="kw">for </span><span class="kw-2">&amp;</span>child <span class="kw">in </span>children {
             <span class="kw">if let </span><span class="prelude-val">Ok</span>((child_global_transform, image_font_gizmo_data)) = child_query.get(child) {
@@ -1302,7 +1424,7 @@
                         image_font_gizmo_data.width <span class="kw">as </span>f32,
                         image_font_gizmo_data.height <span class="kw">as </span>f32,
                     ),
-                    bevy::color::palettes::css::PURPLE,
+                    css::PURPLE,
                 );
             }
         }
@@ -1310,7 +1432,7 @@
         gizmos.cross_2d(
             Isometry2d::from_translation(global_transform.translation().truncate()),
             <span class="number">10.</span>,
-            bevy::color::palettes::css::RED,
+            css::RED,
         );
     }
 }

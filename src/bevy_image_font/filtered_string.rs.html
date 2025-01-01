@@ -67,7 +67,69 @@
 <a href="#66" id="66">66</a>
 <a href="#67" id="67">67</a>
 <a href="#68" id="68">68</a>
-<a href="#69" id="69">69</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt;
+<a href="#69" id="69">69</a>
+<a href="#70" id="70">70</a>
+<a href="#71" id="71">71</a>
+<a href="#72" id="72">72</a>
+<a href="#73" id="73">73</a>
+<a href="#74" id="74">74</a>
+<a href="#75" id="75">75</a>
+<a href="#76" id="76">76</a>
+<a href="#77" id="77">77</a>
+<a href="#78" id="78">78</a>
+<a href="#79" id="79">79</a>
+<a href="#80" id="80">80</a>
+<a href="#81" id="81">81</a>
+<a href="#82" id="82">82</a>
+<a href="#83" id="83">83</a>
+<a href="#84" id="84">84</a>
+<a href="#85" id="85">85</a>
+<a href="#86" id="86">86</a>
+<a href="#87" id="87">87</a>
+<a href="#88" id="88">88</a>
+<a href="#89" id="89">89</a>
+<a href="#90" id="90">90</a>
+<a href="#91" id="91">91</a>
+<a href="#92" id="92">92</a>
+<a href="#93" id="93">93</a>
+<a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a></pre></div><pre class="rust"><code><span class="attr">#![allow(
+    dead_code,
+    reason = <span class="string">"private utility code that, depending on the activated feature set, will sometimes be missing uses"
+</span>)]
+</span><span class="doccomment">//! A module for filtering strings based on a character map.
+//!
+//! This module provides the [`FilteredString`] type, which offers a reusable
+//! and efficient abstraction for working with strings filtered according to a
+//! predefined character map. This is particularly useful in scenarios where
+//! only a subset of characters are supported, such as rendering text with an
+//! `ImageFont`.
+//!
+//! # Key Features
+//! - **Efficient Filtering:** Filters strings without unnecessary allocations,
+//!   making it suitable for performance-sensitive contexts.
+//! - **Iterator Support:** Allows iteration over filtered characters for
+//!   further processing.
+//! - **Display Implementation:** Can be directly converted to a string
+//!   representation of the filtered content.
+//!
+//! # Usage
+//! This module is typically used in conjunction with image font rendering
+//! systems, where only characters supported by the font's atlas are allowed. It
+//! ensures unsupported characters are ignored while preserving the order of the
+//! valid characters.
+
+</span><span class="kw">use </span>std::fmt;
 
 <span class="kw">use </span>bevy::utils::HashMap;
 
@@ -79,12 +141,23 @@
 /// for working with filtered strings efficiently, avoiding unnecessary
 /// allocations.
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>FilteredString&lt;<span class="lifetime">'s</span>, S: AsRef&lt;str&gt;&gt; {
-    string: S,
-    atlas_character_map: <span class="kw-2">&amp;</span><span class="lifetime">'s </span>HashMap&lt;char, usize&gt;,
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>FilteredString&lt;<span class="lifetime">'map</span>, S: AsRef&lt;str&gt;&gt; {
+    <span class="doccomment">/// The input string to be filtered.
+    ///
+    /// This string serves as the source for filtering operations. Characters
+    /// in this string are compared against the characters in
+    /// `atlas_character_map`.
+    </span>string: S,
+
+    <span class="doccomment">/// A reference to a map of characters to their indices in a texture atlas.
+    ///
+    /// This map determines which characters from `string` are retained during
+    /// filtering. Only characters present as keys in this map will be included
+    /// in the filtered output.
+    </span>atlas_character_map: <span class="kw-2">&amp;</span><span class="lifetime">'map </span>HashMap&lt;char, usize&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">'s</span>, S: AsRef&lt;str&gt;&gt; FilteredString&lt;<span class="lifetime">'s</span>, S&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'map</span>, S: AsRef&lt;str&gt;&gt; FilteredString&lt;<span class="lifetime">'map</span>, S&gt; {
     <span class="doccomment">/// Creates a new `FilteredString` instance.
     ///
     /// # Parameters
@@ -95,7 +168,7 @@
     /// # Returns
     /// A `FilteredString` instance that can produce iterators over the filtered
     /// characters.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(string: S, atlas_character_map: <span class="kw-2">&amp;</span><span class="lifetime">'s </span>HashMap&lt;char, usize&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(string: S, atlas_character_map: <span class="kw-2">&amp;</span><span class="lifetime">'map </span>HashMap&lt;char, usize&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             string,
             atlas_character_map,
@@ -113,7 +186,7 @@
         <span class="self">self</span>.string
             .as_ref()
             .chars()
-            .filter(|c| <span class="self">self</span>.atlas_character_map.contains_key(c))
+            .filter(|character| <span class="self">self</span>.atlas_character_map.contains_key(character))
     }
 
     <span class="doccomment">/// Checks if the filtered string is empty.
@@ -122,16 +195,15 @@
     /// `true` if there are no characters in the filtered string; otherwise,
     /// `false`.
     </span><span class="attr">#[inline]
-    #[allow(dead_code)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>is_empty(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.filtered_chars().next().is_none()
     }
 }
 
 <span class="kw">impl</span>&lt;S: AsRef&lt;str&gt;&gt; fmt::Display <span class="kw">for </span>FilteredString&lt;<span class="lifetime">'_</span>, S&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
-        <span class="kw">for </span>c <span class="kw">in </span><span class="self">self</span>.filtered_chars() {
-            <span class="macro">write!</span>(f, <span class="string">"{c}"</span>)<span class="question-mark">?</span>;
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, formatter: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        <span class="kw">for </span>character <span class="kw">in </span><span class="self">self</span>.filtered_chars() {
+            <span class="macro">write!</span>(formatter, <span class="string">"{character}"</span>)<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(())
     }
