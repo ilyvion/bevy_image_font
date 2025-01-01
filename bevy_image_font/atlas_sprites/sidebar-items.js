@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["render_sprite_gizmos","set_up_sprites"],"struct":["ImageFontGizmoData","ImageFontSpriteText"]};

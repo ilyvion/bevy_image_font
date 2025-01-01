@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["mark_changed_fonts_as_dirty"],"mod":["loader","rendered"],"struct":["ImageFont","ImageFontPlugin","ImageFontSet","ImageFontText"]};
+window.SIDEBAR_ITEMS = {"fn":["sync_texts_with_font_changes"],"mod":["atlas_sprites","loader","rendered"],"struct":["ImageFont","ImageFontPlugin","ImageFontSet","ImageFontText"]};

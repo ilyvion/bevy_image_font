@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/lib.rs`."><title>lib.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-46132b98.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="bevy_image_font" data-themes="" data-resource-suffix="" data-rustdoc-version="1.85.0-nightly (7f75bfa1a 2024-12-30)" data-channel="nightly" data-search-js="search-036cda7a.js" data-settings-js="settings-0f613d39.js" ><script src="../../static.files/storage-59e33391.js"></script><script defer src="../../static.files/src-script-56102188.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f194d8c.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">bevy_image_font/</div>lib.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/lib.rs`."><title>lib.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-46132b98.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="bevy_image_font" data-themes="" data-resource-suffix="" data-rustdoc-version="1.85.0-nightly (d117b7f21 2024-12-31)" data-channel="nightly" data-search-js="search-036cda7a.js" data-settings-js="settings-0f613d39.js" ><script src="../../static.files/storage-59e33391.js"></script><script defer src="../../static.files/src-script-56102188.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f194d8c.js"></script><script defer src="../../static.files/scrape-examples-d508a8a9.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">bevy_image_font/</div>lib.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
 <a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
@@ -129,14 +129,79 @@
 <a href="#128" id="128">128</a>
 <a href="#129" id="129">129</a>
 <a href="#130" id="130">130</a>
-<a href="#131" id="131">131</a></pre></div><pre class="rust"><code><span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">"../README.md"</span>)]
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a></pre></div><pre class="rust"><code><span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">"../README.md"</span>)]
+</span><span class="comment">//
+// only enables the `doc_cfg` feature when
+// the `docsrs` configuration attribute is defined
+</span><span class="attr">#![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
 
 </span><span class="kw">use </span>bevy::{
     prelude::<span class="kw-2">*</span>,
     utils::{HashMap, HashSet},
 };
-<span class="kw">use </span>bevy_image::Image;
+<span class="kw">use </span>bevy_image::{Image, ImageSampler};
 <span class="kw">use </span>derive_setters::Setters;
+
+<span class="attr">#[cfg(any(feature = <span class="string">"rendered"</span>, feature = <span class="string">"atlas_sprites"</span>))]
+</span><span class="kw">mod </span>filtered_string;
 
 <span class="kw">pub mod </span>loader;
 
@@ -145,7 +210,44 @@
 <span class="attr">#[cfg(feature = <span class="string">"rendered"</span>)]
 </span><span class="kw">pub use </span>rendered::<span class="kw-2">*</span>;
 
-<span class="attr">#[derive(Default)]
+<span class="attr">#[cfg(feature = <span class="string">"atlas_sprites"</span>)]
+</span><span class="kw">pub mod </span>atlas_sprites;
+<span class="attr">#[cfg(feature = <span class="string">"atlas_sprites"</span>)]
+</span><span class="kw">pub use </span>atlas_sprites::<span class="kw-2">*</span>;
+
+<span class="doccomment">/// A Bevy plugin for rendering image-based fonts.
+///
+/// This plugin enables support for fonts stored as single images (e.g., PNG),
+/// where each glyph is represented by a section of the image. It handles:
+///
+/// - Loading `ImageFont` assets, which describe the glyph layout.
+/// - Registering the `ImageFont` and `ImageFontText` types for use in your app.
+/// - Marking updated fonts as dirty, ensuring proper re-rendering.
+///
+/// ### Features
+/// The plugin conditionally includes additional functionality based on enabled
+/// features:
+/// - `rendered`: Enables support for rendering image fonts.
+/// - `atlas_sprites`: Enables support for more advanced atlas-based sprite
+///   functionality.
+///
+/// ### Usage
+/// To use this plugin, add it to your Bevy app:
+/// ```rust,no_run
+/// use bevy::prelude::*;
+/// use bevy_image_font::ImageFontPlugin;
+///
+/// App::new()
+///     .add_plugins(DefaultPlugins)
+///     .add_plugins(ImageFontPlugin)
+///     .run();
+/// ```
+///
+/// Ensure that `ImageFont` assets are properly loaded and configured using the
+/// asset system, and consider the relevant examples in the documentation for
+/// advanced use cases.
+
+</span><span class="attr">#[derive(Debug, Default)]
 </span><span class="kw">pub struct </span>ImageFontPlugin;
 
 <span class="kw">impl </span>Plugin <span class="kw">for </span>ImageFontPlugin {
@@ -153,27 +255,14 @@
         app.init_asset::&lt;ImageFont&gt;()
             .init_asset_loader::&lt;loader::ImageFontLoader&gt;()
             .register_type::&lt;ImageFont&gt;()
-            .register_type::&lt;ImageFontText&gt;();
+            .register_type::&lt;ImageFontText&gt;()
+            .add_systems(PostUpdate, sync_texts_with_font_changes);
 
         <span class="attr">#[cfg(feature = <span class="string">"rendered"</span>)]
-        </span>app.add_systems(
-            PostUpdate,
-            (mark_changed_fonts_as_dirty, rendered::render_text_to_sprite)
-                .chain()
-                .in_set(ImageFontSet),
-        );
+        </span>app.add_plugins(RenderedPlugin);
 
-        <span class="attr">#[cfg(all(feature = <span class="string">"rendered"</span>, feature = <span class="string">"ui"</span>))]
-        </span>{
-            <span class="kw">use </span>bevy::ui::widget::update_image_content_size_system;
-            app.add_systems(
-                PostUpdate,
-                rendered::render_text_to_image_node
-                    .in_set(ImageFontSet)
-                    .before(update_image_content_size_system)
-                    .after(mark_changed_fonts_as_dirty),
-            );
-        }
+        <span class="attr">#[cfg(feature = <span class="string">"atlas_sprites"</span>)]
+        </span>app.add_plugins(AtlasSpritesPlugin);
     }
 }
 
@@ -183,12 +272,22 @@
 
 <span class="doccomment">/// An image font as well as the mapping of characters to regions inside it.
 </span><span class="attr">#[derive(Debug, Clone, Reflect, Asset)]
+#[reflect(opaque)]
 </span><span class="kw">pub struct </span>ImageFont {
-    <span class="kw">pub </span>atlas_layout: Handle&lt;TextureAtlasLayout&gt;,
-    <span class="kw">pub </span>texture: Handle&lt;Image&gt;,
+    <span class="doccomment">/// The layout of the texture atlas, describing the positioning and sizes
+    /// of glyphs within the image font. This layout is used to map character
+    /// regions within the texture.
+    </span><span class="kw">pub </span>atlas_layout: Handle&lt;TextureAtlasLayout&gt;,
+    <span class="doccomment">/// The image that contains the font glyphs. Each glyph is a section of
+    /// this texture, defined by the `atlas_layout` and `atlas_character_map`.
+    </span><span class="kw">pub </span>texture: Handle&lt;Image&gt;,
     <span class="doccomment">/// The glyph used to render `c` is contained in the part of the image
     /// pointed to by `atlas.textures[atlas_character_map[c]]`.
     </span><span class="kw">pub </span>atlas_character_map: HashMap&lt;char, usize&gt;,
+    <span class="doccomment">/// The [`ImageSampler`] to use during font image rendering. The default is
+    /// `nearest`, which scales an image without blurring, keeping the text
+    /// crisp and pixellated.
+    </span><span class="kw">pub </span>image_sampler: ImageSampler,
 }
 
 <span class="kw">impl </span>ImageFont {
@@ -209,20 +308,19 @@
         texture: Handle&lt;Image&gt;,
         atlas_character_map: HashMap&lt;char, usize&gt;,
         atlas_layout: Handle&lt;TextureAtlasLayout&gt;,
+        image_sampler: ImageSampler,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             atlas_layout,
             texture,
             atlas_character_map,
+            image_sampler,
         }
     }
 
-    <span class="attr">#[allow(dead_code)]
-    </span><span class="kw">fn </span>filter_string(<span class="kw-2">&amp;</span><span class="self">self</span>, s: <span class="kw">impl </span>AsRef&lt;str&gt;) -&gt; String {
-        s.as_ref()
-            .chars()
-            .filter(|c| <span class="self">self</span>.atlas_character_map.contains_key(c))
-            .collect()
+    <span class="attr">#[cfg(any(feature = <span class="string">"rendered"</span>, feature = <span class="string">"atlas_sprites"</span>))]
+    </span><span class="kw">fn </span>filter_string&lt;S: AsRef&lt;str&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, s: S) -&gt; filtered_string::FilteredString&lt;<span class="lifetime">'_</span>, S&gt; {
+        filtered_string::FilteredString::new(s, <span class="kw-2">&amp;</span><span class="self">self</span>.atlas_character_map)
     }
 }
 
@@ -230,8 +328,12 @@
 </span><span class="attr">#[derive(Debug, Clone, Reflect, Default, Component, Setters)]
 #[setters(into)]
 </span><span class="kw">pub struct </span>ImageFontText {
-    <span class="kw">pub </span>text: String,
-    <span class="kw">pub </span>font: Handle&lt;ImageFont&gt;,
+    <span class="doccomment">/// The string of text to be rendered. Each character in the string is
+    /// mapped to a corresponding glyph in the associated [`ImageFont`].
+    </span><span class="kw">pub </span>text: String,
+    <span class="doccomment">/// The handle to the [`ImageFont`] used to render this text. The font's
+    /// texture and atlas mapping determine how characters are displayed.
+    </span><span class="kw">pub </span>font: Handle&lt;ImageFont&gt;,
     <span class="doccomment">/// If set, overrides the height the font is rendered at. This should be an
     /// integer multiple of the 'native' height if you want pixel accuracy,
     /// but we allow float values for things like animations.
@@ -239,25 +341,39 @@
 }
 
 <span class="doccomment">/// Marks any text where the underlying [`ImageFont`] asset has changed as
-/// dirty, which will cause it to be rerendered.
-</span><span class="kw">pub fn </span>mark_changed_fonts_as_dirty(
+/// changed, which will cause it to be re-rendered.
+</span><span class="attr">#[allow(private_interfaces)]
+</span><span class="kw">pub fn </span>sync_texts_with_font_changes(
     <span class="kw-2">mut </span>events: EventReader&lt;AssetEvent&lt;ImageFont&gt;&gt;,
     <span class="kw-2">mut </span>query: Query&lt;<span class="kw-2">&amp;mut </span>ImageFontText&gt;,
+    <span class="kw-2">mut </span>changed_fonts: Local&lt;CachedHashSet&gt;,
 ) {
-    <span class="kw">let </span>changed_fonts: HashSet&lt;<span class="kw">_</span>&gt; = events
-        .read()
-        .filter_map(|event| <span class="kw">match </span>event {
-            AssetEvent::Modified { id } | AssetEvent::LoadedWithDependencies { id } =&gt; {
-                <span class="macro">info!</span>(<span class="string">"Image font {id} finished loading; marking as dirty"</span>);
-                <span class="prelude-val">Some</span>(id)
-            }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
-        })
-        .collect();
-    <span class="kw">for </span><span class="kw-2">mut </span>image_font_text <span class="kw">in </span><span class="kw-2">&amp;mut </span>query {
+    <span class="comment">// Extract relevant IDs from events
+    </span><span class="kw">for </span>id <span class="kw">in </span>events.read().filter_map(extract_asset_id) {
+        <span class="macro">info!</span>(<span class="string">"Image font {id} finished loading; marking as dirty"</span>);
+        changed_fonts.insert(id);
+    }
+
+    <span class="comment">// Update query for affected fonts
+    </span><span class="kw">for </span><span class="kw-2">mut </span>image_font_text <span class="kw">in </span><span class="kw-2">&amp;mut </span>query {
         <span class="kw">if </span>changed_fonts.contains(<span class="kw-2">&amp;</span>image_font_text.font.id()) {
             image_font_text.set_changed();
         }
     }
+
+    <span class="comment">// Reset the local state
+    </span>changed_fonts.clear();
 }
+
+<span class="comment">// Helper function to extract the relevant asset ID
+</span><span class="attr">#[inline]
+</span><span class="kw">fn </span>extract_asset_id(event: <span class="kw-2">&amp;</span>AssetEvent&lt;ImageFont&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;AssetId&lt;ImageFont&gt;&gt; {
+    <span class="kw">match </span>event {
+        AssetEvent::Modified { id } | AssetEvent::LoadedWithDependencies { id } =&gt; <span class="prelude-val">Some</span>(<span class="kw-2">*</span>id),
+        <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
+    }
+}
+
+<span class="attr">#[derive(Default, Deref, DerefMut)]
+</span><span class="kw">struct </span>CachedHashSet(HashSet&lt;AssetId&lt;ImageFont&gt;&gt;);
 </code></pre></div></section></main></body></html>

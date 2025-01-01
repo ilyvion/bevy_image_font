@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/rendered.rs`."><title>rendered.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-46132b98.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="bevy_image_font" data-themes="" data-resource-suffix="" data-rustdoc-version="1.85.0-nightly (7f75bfa1a 2024-12-30)" data-channel="nightly" data-search-js="search-036cda7a.js" data-settings-js="settings-0f613d39.js" ><script src="../../static.files/storage-59e33391.js"></script><script defer src="../../static.files/src-script-56102188.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f194d8c.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">bevy_image_font/</div>rendered.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/rendered.rs`."><title>rendered.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-46132b98.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="bevy_image_font" data-themes="" data-resource-suffix="" data-rustdoc-version="1.85.0-nightly (d117b7f21 2024-12-31)" data-channel="nightly" data-search-js="search-036cda7a.js" data-settings-js="settings-0f613d39.js" ><script src="../../static.files/storage-59e33391.js"></script><script defer src="../../static.files/src-script-56102188.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f194d8c.js"></script><script defer src="../../static.files/scrape-examples-d508a8a9.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">bevy_image_font/</div>rendered.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
 <a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
@@ -271,7 +271,52 @@
 <a href="#270" id="270">270</a>
 <a href="#271" id="271">271</a>
 <a href="#272" id="272">272</a>
-<a href="#273" id="273">273</a></pre></div><pre class="rust"><code><span class="doccomment">//! This module provides functionality for rendering text as images in the Bevy
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a></pre></div><pre class="rust"><code><span class="doccomment">//! This module provides functionality for rendering text as images in the Bevy
 //! engine, utilizing custom image fonts. It includes components for
 //! pre-rendering text for both in-world and UI contexts, as well as systems to
 //! update and render the text when changes occur.
@@ -297,7 +342,33 @@
 };
 <span class="kw">use </span>thiserror::Error;
 
-<span class="kw">use crate</span>::{ImageFont, ImageFontText};
+<span class="kw">use crate</span>::{sync_texts_with_font_changes, ImageFont, ImageFontSet, ImageFontText};
+
+<span class="attr">#[derive(Default)]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>RenderedPlugin;
+
+<span class="kw">impl </span>Plugin <span class="kw">for </span>RenderedPlugin {
+    <span class="kw">fn </span>build(<span class="kw-2">&amp;</span><span class="self">self</span>, app: <span class="kw-2">&amp;mut </span>App) {
+        app.add_systems(
+            PostUpdate,
+            render_text_to_sprite
+                .after(sync_texts_with_font_changes)
+                .in_set(ImageFontSet),
+        );
+
+        <span class="attr">#[cfg(feature = <span class="string">"ui"</span>)]
+        </span>{
+            <span class="kw">use </span>bevy::ui::widget::update_image_content_size_system;
+            app.add_systems(
+                PostUpdate,
+                render_text_to_image_node
+                    .in_set(ImageFontSet)
+                    .before(update_image_content_size_system)
+                    .after(sync_texts_with_font_changes),
+            );
+        }
+    }
+}
 
 <span class="doccomment">/// A component for displaying in-world text that has been pre-rendered using an
 /// image font.
@@ -439,12 +510,12 @@
 
     <span class="comment">// as wide as the sum of all characters, as tall as the tallest one
     </span><span class="kw">let </span>height = text
-        .chars()
+        .filtered_chars()
         .map(|c| layout.textures[image_font.atlas_character_map[<span class="kw-2">&amp;</span>c]].height())
         .reduce(u32::max)
         .unwrap();
     <span class="kw">let </span>width = text
-        .chars()
+        .filtered_chars()
         .map(|c| layout.textures[image_font.atlas_character_map[<span class="kw-2">&amp;</span>c]].width())
         .reduce(|a, b| a + b)
         .unwrap();
@@ -458,7 +529,7 @@
     .ok_or(ImageFontRenderError::UnknownError)<span class="question-mark">?</span>;
 
     <span class="kw">let </span><span class="kw-2">mut </span>x = <span class="number">0</span>;
-    <span class="kw">for </span>c <span class="kw">in </span>text.chars() {
+    <span class="kw">for </span>c <span class="kw">in </span>text.filtered_chars() {
         <span class="kw">let </span>rect = layout.textures[image_font.atlas_character_map[<span class="kw-2">&amp;</span>c]];
         <span class="kw">let </span>width = rect.width();
         <span class="kw">let </span>height = rect.height();
@@ -501,19 +572,38 @@
     <span class="prelude-val">Ok</span>(bevy_image)
 }
 
-<span class="doccomment">/// Errors that can show up during rendering.
+<span class="doccomment">/// Errors that can occur during the rendering of an `ImageFont`.
 </span><span class="attr">#[derive(Debug, Error)]
 #[non_exhaustive]
 </span><span class="kw">pub enum </span>ImageFontRenderError {
-    <span class="attr">#[error(<span class="string">"failed to convert image to DynamicImage: {0}"</span>)]
+    <span class="doccomment">/// The image could not be converted to a `DynamicImage`. This typically
+    /// indicates an issue with the underlying image data or its format.
+    </span><span class="attr">#[error(<span class="string">"failed to convert image to DynamicImage: {0}"</span>)]
     </span>ImageConversion(String),
-    <span class="attr">#[error(<span class="string">"ImageFont asset not loaded"</span>)]
+
+    <span class="doccomment">/// The `ImageFont` asset required for rendering was not loaded. Ensure
+    /// that the font asset is correctly loaded into the Bevy app. This should
+    /// happend automatically when using the `AssetLoader` to load the font
+    /// asset.
+    </span><span class="attr">#[error(<span class="string">"ImageFont asset not loaded"</span>)]
     </span>MissingImageFontAsset,
-    <span class="attr">#[error(<span class="string">"Font texture asset not loaded"</span>)]
+
+    <span class="doccomment">/// The texture asset associated with the `ImageFont` was not loaded. This
+    /// could indicate an issue with the asset pipeline or a missing dependency.
+    /// This should happend automatically when using the `AssetLoader` to
+    /// load the font asset.
+    </span><span class="attr">#[error(<span class="string">"Font texture asset not loaded"</span>)]
     </span>MissingTextureAsset,
-    <span class="attr">#[error(<span class="string">"internal error"</span>)]
+
+    <span class="doccomment">/// An unspecified internal error occurred during rendering. This may
+    /// indicate a bug or unexpected state in the rendering system.
+    </span><span class="attr">#[error(<span class="string">"internal error"</span>)]
     </span>UnknownError,
-    <span class="attr">#[error(<span class="string">"failed to copy from atlas"</span>)]
+
+    <span class="doccomment">/// Failed to copy a character from the source font image texture to the
+    /// target rendered text sprite image texture. This error typically occurs
+    /// when there is an issue with the image data or the copying process.
+    </span><span class="attr">#[error(<span class="string">"failed to copy from atlas"</span>)]
     </span>CopyFailure(<span class="attr">#[from] </span>ImageError),
 }
 

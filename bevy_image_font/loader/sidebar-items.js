@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["ImageFontLayout","ImageFontLoadError"],"struct":["ImageFontLoader","ImageFontSettings"]};
+window.SIDEBAR_ITEMS = {"enum":["ImageFontLayout","ImageFontLoadError"],"struct":["ImageFontLoader","ImageFontLoaderSettings","ImageFontSettings"]};
