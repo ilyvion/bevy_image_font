@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/loader.rs`."><title>loader.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-46132b98.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="bevy_image_font" data-themes="" data-resource-suffix="" data-rustdoc-version="1.85.0-nightly (45d11e51b 2025-01-01)" data-channel="nightly" data-search-js="search-036cda7a.js" data-settings-js="settings-0f613d39.js" ><script src="../../static.files/storage-59e33391.js"></script><script defer src="../../static.files/src-script-56102188.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f194d8c.js"></script><script defer src="../../static.files/scrape-examples-d508a8a9.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">bevy_image_font/</div>loader.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/loader.rs`."><title>loader.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-46132b98.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="bevy_image_font" data-themes="" data-resource-suffix="" data-rustdoc-version="1.85.0-nightly (4363f9b6f 2025-01-02)" data-channel="nightly" data-search-js="search-75f5ac3e.js" data-settings-js="settings-0f613d39.js" ><script src="../../static.files/storage-59e33391.js"></script><script defer src="../../static.files/src-script-56102188.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f194d8c.js"></script><script defer src="../../static.files/scrape-examples-d508a8a9.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">bevy_image_font/</div>loader.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
 <a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
@@ -347,7 +347,256 @@
 <a href="#346" id="346">346</a>
 <a href="#347" id="347">347</a>
 <a href="#348" id="348">348</a>
-<a href="#349" id="349">349</a></pre></div><pre class="rust"><code><span class="doccomment">//! Code for parsing an [`ImageFont`] off of an on-disk representation.
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a>
+<a href="#353" id="353">353</a>
+<a href="#354" id="354">354</a>
+<a href="#355" id="355">355</a>
+<a href="#356" id="356">356</a>
+<a href="#357" id="357">357</a>
+<a href="#358" id="358">358</a>
+<a href="#359" id="359">359</a>
+<a href="#360" id="360">360</a>
+<a href="#361" id="361">361</a>
+<a href="#362" id="362">362</a>
+<a href="#363" id="363">363</a>
+<a href="#364" id="364">364</a>
+<a href="#365" id="365">365</a>
+<a href="#366" id="366">366</a>
+<a href="#367" id="367">367</a>
+<a href="#368" id="368">368</a>
+<a href="#369" id="369">369</a>
+<a href="#370" id="370">370</a>
+<a href="#371" id="371">371</a>
+<a href="#372" id="372">372</a>
+<a href="#373" id="373">373</a>
+<a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
+<a href="#392" id="392">392</a>
+<a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a>
+<a href="#410" id="410">410</a>
+<a href="#411" id="411">411</a>
+<a href="#412" id="412">412</a>
+<a href="#413" id="413">413</a>
+<a href="#414" id="414">414</a>
+<a href="#415" id="415">415</a>
+<a href="#416" id="416">416</a>
+<a href="#417" id="417">417</a>
+<a href="#418" id="418">418</a>
+<a href="#419" id="419">419</a>
+<a href="#420" id="420">420</a>
+<a href="#421" id="421">421</a>
+<a href="#422" id="422">422</a>
+<a href="#423" id="423">423</a>
+<a href="#424" id="424">424</a>
+<a href="#425" id="425">425</a>
+<a href="#426" id="426">426</a>
+<a href="#427" id="427">427</a>
+<a href="#428" id="428">428</a>
+<a href="#429" id="429">429</a>
+<a href="#430" id="430">430</a>
+<a href="#431" id="431">431</a>
+<a href="#432" id="432">432</a>
+<a href="#433" id="433">433</a>
+<a href="#434" id="434">434</a>
+<a href="#435" id="435">435</a>
+<a href="#436" id="436">436</a>
+<a href="#437" id="437">437</a>
+<a href="#438" id="438">438</a>
+<a href="#439" id="439">439</a>
+<a href="#440" id="440">440</a>
+<a href="#441" id="441">441</a>
+<a href="#442" id="442">442</a>
+<a href="#443" id="443">443</a>
+<a href="#444" id="444">444</a>
+<a href="#445" id="445">445</a>
+<a href="#446" id="446">446</a>
+<a href="#447" id="447">447</a>
+<a href="#448" id="448">448</a>
+<a href="#449" id="449">449</a>
+<a href="#450" id="450">450</a>
+<a href="#451" id="451">451</a>
+<a href="#452" id="452">452</a>
+<a href="#453" id="453">453</a>
+<a href="#454" id="454">454</a>
+<a href="#455" id="455">455</a>
+<a href="#456" id="456">456</a>
+<a href="#457" id="457">457</a>
+<a href="#458" id="458">458</a>
+<a href="#459" id="459">459</a>
+<a href="#460" id="460">460</a>
+<a href="#461" id="461">461</a>
+<a href="#462" id="462">462</a>
+<a href="#463" id="463">463</a>
+<a href="#464" id="464">464</a>
+<a href="#465" id="465">465</a>
+<a href="#466" id="466">466</a>
+<a href="#467" id="467">467</a>
+<a href="#468" id="468">468</a>
+<a href="#469" id="469">469</a>
+<a href="#470" id="470">470</a>
+<a href="#471" id="471">471</a>
+<a href="#472" id="472">472</a>
+<a href="#473" id="473">473</a>
+<a href="#474" id="474">474</a>
+<a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
+<a href="#478" id="478">478</a>
+<a href="#479" id="479">479</a>
+<a href="#480" id="480">480</a>
+<a href="#481" id="481">481</a>
+<a href="#482" id="482">482</a>
+<a href="#483" id="483">483</a>
+<a href="#484" id="484">484</a>
+<a href="#485" id="485">485</a>
+<a href="#486" id="486">486</a>
+<a href="#487" id="487">487</a>
+<a href="#488" id="488">488</a>
+<a href="#489" id="489">489</a>
+<a href="#490" id="490">490</a>
+<a href="#491" id="491">491</a>
+<a href="#492" id="492">492</a>
+<a href="#493" id="493">493</a>
+<a href="#494" id="494">494</a>
+<a href="#495" id="495">495</a>
+<a href="#496" id="496">496</a>
+<a href="#497" id="497">497</a>
+<a href="#498" id="498">498</a>
+<a href="#499" id="499">499</a>
+<a href="#500" id="500">500</a>
+<a href="#501" id="501">501</a>
+<a href="#502" id="502">502</a>
+<a href="#503" id="503">503</a>
+<a href="#504" id="504">504</a>
+<a href="#505" id="505">505</a>
+<a href="#506" id="506">506</a>
+<a href="#507" id="507">507</a>
+<a href="#508" id="508">508</a>
+<a href="#509" id="509">509</a>
+<a href="#510" id="510">510</a>
+<a href="#511" id="511">511</a>
+<a href="#512" id="512">512</a>
+<a href="#513" id="513">513</a>
+<a href="#514" id="514">514</a>
+<a href="#515" id="515">515</a>
+<a href="#516" id="516">516</a>
+<a href="#517" id="517">517</a>
+<a href="#518" id="518">518</a>
+<a href="#519" id="519">519</a>
+<a href="#520" id="520">520</a>
+<a href="#521" id="521">521</a>
+<a href="#522" id="522">522</a>
+<a href="#523" id="523">523</a>
+<a href="#524" id="524">524</a>
+<a href="#525" id="525">525</a>
+<a href="#526" id="526">526</a>
+<a href="#527" id="527">527</a>
+<a href="#528" id="528">528</a>
+<a href="#529" id="529">529</a>
+<a href="#530" id="530">530</a>
+<a href="#531" id="531">531</a>
+<a href="#532" id="532">532</a>
+<a href="#533" id="533">533</a>
+<a href="#534" id="534">534</a>
+<a href="#535" id="535">535</a>
+<a href="#536" id="536">536</a>
+<a href="#537" id="537">537</a>
+<a href="#538" id="538">538</a>
+<a href="#539" id="539">539</a>
+<a href="#540" id="540">540</a>
+<a href="#541" id="541">541</a>
+<a href="#542" id="542">542</a>
+<a href="#543" id="543">543</a>
+<a href="#544" id="544">544</a>
+<a href="#545" id="545">545</a>
+<a href="#546" id="546">546</a>
+<a href="#547" id="547">547</a>
+<a href="#548" id="548">548</a>
+<a href="#549" id="549">549</a>
+<a href="#550" id="550">550</a>
+<a href="#551" id="551">551</a>
+<a href="#552" id="552">552</a>
+<a href="#553" id="553">553</a>
+<a href="#554" id="554">554</a>
+<a href="#555" id="555">555</a>
+<a href="#556" id="556">556</a>
+<a href="#557" id="557">557</a>
+<a href="#558" id="558">558</a>
+<a href="#559" id="559">559</a>
+<a href="#560" id="560">560</a>
+<a href="#561" id="561">561</a>
+<a href="#562" id="562">562</a>
+<a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
+<a href="#573" id="573">573</a>
+<a href="#574" id="574">574</a>
+<a href="#575" id="575">575</a>
+<a href="#576" id="576">576</a>
+<a href="#577" id="577">577</a>
+<a href="#578" id="578">578</a>
+<a href="#579" id="579">579</a>
+<a href="#580" id="580">580</a>
+<a href="#581" id="581">581</a>
+<a href="#582" id="582">582</a>
+<a href="#583" id="583">583</a>
+<a href="#584" id="584">584</a>
+<a href="#585" id="585">585</a>
+<a href="#586" id="586">586</a>
+<a href="#587" id="587">587</a>
+<a href="#588" id="588">588</a>
+<a href="#589" id="589">589</a>
+<a href="#590" id="590">590</a>
+<a href="#591" id="591">591</a>
+<a href="#592" id="592">592</a>
+<a href="#593" id="593">593</a>
+<a href="#594" id="594">594</a>
+<a href="#595" id="595">595</a>
+<a href="#596" id="596">596</a>
+<a href="#597" id="597">597</a>
+<a href="#598" id="598">598</a></pre></div><pre class="rust"><code><span class="doccomment">//! Code for parsing an [`ImageFont`] off of an on-disk representation.
 
 </span><span class="attr">#![expect(clippy::absolute_paths, reason = <span class="string">"false positives"</span>)]
 
@@ -355,12 +604,12 @@
 <span class="kw">use </span>std::path::PathBuf;
 
 <span class="kw">use </span>bevy::{
-    asset::{io::Reader, AssetLoader, AsyncReadExt <span class="kw">as _</span>, LoadContext, LoadDirectError},
+    asset::{io::Reader, AssetLoader, LoadContext, LoadDirectError},
     prelude::<span class="kw-2">*</span>,
     utils::HashMap,
 };
 <span class="kw">use </span>bevy_image::{Image, ImageSampler, ImageSamplerDescriptor};
-<span class="kw">use </span>camino::Utf8PathBuf;
+<span class="kw">use </span>camino::{Utf8Path, Utf8PathBuf};
 <span class="kw">use </span>ron::de::SpannedError;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>thiserror::Error;
@@ -436,6 +685,57 @@
     </span>Manual(HashMap&lt;char, URect&gt;),
 }
 
+<span class="doccomment">/// Errors that can show up during validation.
+</span><span class="attr">#[derive(Debug, Error)]
+#[non_exhaustive]
+</span><span class="kw">pub enum </span>ImageFontLayoutValidationError {
+    <span class="doccomment">/// The image width does not evenly divide the character count per line.
+    ///
+    /// This error occurs when the width of the provided image is not a multiple
+    /// of the number of characters per line specified in the layout.
+    </span><span class="attr">#[error(
+        <span class="string">"Image width {width} is not an exact multiple of per-line character count \
+    {per_line_character_count}."
+    </span>)]
+    </span>InvalidImageWidth {
+        <span class="doccomment">/// The width of the image being validated.
+        </span>width: u32,
+        <span class="doccomment">/// The number of characters per line in the layout.
+        </span>per_line_character_count: u32,
+    },
+
+    <span class="doccomment">/// The image height does not evenly divide the number of lines.
+    ///
+    /// This error occurs when the height of the provided image is not a
+    /// multiple of the number of lines in the layout.
+    </span><span class="attr">#[error(<span class="string">"Image height {height} is not an exact multiple of line count {line_count}."</span>)]
+    </span>InvalidImageHeight {
+        <span class="doccomment">/// The height of the image being validated.
+        </span>height: u32,
+        <span class="doccomment">/// The number of lines in the layout.
+        </span>line_count: u32,
+    },
+
+    <span class="doccomment">/// A repeated character was found in an `Automatic` layout string.
+    ///
+    /// This error occurs when the same character appears multiple times in the
+    /// layout string, leading to conflicting placement definitions.
+    </span><span class="attr">#[error(
+        <span class="string">"The character '{character}' appears more than once. The second appearance is in the \
+        layout string at row {row}, column {column}."
+    </span>)]
+    </span>AutomaticRepeatedCharacter {
+        <span class="doccomment">/// The row in the layout string where the repeated character is
+        /// located.
+        </span>row: usize,
+        <span class="doccomment">/// The column in the layout string where the repeated character is
+        /// located.
+        </span>column: usize,
+        <span class="doccomment">/// The character that was repeated in the layout string.
+        </span>character: char,
+    },
+}
+
 <span class="kw">impl </span>ImageFontLayout {
     <span class="doccomment">/// Given the image size, returns a map from each codepoint to its location.
     </span><span class="attr">#[expect(
@@ -443,17 +743,21 @@
         reason = <span class="string">"while usize can hold more data than u32, we're working on a number here that \
         should be substantially smaller than even u32's capacity"
     </span>)]
-    </span><span class="kw">fn </span>into_char_map(<span class="self">self</span>, size: UVec2) -&gt; HashMap&lt;char, URect&gt; {
+    </span><span class="kw">fn </span>into_character_rect_map(
+        <span class="self">self</span>,
+        size: UVec2,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;HashMap&lt;char, URect&gt;, ImageFontLayoutValidationError&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             ImageFontLayout::Automatic(str) =&gt; {
                 <span class="comment">// trim() removes whitespace, which is not what we want!
                 </span><span class="kw">let </span>str = str
                     .trim_start_matches([<span class="string">'\r'</span>, <span class="string">'\n'</span>])
                     .trim_end_matches([<span class="string">'\r'</span>, <span class="string">'\n'</span>]);
-                <span class="kw">let </span><span class="kw-2">mut </span>rect_map = HashMap::new();
                 <span class="attr">#[expect(
                     clippy::expect_used,
-                    reason = <span class="string">"this intentionally panics on an empty string"
+                    reason = <span class="string">"this intentionally panics on an empty string. Should never happen as \
+                    the ImageFontLayout should always have been validated before this method gets \
+                    called"
                 </span>)]
                 </span><span class="kw">let </span>max_chars_per_line = str
                     .lines()
@@ -464,42 +768,54 @@
                     <span class="kw">as </span>u32;
 
                 <span class="kw">if </span>size.x % max_chars_per_line != <span class="number">0 </span>{
-                    <span class="macro">warn!</span>(
-                        <span class="string">"image width {} is not an exact multiple of character count {}"</span>,
-                        size.x, max_chars_per_line
-                    );
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(ImageFontLayoutValidationError::InvalidImageWidth {
+                        width: size.x,
+                        per_line_character_count: max_chars_per_line,
+                    });
                 }
                 <span class="kw">let </span>line_count = str.lines().count() <span class="kw">as </span>u32;
                 <span class="kw">if </span>size.y % line_count != <span class="number">0 </span>{
-                    <span class="macro">warn!</span>(
-                        <span class="string">"image height {} is not an exact multiple of character count {}"</span>,
-                        size.y, line_count
-                    );
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(ImageFontLayoutValidationError::InvalidImageHeight {
+                        height: size.y,
+                        line_count,
+                    });
                 }
+
+                <span class="kw">let </span><span class="kw-2">mut </span>rect_map =
+                    HashMap::with_capacity((max_chars_per_line * line_count) <span class="kw">as </span>usize);
 
                 <span class="kw">let </span>rect_width = size.x / max_chars_per_line;
                 <span class="kw">let </span>rect_height = size.y / line_count;
 
                 <span class="kw">for </span>(row, line) <span class="kw">in </span>str.lines().enumerate() {
-                    <span class="kw">for </span>(col, char) <span class="kw">in </span>line.chars().enumerate() {
+                    <span class="kw">for </span>(column, character) <span class="kw">in </span>line.chars().enumerate() {
                         <span class="kw">let </span>rect = URect::new(
-                            rect_width * col <span class="kw">as </span>u32,
+                            rect_width * column <span class="kw">as </span>u32,
                             rect_height * row <span class="kw">as </span>u32,
-                            rect_width * (col + <span class="number">1</span>) <span class="kw">as </span>u32,
+                            rect_width * (column + <span class="number">1</span>) <span class="kw">as </span>u32,
                             rect_height * (row + <span class="number">1</span>) <span class="kw">as </span>u32,
                         );
-                        rect_map.insert(char, rect);
+                        <span class="kw">if </span>rect_map.insert(character, rect).is_some() {
+                            <span class="kw">return </span><span class="prelude-val">Err</span>(
+                                ImageFontLayoutValidationError::AutomaticRepeatedCharacter {
+                                    row,
+                                    column,
+                                    character,
+                                },
+                            );
+                        }
                     }
                 }
-                rect_map
+
+                <span class="prelude-val">Ok</span>(rect_map)
             }
-            ImageFontLayout::ManualMonospace { size, coords } =&gt; coords
+            ImageFontLayout::ManualMonospace { size, coords } =&gt; <span class="prelude-val">Ok</span>(coords
                 .into_iter()
                 .map(|(character, top_left)| {
                     (character, URect::from_corners(top_left, size + top_left))
                 })
-                .collect(),
-            ImageFontLayout::Manual(urect_map) =&gt; urect_map,
+                .collect()),
+            ImageFontLayout::Manual(urect_map) =&gt; <span class="prelude-val">Ok</span>(urect_map),
         }
     }
 }
@@ -510,21 +826,83 @@
 ///
 /// [the example font's RON asset](https://github.com/ilyvion/bevy_image_font/blob/main/assets/example_font.image_font.ron)
 </span><span class="attr">#[derive(Debug, Serialize, Deserialize)]
-</span><span class="comment">// TODO: Rename to ImageFontDescriptor
-</span><span class="kw">pub struct </span>ImageFontSettings {
+</span><span class="kw">pub struct </span>ImageFontDescriptor {
     <span class="doccomment">/// The path to the image file containing the font glyphs, relative to the
     /// RON file. This should be a valid path to a texture file that can be
     /// loaded by the asset system.
+    </span><span class="attr">#[deprecated(
+        since = <span class="string">"7.1.0"</span>,
+        note = <span class="string">"This field will become private in the next major version. Use `new` to create a \
+        value of this type and `image` to read the field."
+    </span>)]
     </span><span class="kw">pub </span>image: Utf8PathBuf,
 
     <span class="doccomment">/// The layout description of the font, specifying how characters map to
     /// regions within the image. This can use any of the variants provided
     /// by [`ImageFontLayout`], allowing flexible configuration.
+    </span><span class="attr">#[deprecated(
+        since = <span class="string">"7.1.0"</span>,
+        note = <span class="string">"This field will become private in the next major version. Use `new` to create a \
+        value of this type and `layout` to read the field."
+    </span>)]
     </span><span class="kw">pub </span>layout: ImageFontLayout,
 }
 
-<span class="kw">impl </span>ImageFontSettings {
-    <span class="doccomment">/// Validates the `ImageFontSettings` struct to ensure all required fields
+<span class="doccomment">/// Errors that can show up during validation.
+</span><span class="attr">#[derive(Debug, Error)]
+#[non_exhaustive]
+</span><span class="kw">pub enum </span>ImageFontDescriptorValidationError {
+    <span class="doccomment">/// The image path provided is empty.
+    </span><span class="attr">#[error(<span class="string">"Image path is empty."</span>)]
+    </span>EmptyImagePath,
+
+    <span class="doccomment">/// The layout string used for automatic character placement is empty.
+    /// This error occurs when no characters are defined in the automatic layout
+    /// string.
+    </span><span class="attr">#[error(<span class="string">"Automatic layout string is empty."</span>)]
+    </span>EmptyLayoutString,
+}
+
+<span class="attr">#[expect(
+    missing_docs,
+    reason = <span class="string">"temporary type alias for a deprecated, renamed type"
+</span>)]
+#[deprecated(
+    since = <span class="string">"7.1.0"</span>,
+    note = <span class="string">"ImageFontSettings was renamed to ImageFontDescriptor and will be removed in version 8.0"
+</span>)]
+</span><span class="kw">pub type </span>ImageFontSettings = ImageFontDescriptor;
+
+<span class="kw">impl </span>ImageFontDescriptor {
+    <span class="doccomment">/// Creates a new `ImageFontDescriptor` instance with the provided image
+    /// path and font layout, performing validation to ensure the descriptor
+    /// is valid.
+    ///
+    /// # Parameters
+    /// - `image`: The path to the image file containing the font glyphs,
+    ///   relative to the RON file that described the font. This should be a
+    ///   valid path to a texture file that can be loaded by the asset system.
+    /// - `layout`: The layout description of the font, specifying how
+    ///   characters map to regions within the image. See [`ImageFontLayout`]
+    ///   for more details about the available layout configurations.
+    ///
+    /// # Returns
+    /// A new `ImageFontDescriptor` instance if validation succeeds.
+    ///
+    /// # Errors
+    /// Returns an [`ImageFontDescriptorValidationError`] if the provided values
+    /// do not pass validation.
+    </span><span class="attr">#[expect(deprecated, reason = <span class="string">"fields are only deprecated externally"</span>)]
+    </span><span class="kw">pub fn </span>new(
+        image: Utf8PathBuf,
+        layout: ImageFontLayout,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ImageFontDescriptorValidationError&gt; {
+        <span class="kw">let </span>value = <span class="self">Self </span>{ image, layout };
+        value.validate()<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(value)
+    }
+
+    <span class="doccomment">/// Validates the `ImageFontDescriptor` struct to ensure all required fields
     /// are populated.
     ///
     /// # Errors
@@ -535,24 +913,56 @@
     /// # Example
     /// ```rust
     /// # use camino::Utf8PathBuf;
-    /// # use bevy_image_font::loader::{ImageFontLayout, ImageFontSettings};
+    /// # use bevy_image_font::loader::{ImageFontLayout, ImageFontDescriptor};
     ///
-    /// let settings = ImageFontSettings {
+    /// let settings = ImageFontDescriptor {
     ///     image: Utf8PathBuf::from("path/to/font.png"),
     ///     layout: ImageFontLayout::Automatic("ABCDEF".into()),
     /// };
     /// assert!(settings.validate().is_ok());
     /// ```
-    </span><span class="comment">//#[allow(clippy::result_large_err)]
-    </span><span class="kw">pub fn </span>validate(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ImageFontLoadError&gt; {
+    </span><span class="attr">#[deprecated(
+        since = <span class="string">"7.1.0"</span>,
+        note = <span class="string">"This method will become private in the next major version. When using `new` to create a \
+        value of this type, `validate` gets invoked automatically."
+    </span>)]
+    #[expect(deprecated, reason = <span class="string">"fields are only deprecated externally"</span>)]
+    </span><span class="kw">pub fn </span>validate(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ImageFontDescriptorValidationError&gt; {
         <span class="kw">if </span><span class="self">self</span>.image.as_str().trim().is_empty() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ImageFontLoadError::EmptyImagePath);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(ImageFontDescriptorValidationError::EmptyImagePath);
         }
         <span class="kw">if </span><span class="macro">matches!</span>(<span class="self">self</span>.layout, ImageFontLayout::Automatic(<span class="kw-2">ref </span>layout) <span class="kw">if </span>layout.trim().is_empty())
         {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ImageFontLoadError::EmptyLayoutString);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(ImageFontDescriptorValidationError::EmptyLayoutString);
         }
         <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="doccomment">/// Gets the path to the image file containing the font glyphs.
+    ///
+    /// This is the value of the `image` field. The path is relative to the
+    /// RON file and should point to a valid texture file.
+    ///
+    /// # Returns
+    /// A reference to the `Utf8PathBuf` containing the image file path.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>image(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Utf8Path {
+        <span class="attr">#[expect(deprecated, reason = <span class="string">"field is only deprecated externally"</span>)]
+        </span><span class="kw-2">&amp;</span><span class="self">self</span>.image
+    }
+
+    <span class="doccomment">/// Gets the layout description of the font.
+    ///
+    /// This is the value of the `layout` field, which specifies how characters
+    /// map to regions within the image. See [`ImageFontLayout`] for details
+    /// about the available variants.
+    ///
+    /// # Returns
+    /// A reference to the `ImageFontLayout` describing the font layout.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>layout(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>ImageFontLayout {
+        <span class="attr">#[expect(deprecated, reason = <span class="string">"field is only deprecated externally"</span>)]
+        </span><span class="kw-2">&amp;</span><span class="self">self</span>.layout
     }
 }
 
@@ -572,12 +982,30 @@
     <span class="doccomment">/// The image path provided in the settings is empty. This error occurs
     /// when no valid file path is specified for the font image.
     </span><span class="attr">#[error(<span class="string">"Image path is empty."</span>)]
+    #[deprecated(
+        since = <span class="string">"7.1.0"</span>,
+        note = <span class="string">"No longer in use and will be removed in version 8.0. Use `ValidationError` instead."
+    </span>)]
     </span>EmptyImagePath,
 
     <span class="doccomment">/// The layout string used for automatic character placement is empty.
     /// This error occurs when no characters are defined in the layout string.
     </span><span class="attr">#[error(<span class="string">"Automatic layout string is empty."</span>)]
+    #[deprecated(
+        since = <span class="string">"7.1.0"</span>,
+        note = <span class="string">"No longer in use and will be removed in version 8.0. Use `ValidationError` instead."
+    </span>)]
     </span>EmptyLayoutString,
+
+    <span class="doccomment">/// A validation error occurred on the `ImageFontDescriptor`. Inspect the
+    /// value of the inner error for details.
+    </span><span class="attr">#[error(<span class="string">"Font descriptor is invalid: {0}"</span>)]
+    </span>DescriptorValidationError(<span class="attr">#[from] </span>ImageFontDescriptorValidationError),
+
+    <span class="doccomment">/// A validation error occurred on the `ImageFontLayout`. Inspect the
+    /// value of the inner error for details.
+    </span><span class="attr">#[error(<span class="string">"Font layout is invalid: {0}"</span>)]
+    </span>LayoutValidationError(<span class="attr">#[from] </span>ImageFontLayoutValidationError),
 
     <span class="doccomment">/// An I/O error occurred while loading the image font. This might happen
     /// if the file cannot be accessed, is missing, or is corrupted.
@@ -640,30 +1068,28 @@
 
     <span class="kw">type </span>Error = ImageFontLoadError;
 
-    <span class="kw">async fn </span>load(
+    <span class="comment">// NOTE: Until I or someone else thinks of a way to reliably run `AssetLoaders`
+    //       in a unit test, parts of this method will unfortunately remain
+    //       uncovered by tests.
+    </span><span class="kw">async fn </span>load(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         reader: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>Reader,
         settings: <span class="kw-2">&amp;</span><span class="self">Self</span>::Settings,
         load_context: <span class="kw-2">&amp;mut </span>LoadContext&lt;<span class="lifetime">'_</span>&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Asset, <span class="self">Self</span>::Error&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>str = String::new();
-        reader.read_to_string(<span class="kw-2">&amp;mut </span>str).<span class="kw">await</span><span class="question-mark">?</span>;
-
-        <span class="kw">let </span>disk_format: ImageFontSettings = ron::from_str(<span class="kw-2">&amp;</span>str)<span class="question-mark">?</span>;
-
-        disk_format.validate()<span class="question-mark">?</span>;
+        <span class="kw">let </span>font_descriptor = read_and_validate_font_descriptor(reader).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="comment">// need the image loaded immediately because we need its size
         </span><span class="kw">let </span>image_path = load_context
             .path()
             .parent()
             .ok_or(ImageFontLoadError::MissingParentPath)<span class="question-mark">?
-            </span>.join(disk_format.image.clone());
+            </span>.join(font_descriptor.image());
         <span class="kw">let </span><span class="prelude-val">Some</span>(<span class="kw-2">mut </span>image) = load_context
             .loader()
             .immediate()
             .with_unknown_type()
-            .load(image_path.clone())
+            .load(image_path.as_path())
             .<span class="kw">await</span><span class="question-mark">?
             </span>.take::&lt;Image&gt;()
         <span class="kw">else </span>{
@@ -675,17 +1101,17 @@
         };
 
         image.sampler = settings.image_sampler.clone();
-
         <span class="kw">let </span>size = image.size();
-        <span class="kw">let </span>char_map = disk_format.layout.into_char_map(size);
-        <span class="kw">let </span>image_handle = load_context.add_labeled_asset(String::from(<span class="string">"texture"</span>), image);
 
-        <span class="kw">let </span>(map, layout) = ImageFont::mapped_atlas_layout_from_char_map(size, <span class="kw-2">&amp;</span>char_map);
+        <span class="kw">let </span>(atlas_character_map, layout) =
+            descriptor_to_character_map_and_layout(font_descriptor, size)<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>image_handle = load_context.add_labeled_asset(String::from(<span class="string">"texture"</span>), image);
         <span class="kw">let </span>layout_handle = load_context.add_labeled_asset(String::from(<span class="string">"layout"</span>), layout);
 
         <span class="kw">let </span>image_font = ImageFont::from_mapped_atlas_layout(
             image_handle,
-            map,
+            atlas_character_map,
             layout_handle,
             settings.image_sampler.clone(),
         );
@@ -696,4 +1122,76 @@
         <span class="kw-2">&amp;</span>[<span class="string">"image_font.ron"</span>]
     }
 }
+
+<span class="doccomment">/// Reads and validates an `ImageFontDescriptor` from a reader.
+///
+/// This function reads the entirety of the data provided by the `reader`,
+/// deserializes it into an `ImageFontDescriptor`, and performs validation
+/// to ensure the descriptor is valid.
+///
+/// # Parameters
+/// - `reader`: A mutable reference to an object implementing the [`Reader`]
+///   trait. This reader provides the serialized data for the font descriptor.
+///
+/// # Returns
+/// A `Result` containing either a valid `ImageFontDescriptor` or an error if
+/// reading, deserialization, or validation fails.
+///
+/// # Errors
+/// Returns an error in the following cases:
+/// - If reading from the `reader` fails.
+/// - If the data cannot be deserialized into an `ImageFontDescriptor`.
+/// - If the resulting `ImageFontDescriptor` does not pass validation.
+</span><span class="kw">async fn </span>read_and_validate_font_descriptor(
+    reader: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>Reader,
+) -&gt; <span class="prelude-ty">Result</span>&lt;ImageFontDescriptor, ImageFontLoadError&gt; {
+    <span class="comment">// Read data
+    </span><span class="kw">let </span><span class="kw-2">mut </span>data = Vec::new();
+    reader.read_to_end(<span class="kw-2">&amp;mut </span>data).<span class="kw">await</span><span class="question-mark">?</span>;
+
+    <span class="comment">// Deserialize into ImageFontDescriptor and validate
+    </span><span class="kw">let </span>font_descriptor: ImageFontDescriptor = ron::de::from_bytes(<span class="kw-2">&amp;</span>data)<span class="question-mark">?</span>;
+    <span class="attr">#[expect(deprecated, reason = <span class="string">"method is only deprecated externally"</span>)]
+    </span>font_descriptor.validate()<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(font_descriptor)
+}
+
+<span class="doccomment">/// Converts an `ImageFontDescriptor` into a character map and texture atlas
+/// layout.
+///
+/// This function processes the given `ImageFontDescriptor` to generate a
+/// character-to-index map and a [`TextureAtlasLayout`], based on the provided
+/// image size. It uses the descriptor's layout information to map characters to
+/// specific regions within the texture atlas.
+///
+/// # Parameters
+/// - `font_descriptor`: The `ImageFontDescriptor` containing the layout.
+/// - `image_size`: A [`UVec2`] representing the dimensions of the image
+///   containing the font glyphs.
+///
+/// # Returns
+/// A tuple where
+/// - the first element is a `HashMap&lt;char, usize&gt;` mapping characters to
+///   indices in the texture atlas.
+/// - the second element is a [`TextureAtlasLayout`] describing the texture
+///   atlas layout.
+///
+/// # Errors
+/// This function will return an [`ImageFontLoadError`] in the following cases:
+/// - If there are any validation errors in the layout. See
+///   [`ImageFontLayoutValidationError`] for details.
+</span><span class="kw">fn </span>descriptor_to_character_map_and_layout(
+    font_descriptor: ImageFontDescriptor,
+    image_size: UVec2,
+) -&gt; <span class="prelude-ty">Result</span>&lt;(HashMap&lt;char, usize&gt;, TextureAtlasLayout), ImageFontLoadError&gt; {
+    <span class="attr">#[expect(deprecated, reason = <span class="string">"fields are only deprecated externally"</span>)]
+    </span><span class="kw">let </span>rect_character_map = font_descriptor.layout.into_character_rect_map(image_size)<span class="question-mark">?</span>;
+    <span class="kw">let </span>(atlas_character_map, layout) =
+        ImageFont::mapped_atlas_layout_from_char_map(image_size, <span class="kw-2">&amp;</span>rect_character_map);
+    <span class="prelude-val">Ok</span>((atlas_character_map, layout))
+}
+
+<span class="attr">#[cfg(test)]
+</span><span class="kw">mod </span>tests;
 </code></pre></div></section></main></body></html>
