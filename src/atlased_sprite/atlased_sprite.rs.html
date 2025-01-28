@@ -163,7 +163,24 @@
 <a href="#162" id="162">162</a>
 <a href="#163" id="163">163</a>
 <a href="#164" id="164">164</a>
-<a href="#165" id="165">165</a></pre></div><pre class="rust"><code><span class="doccomment">//! Demonstrates showing a texture atlas-based image font text at both its
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a></pre></div><pre class="rust"><code><span class="doccomment">//! Demonstrates showing a texture atlas-based image font text at both its
 //! 'native' height and a scaled-up height, also demonstrating use of its
 //! additional `color` value.
 
@@ -180,8 +197,8 @@
 <span class="kw">use </span>bevy::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>bevy::sprite::Anchor;
 <span class="kw">use </span>bevy_asset_loader::prelude::AssetCollectionApp <span class="kw">as _</span>;
-<span class="kw">use </span>bevy_image_font::atlas_sprites::ImageFontSpriteText;
-<span class="kw">use </span>bevy_image_font::{ImageFontPlugin, ImageFontText, LetterSpacing};
+<span class="kw">use </span>bevy_image_font::atlas_sprites::{ImageFontSpriteText, LetterSpacing};
+<span class="kw">use </span>bevy_image_font::{ImageFontPlugin, ImageFontText};
 
 <span class="kw">use </span><span class="kw">crate</span>::common::{DemoAssets, FONT_WIDTH, RAINBOW, TEXT};
 
@@ -229,7 +246,11 @@
             .text(TEXT)
             .font(assets.image_font.clone())
             .font_height(<span class="number">36.0</span>),
-        Transform::from_translation(Vec3::new(<span class="number">0.</span>, <span class="number">0.</span>, <span class="number">0.</span>)),
+        <span class="comment">// Shift 0.5 pixels so our characters end up at integer pixel values. This is only
+        // necessary because we're using a horizontally centered anchor combined with an
+        // odd number of characters. If we used left or right alignment, we wouldn't need
+        // to do this, even with an odd number of characters.
+        </span>Transform::from_translation(Vec3::new(<span class="number">0.5</span>, <span class="number">0.</span>, <span class="number">0.</span>)),
     ));
     commands.spawn((
         AnimateText(TEXT, <span class="number">0</span>),
@@ -260,6 +281,19 @@
             .font(assets.image_font.clone())
             .font_height(<span class="number">36.0</span>),
         Transform::from_translation(Vec3::new(<span class="number">0.5</span>, -<span class="number">40.</span>, <span class="number">0.</span>)),
+    ));
+
+    <span class="comment">// This will currently render without spaces; I intend to add a new feature
+    // shortly that will allow a font to have space without needing to have a
+    // space in the font image itself.
+    </span>commands.spawn((
+        AnimateColor(ColorCurve::new(RAINBOW).expect(<span class="string">"RAINBOW contains at least two colors"</span>)),
+        ImageFontSpriteText::default().letter_spacing(LetterSpacing::Pixel(<span class="number">1</span>)),
+        ImageFontText::default()
+            .text(TEXT.to_uppercase())
+            .font(assets.variable_width_image_font.clone())
+            .font_height(<span class="number">32.0</span>),
+        Transform::from_translation(Vec3::new(<span class="number">0.</span>, -<span class="number">120.</span>, <span class="number">0.</span>)),
     ));
 }
 

@@ -891,7 +891,36 @@
 <a href="#890" id="890">890</a>
 <a href="#891" id="891">891</a>
 <a href="#892" id="892">892</a>
-<a href="#893" id="893">893</a></pre></div><pre class="rust"><code><span class="doccomment">//! This module provides functionality for rendering text as individual sprites
+<a href="#893" id="893">893</a>
+<a href="#894" id="894">894</a>
+<a href="#895" id="895">895</a>
+<a href="#896" id="896">896</a>
+<a href="#897" id="897">897</a>
+<a href="#898" id="898">898</a>
+<a href="#899" id="899">899</a>
+<a href="#900" id="900">900</a>
+<a href="#901" id="901">901</a>
+<a href="#902" id="902">902</a>
+<a href="#903" id="903">903</a>
+<a href="#904" id="904">904</a>
+<a href="#905" id="905">905</a>
+<a href="#906" id="906">906</a>
+<a href="#907" id="907">907</a>
+<a href="#908" id="908">908</a>
+<a href="#909" id="909">909</a>
+<a href="#910" id="910">910</a>
+<a href="#911" id="911">911</a>
+<a href="#912" id="912">912</a>
+<a href="#913" id="913">913</a>
+<a href="#914" id="914">914</a>
+<a href="#915" id="915">915</a>
+<a href="#916" id="916">916</a>
+<a href="#917" id="917">917</a>
+<a href="#918" id="918">918</a>
+<a href="#919" id="919">919</a>
+<a href="#920" id="920">920</a>
+<a href="#921" id="921">921</a>
+<a href="#922" id="922">922</a></pre></div><pre class="rust"><code><span class="doccomment">//! This module provides functionality for rendering text as individual sprites
 //! using the Bevy engine, utilizing custom image fonts.
 //!
 //! It breaks down text into individual characters and represents them as
@@ -914,7 +943,7 @@
 <span class="kw">use </span>bevy::sprite::Anchor;
 <span class="kw">use </span>derive_setters::Setters;
 
-<span class="kw">use crate</span>::{filtered_string, LetterSpacing};
+<span class="kw">use </span><span class="kw">crate</span>::filtered_string;
 <span class="kw">use crate</span>::{sync_texts_with_font_changes, ImageFont, ImageFontSet, ImageFontText};
 
 <span class="doccomment">/// Internal plugin for conveniently organizing the code related to this
@@ -931,7 +960,10 @@
                 .in_set(ImageFontSet),
         );
 
-        <span class="attr">#[cfg(feature = <span class="string">"gizmos"</span>)]
+        <span class="attr">#[cfg(all(
+            feature = <span class="string">"gizmos"</span>,
+            not(feature = <span class="string">"DO_NOT_USE_internal_tests_disable_gizmos"</span>)
+        ))]
         </span>{
             app.add_systems(Update, render_sprite_gizmos);
         }
@@ -1017,6 +1049,34 @@
 </span><span class="kw">struct </span>ImageFontTextData {
     <span class="doccomment">/// Basically a map between character index and character sprite
     </span>sprites: Vec&lt;Entity&gt;,
+}
+
+<span class="doccomment">/// How kerning between characters is specified.
+</span><span class="attr">#[derive(Debug, Clone, Copy, Reflect)]
+</span><span class="kw">pub enum </span>LetterSpacing {
+    <span class="doccomment">/// Kerning as an integer value, use this when you want a pixel-perfect
+    /// spacing between characters.
+    </span>Pixel(i16),
+    <span class="doccomment">/// Kerning as a floating point value, use this when you want precise
+    /// control over the spacing between characters and don't care about
+    /// pixel-perfectness.
+    </span>Floating(f32),
+}
+
+<span class="kw">impl </span>Default <span class="kw">for </span>LetterSpacing {
+    <span class="doccomment">/// Zero constant spacing between character
+    </span><span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::Pixel(<span class="number">0</span>)
+    }
+}
+
+<span class="kw">impl </span>From&lt;LetterSpacing&gt; <span class="kw">for </span>f32 {
+    <span class="kw">fn </span>from(spacing: LetterSpacing) -&gt; f32 {
+        <span class="kw">match </span>spacing {
+            LetterSpacing::Pixel(pixels) =&gt; f32::from(pixels),
+            LetterSpacing::Floating(value) =&gt; value,
+        }
+    }
 }
 
 <span class="doccomment">/// Debugging data for visualizing an `ImageFontSpriteText` in a scene, enabled
@@ -1653,8 +1713,6 @@
                 anchor_vec_whole,
                 anchor_vec_individual,
             );
-
-            <span class="macro">debug!</span>(<span class="string">"Rendering {character} @ {x_pos} with size {width}"</span>);
 
             x_pos += width;
 
