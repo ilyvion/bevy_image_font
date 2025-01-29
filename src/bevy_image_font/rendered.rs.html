@@ -334,7 +334,11 @@
 <a href="#333" id="333">333</a>
 <a href="#334" id="334">334</a>
 <a href="#335" id="335">335</a>
-<a href="#336" id="336">336</a></pre></div><pre class="rust"><code><span class="doccomment">//! This module provides functionality for rendering text as images in the Bevy
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a></pre></div><pre class="rust"><code><span class="doccomment">//! This module provides functionality for rendering text as images in the Bevy
 //! engine, utilizing custom image fonts. It includes components for
 //! pre-rendering text for both in-world and UI contexts, as well as systems to
 //! update and render the text when changes occur.
@@ -542,7 +546,9 @@
     </span>)]
     </span><span class="kw">let </span>height = text
         .filtered_chars()
-        .map(|character| layout.textures[image_font.atlas_character_map[<span class="kw-2">&amp;</span>character]].height())
+        .map(|character| {
+            layout.textures[image_font.atlas_character_map[<span class="kw-2">&amp;</span>character].atlas_index].height()
+        })
         .reduce(u32::max)
         .expect(<span class="string">"we've verified !text.is_empty() already"</span>);
     <span class="attr">#[expect(
@@ -551,7 +557,9 @@
     </span>)]
     </span><span class="kw">let </span>width = text
         .filtered_chars()
-        .map(|character| layout.textures[image_font.atlas_character_map[<span class="kw-2">&amp;</span>character]].width())
+        .map(|character| {
+            layout.textures[image_font.atlas_character_map[<span class="kw-2">&amp;</span>character].atlas_index].width()
+        })
         .reduce(|accumulator, value| accumulator + value)
         .expect(<span class="string">"we've verified !text.is_empty() already"</span>);
 
@@ -565,7 +573,7 @@
 
     <span class="kw">let </span><span class="kw-2">mut </span>x = <span class="number">0</span>;
     <span class="kw">for </span>character <span class="kw">in </span>text.filtered_chars() {
-        <span class="kw">let </span>rect = layout.textures[image_font.atlas_character_map[<span class="kw-2">&amp;</span>character]];
+        <span class="kw">let </span>rect = layout.textures[image_font.atlas_character_map[<span class="kw-2">&amp;</span>character].atlas_index];
         <span class="kw">let </span>width = rect.width();
         <span class="kw">let </span>height = rect.height();
         output_image.copy_from(

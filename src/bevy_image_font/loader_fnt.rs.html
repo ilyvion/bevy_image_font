@@ -138,7 +138,13 @@
 <a href="#137" id="137">137</a>
 <a href="#138" id="138">138</a>
 <a href="#139" id="139">139</a>
-<a href="#140" id="140">140</a></pre></div><pre class="rust"><code><span class="doccomment">//! Code for parsing an [`ImageFont`] off of an on-disk representation in `fnt`
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a></pre></div><pre class="rust"><code><span class="doccomment">//! Code for parsing an [`ImageFont`] off of an on-disk representation in `fnt`
 //! format.
 
 </span><span class="kw">use </span>bevy::{
@@ -149,6 +155,7 @@
     utils::HashMap,
 };
 
+<span class="kw">use </span><span class="kw">crate</span>::ImageFontCharacter;
 <span class="kw">use crate</span>::{
     loader::{
         ImageFontDescriptor, ImageFontDescriptorValidationError, ImageFontLayout,
@@ -260,7 +267,12 @@
         <span class="kw">let </span><span class="kw-2">mut </span>atlas_character_map = HashMap::new();
         <span class="kw">let </span><span class="kw-2">mut </span>atlas_layout = TextureAtlasLayout::new_empty(size);
         <span class="kw">for </span>(<span class="kw-2">&amp;</span>character, <span class="kw-2">&amp;</span>rect) <span class="kw">in </span><span class="kw-2">&amp;</span>map {
-            atlas_character_map.insert(character, atlas_layout.add_texture(rect));
+            atlas_character_map.insert(
+                character,
+                ImageFontCharacter {
+                    atlas_index: atlas_layout.add_texture(rect),
+                },
+            );
         }
 
         <span class="kw">let </span>layout_handle = load_context.add_labeled_asset(String::from(<span class="string">"layout"</span>), atlas_layout);

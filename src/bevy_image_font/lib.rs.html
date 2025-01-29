@@ -283,7 +283,40 @@
 <a href="#282" id="282">282</a>
 <a href="#283" id="283">283</a>
 <a href="#284" id="284">284</a>
-<a href="#285" id="285">285</a></pre></div><pre class="rust"><code><span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">"../README.md"</span>)]
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a></pre></div><pre class="rust"><code><span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">"../README.md"</span>)]
 </span><span class="comment">//
 // only enables the `doc_cfg` feature when
 // the `docsrs` configuration attribute is defined
@@ -383,7 +416,7 @@
     </span><span class="kw">pub </span>texture: Handle&lt;Image&gt;,
     <span class="doccomment">/// The glyph used to render `c` is contained in the part of the image
     /// pointed to by `atlas.textures[atlas_character_map[c]]`.
-    </span><span class="kw">pub </span>atlas_character_map: HashMap&lt;char, usize&gt;,
+    </span><span class="kw">pub </span>atlas_character_map: HashMap&lt;char, ImageFontCharacter&gt;,
     <span class="doccomment">/// The [`ImageSampler`] to use during font image rendering. The default is
     /// `nearest`, which scales an image without blurring, keeping the text
     /// crisp and pixellated.
@@ -415,11 +448,16 @@
     </span><span class="kw">fn </span>mapped_atlas_layout_from_char_map(
         size: UVec2,
         char_rect_map: <span class="kw-2">&amp;</span>HashMap&lt;char, URect&gt;,
-    ) -&gt; (HashMap&lt;char, usize&gt;, TextureAtlasLayout) {
+    ) -&gt; (HashMap&lt;char, ImageFontCharacter&gt;, TextureAtlasLayout) {
         <span class="kw">let </span><span class="kw-2">mut </span>atlas_character_map = HashMap::new();
         <span class="kw">let </span><span class="kw-2">mut </span>atlas_layout = TextureAtlasLayout::new_empty(size);
         <span class="kw">for </span>(<span class="kw-2">&amp;</span>character, <span class="kw-2">&amp;</span>rect) <span class="kw">in </span>char_rect_map {
-            atlas_character_map.insert(character, atlas_layout.add_texture(rect));
+            atlas_character_map.insert(
+                character,
+                ImageFontCharacter {
+                    atlas_index: atlas_layout.add_texture(rect),
+                },
+            );
         }
 
         (atlas_character_map, atlas_layout)
@@ -444,7 +482,7 @@
     /// An `ImageFont` instance ready to be used for rendering text.
     </span><span class="kw">fn </span>from_mapped_atlas_layout(
         texture: Handle&lt;Image&gt;,
-        atlas_character_map: HashMap&lt;char, usize&gt;,
+        atlas_character_map: HashMap&lt;char, ImageFontCharacter&gt;,
         atlas_layout: Handle&lt;TextureAtlasLayout&gt;,
         image_sampler: ImageSampler,
     ) -&gt; <span class="self">Self </span>{
@@ -478,6 +516,34 @@
     </span><span class="kw">fn </span>filter_string&lt;S: AsRef&lt;str&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, string: S) -&gt; filtered_string::FilteredString&lt;<span class="lifetime">'_</span>, S&gt; {
         filtered_string::FilteredString::new(string, <span class="kw-2">&amp;</span><span class="self">self</span>.atlas_character_map)
     }
+}
+
+<span class="doccomment">/// Represents a character in an [`ImageFont`], storing metadata required for
+/// rendering.
+///
+/// This struct contains information about a specific character in the font,
+/// including its location in the texture atlas and any additional properties
+/// that may be useful for rendering, alignment, or future extensions.
+///
+/// # Fields
+/// - `atlas_index`: The index of the character's glyph in the texture atlas.
+/// - *(Planned: Additional metadata fields, such as offsets, kerning, or
+///   stylistic variants.)*
+///
+/// # Future Considerations
+/// This struct is designed to be extensible. In the future, it may include:
+/// - **Kerning Information:** Adjustments for character spacing.
+/// - **Per-Character Offsets:** Fine-tuned positioning for different glyphs.
+/// - **Stylistic Variants:** Alternative representations of characters.
+</span><span class="attr">#[derive(Debug, Clone, Reflect)]
+#[non_exhaustive]
+</span><span class="kw">pub struct </span>ImageFontCharacter {
+    <span class="doccomment">/// The index of this character's glyph in the texture atlas.
+    ///
+    /// This value corresponds to an entry in the [`TextureAtlasLayout`],
+    /// determining the region of the texture where this character's glyph
+    /// is located.
+    </span><span class="kw">pub </span>atlas_index: usize,
 }
 
 <span class="doccomment">/// Text rendered using an [`ImageFont`].
