@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/lib.rs`."><title>lib.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-e7950ecc.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="bevy_image_font" data-themes="" data-resource-suffix="" data-rustdoc-version="1.86.0-nightly (ae5de6c75 2025-01-29)" data-channel="nightly" data-search-js="search-2d513d54.js" data-settings-js="settings-5411db44.js" ><script src="../../static.files/storage-c4642c8f.js"></script><script defer src="../../static.files/src-script-8fee9dc5.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9b5d7e41.js"></script><script defer src="../../static.files/scrape-examples-2ea993ec.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">bevy_image_font/</div>lib.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/lib.rs`."><title>lib.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-cf3c48c1.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="bevy_image_font" data-themes="" data-resource-suffix="" data-rustdoc-version="1.86.0-nightly (a9730c3b5 2025-02-05)" data-channel="nightly" data-search-js="search-581efc7a.js" data-settings-js="settings-6dad6058.js" ><script src="../../static.files/storage-3a5871a4.js"></script><script defer src="../../static.files/src-script-8fee9dc5.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-4d63596a.js"></script><script defer src="../../static.files/scrape-examples-2ea993ec.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">bevy_image_font/</div>lib.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
 <a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
@@ -316,7 +316,49 @@
 <a href="#315" id="315">315</a>
 <a href="#316" id="316">316</a>
 <a href="#317" id="317">317</a>
-<a href="#318" id="318">318</a></pre></div><pre class="rust"><code><span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">"../README.md"</span>)]
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a>
+<a href="#353" id="353">353</a>
+<a href="#354" id="354">354</a>
+<a href="#355" id="355">355</a>
+<a href="#356" id="356">356</a>
+<a href="#357" id="357">357</a>
+<a href="#358" id="358">358</a>
+<a href="#359" id="359">359</a>
+<a href="#360" id="360">360</a></pre></div><pre class="rust"><code><span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">"../README.md"</span>)]
 </span><span class="comment">//
 // only enables the `doc_cfg` feature when
 // the `docsrs` configuration attribute is defined
@@ -329,12 +371,15 @@
 <span class="kw">use </span>bevy_image::{Image, ImageSampler};
 <span class="kw">use </span>derive_setters::Setters;
 
+<span class="kw">mod </span>letter_spacing;
 <span class="attr">#[cfg(any(feature = <span class="string">"rendered"</span>, feature = <span class="string">"atlas_sprites"</span>))]
-</span><span class="kw">mod </span>filtered_string;
+</span><span class="kw">mod </span>render_context;
+<span class="kw">mod </span>scaling_mode;
+
+<span class="kw">pub use </span>letter_spacing::<span class="kw-2">*</span>;
+<span class="kw">pub use </span>scaling_mode::<span class="kw-2">*</span>;
 
 <span class="kw">pub mod </span>loader;
-<span class="attr">#[cfg(feature = <span class="string">"fnt"</span>)]
-</span><span class="kw">pub mod </span>loader_fnt;
 
 <span class="attr">#[cfg(feature = <span class="string">"rendered"</span>)]
 </span><span class="kw">pub mod </span>rendered;
@@ -388,8 +433,8 @@
         <span class="attr">#[cfg(feature = <span class="string">"rendered"</span>)]
         </span>app.add_plugins(rendered::RenderedPlugin);
 
-        <span class="attr">#[cfg(feature = <span class="string">"fnt"</span>)]
-        </span>app.init_asset_loader::&lt;loader_fnt::ImageFntFontLoader&gt;();
+        <span class="attr">#[cfg(feature = <span class="string">"bmf"</span>)]
+        </span>app.init_asset_loader::&lt;loader::BmFontLoader&gt;();
 
         <span class="attr">#[cfg(feature = <span class="string">"atlas_sprites"</span>)]
         </span>app.add_plugins(atlas_sprites::AtlasSpritesPlugin);
@@ -404,18 +449,20 @@
 </span><span class="kw">pub struct </span>ImageFontSet;
 
 <span class="doccomment">/// An image font as well as the mapping of characters to regions inside it.
-</span><span class="attr">#[derive(Debug, Clone, Reflect, Asset)]
+</span><span class="attr">#[derive(Debug, Clone, Reflect, Asset, Default)]
 #[reflect(opaque)]
+#[non_exhaustive]
 </span><span class="kw">pub struct </span>ImageFont {
-    <span class="doccomment">/// The layout of the texture atlas, describing the positioning and sizes
-    /// of glyphs within the image font. This layout is used to map character
-    /// regions within the texture.
-    </span><span class="kw">pub </span>atlas_layout: Handle&lt;TextureAtlasLayout&gt;,
-    <span class="doccomment">/// The image that contains the font glyphs. Each glyph is a section of
-    /// this texture, defined by the `atlas_layout` and `atlas_character_map`.
-    </span><span class="kw">pub </span>texture: Handle&lt;Image&gt;,
-    <span class="doccomment">/// The glyph used to render `c` is contained in the part of the image
-    /// pointed to by `atlas.textures[atlas_character_map[c]]`.
+    <span class="doccomment">/// The layouts of the texture atlases describing the positioning and sizes
+    /// of glyphs within the image font. This layout is used to map characters
+    /// to regions within the texture.
+    </span><span class="kw">pub </span>atlas_layouts: Vec&lt;Handle&lt;TextureAtlasLayout&gt;&gt;,
+    <span class="doccomment">/// The images that contain the font glyphs. Each glyph is a section of one
+    /// of these textures, as defined by the `atlas_layout` and
+    /// `atlas_character_map` fields.
+    </span><span class="kw">pub </span>textures: Vec&lt;Handle&lt;Image&gt;&gt;,
+    <span class="doccomment">/// The information required to render the character `c` in
+    /// `atlas_character_map[c]` is stored here.
     </span><span class="kw">pub </span>atlas_character_map: HashMap&lt;char, ImageFontCharacter&gt;,
     <span class="doccomment">/// The [`ImageSampler`] to use during font image rendering. The default is
     /// `nearest`, which scales an image without blurring, keeping the text
@@ -441,21 +488,24 @@
     ///
     /// # Returns
     /// A tuple containing:
-    /// - `HashMap&lt;char, usize&gt;`: A map of characters to their indices in the
-    ///   atlas.
+    /// - `HashMap&lt;char, ImageFontCharacter&gt;`: A map of characters to their
+    ///   atlas placement, including texture page index and character index.
     /// - `TextureAtlasLayout`: The texture atlas layout with the bounding
     ///   rectangles.
     </span><span class="kw">fn </span>mapped_atlas_layout_from_char_map(
+        page: usize,
         size: UVec2,
-        char_rect_map: <span class="kw-2">&amp;</span>HashMap&lt;char, URect&gt;,
+        char_rect_mapping: <span class="kw">impl </span>Iterator&lt;Item = (char, URect)&gt;,
     ) -&gt; (HashMap&lt;char, ImageFontCharacter&gt;, TextureAtlasLayout) {
         <span class="kw">let </span><span class="kw-2">mut </span>atlas_character_map = HashMap::new();
         <span class="kw">let </span><span class="kw-2">mut </span>atlas_layout = TextureAtlasLayout::new_empty(size);
-        <span class="kw">for </span>(<span class="kw-2">&amp;</span>character, <span class="kw-2">&amp;</span>rect) <span class="kw">in </span>char_rect_map {
+        <span class="kw">for </span>(character, rect) <span class="kw">in </span>char_rect_mapping {
             atlas_character_map.insert(
                 character,
                 ImageFontCharacter {
-                    atlas_index: atlas_layout.add_texture(rect),
+                    page_index: page,
+                    character_index: atlas_layout.add_texture(rect),
+                    ..default()
                 },
             );
         }
@@ -480,41 +530,41 @@
     ///
     /// # Returns
     /// An `ImageFont` instance ready to be used for rendering text.
-    </span><span class="kw">fn </span>from_mapped_atlas_layout(
-        texture: Handle&lt;Image&gt;,
+    </span><span class="kw">fn </span>new(
+        texture: Vec&lt;Handle&lt;Image&gt;&gt;,
         atlas_character_map: HashMap&lt;char, ImageFontCharacter&gt;,
-        atlas_layout: Handle&lt;TextureAtlasLayout&gt;,
+        atlas_layout: Vec&lt;Handle&lt;TextureAtlasLayout&gt;&gt;,
         image_sampler: ImageSampler,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            atlas_layout,
-            texture,
+            atlas_layouts: atlas_layout,
+            textures: texture,
             atlas_character_map,
             image_sampler,
-        }
+            <span class="comment">// size: default(),
+            // padding: default(),
+            // spacing: default(),
+        </span>}
     }
 
-    <span class="doccomment">/// Filters a string to include only characters present in the font's
-    /// character map.
-    ///
-    /// This function returns a
-    /// [`FilteredString`](filtered_string::FilteredString) containing only the
-    /// characters from the input string that exist in the font's
-    /// `atlas_character_map`. It ensures that unsupported characters are
-    /// excluded during rendering.
+    <span class="doccomment">/// Retrieves references to the font's textures.
     ///
     /// # Parameters
-    /// - `string`: The input string to filter.
+    /// - `image_assets`: The asset storage for images.
     ///
     /// # Returns
-    /// A `FilteredString` returning only characters supported by the font.
-    ///
-    /// # Notes
-    /// This function requires either the `rendered` or `atlas_sprites` feature
-    /// to be enabled.
-    </span><span class="attr">#[cfg(any(feature = <span class="string">"rendered"</span>, feature = <span class="string">"atlas_sprites"</span>))]
-    </span><span class="kw">fn </span>filter_string&lt;S: AsRef&lt;str&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, string: S) -&gt; filtered_string::FilteredString&lt;<span class="lifetime">'_</span>, S&gt; {
-        filtered_string::FilteredString::new(string, <span class="kw-2">&amp;</span><span class="self">self</span>.atlas_character_map)
+    /// A vector of references to the images in use by this font.
+    </span><span class="attr">#[cfg(feature = <span class="string">"rendered"</span>)]
+    </span><span class="kw">fn </span>textures&lt;<span class="lifetime">'assets</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, image_assets: <span class="kw-2">&amp;</span><span class="lifetime">'assets </span>Assets&lt;Image&gt;) -&gt; Vec&lt;<span class="kw-2">&amp;</span><span class="lifetime">'assets </span>Image&gt; {
+        <span class="self">self</span>.textures
+            .iter()
+            .map(|handle| {
+                <span class="attr">#[expect(clippy::expect_used, reason = <span class="string">"handle is kept alive by ImageFont"</span>)]
+                </span>image_assets
+                    .get(handle)
+                    .expect(<span class="string">"handle is kept alive by ImageFont"</span>)
+            })
+            .collect()
     }
 }
 
@@ -526,7 +576,10 @@
 /// that may be useful for rendering, alignment, or future extensions.
 ///
 /// # Fields
-/// - `atlas_index`: The index of the character's glyph in the texture atlas.
+/// - `character_index`: The index of the character's glyph in the texture
+///   atlas.
+/// - `page_index`: The index of the texture atlas page where this character's
+///   glyph is stored.
 /// - *(Planned: Additional metadata fields, such as offsets, kerning, or
 ///   stylistic variants.)*
 ///
@@ -535,20 +588,36 @@
 /// - **Kerning Information:** Adjustments for character spacing.
 /// - **Per-Character Offsets:** Fine-tuned positioning for different glyphs.
 /// - **Stylistic Variants:** Alternative representations of characters.
-</span><span class="attr">#[derive(Debug, Clone, Reflect)]
+</span><span class="attr">#[derive(Clone, Debug, Default, Reflect)]
 #[non_exhaustive]
 </span><span class="kw">pub struct </span>ImageFontCharacter {
-    <span class="doccomment">/// The index of this character's glyph in the texture atlas.
+    <span class="doccomment">/// The index of this character's glyph in the texture atlas given by
+    /// `atlas_page`.
     ///
     /// This value corresponds to an entry in the [`TextureAtlasLayout`],
     /// determining the region of the texture where this character's glyph
     /// is located.
-    </span><span class="kw">pub </span>atlas_index: usize,
+    </span><span class="kw">pub </span>character_index: usize,
+
+    <span class="doccomment">/// The index of the texture atlas page where this character's glyph is
+    /// stored.
+    ///
+    /// When a font spans multiple textures, this field identifies which
+    /// specific texture contains the glyph.
+    </span><span class="kw">pub </span>page_index: usize,
+
+    <span class="doccomment">/// How to move the character relative to the baseline.
+    </span><span class="kw">pub </span>offsets: Vec2,
+
+    <span class="doccomment">/// How much to advance the x position after rendering the character. `None`
+    /// means use character width.
+    </span><span class="kw">pub </span>x_advance: <span class="prelude-ty">Option</span>&lt;f32&gt;,
 }
 
 <span class="doccomment">/// Text rendered using an [`ImageFont`].
 </span><span class="attr">#[derive(Debug, Clone, Reflect, Default, Component, Setters)]
 #[setters(into)]
+#[non_exhaustive]
 </span><span class="kw">pub struct </span>ImageFontText {
     <span class="doccomment">/// The string of text to be rendered. Each character in the string is
     /// mapped to a corresponding glyph in the associated [`ImageFont`].
@@ -559,6 +628,7 @@
     <span class="doccomment">/// If set, overrides the height the font is rendered at. This should be an
     /// integer multiple of the 'native' height if you want pixel accuracy,
     /// but we allow float values for things like animations.
+    </span><span class="attr">#[doc(alias = <span class="string">"line_height"</span>)]
     </span><span class="kw">pub </span>font_height: <span class="prelude-ty">Option</span>&lt;f32&gt;,
 }
 
@@ -632,6 +702,20 @@
 </span><span class="attr">#[derive(Default, Deref, DerefMut)]
 </span><span class="kw">struct </span>CachedHashSet(HashSet&lt;AssetId&lt;ImageFont&gt;&gt;);
 
-<span class="attr">#[cfg(test)]
+<span class="comment">// #[derive(Debug, Clone, Copy, Reflect, Default)]
+// pub struct Padding {
+//     up: u8,
+//     right: u8,
+//     down: u8,
+//     left: u8,
+// }
+
+// #[derive(Debug, Clone, Copy, Reflect, Default)]
+// pub struct Spacing {
+//     horizontal: u8,
+//     vertical: u8,
+// }
+
+</span><span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests;
 </code></pre></div></section></main></body></html>

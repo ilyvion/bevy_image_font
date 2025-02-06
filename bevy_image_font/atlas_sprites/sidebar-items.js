@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["LetterSpacing","ScalingMode"],"fn":["set_up_sprites"],"struct":["ImageFontGizmoData","ImageFontSpriteText"]};
+window.SIDEBAR_ITEMS = {"fn":["set_up_sprites"],"mod":["gizmos"],"struct":["ImageFontSpriteText"]};

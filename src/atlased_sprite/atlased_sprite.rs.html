@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `examples/atlased_sprite.rs`."><title>atlased_sprite.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-e7950ecc.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="atlased_sprite" data-themes="" data-resource-suffix="" data-rustdoc-version="1.86.0-nightly (ae5de6c75 2025-01-29)" data-channel="nightly" data-search-js="search-2d513d54.js" data-settings-js="settings-5411db44.js" ><script src="../../static.files/storage-c4642c8f.js"></script><script defer src="../../static.files/src-script-8fee9dc5.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9b5d7e41.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">atlased_sprite/</div>atlased_sprite.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `examples/atlased_sprite.rs`."><title>atlased_sprite.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-cf3c48c1.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="atlased_sprite" data-themes="" data-resource-suffix="" data-rustdoc-version="1.86.0-nightly (a9730c3b5 2025-02-05)" data-channel="nightly" data-search-js="search-581efc7a.js" data-settings-js="settings-6dad6058.js" ><script src="../../static.files/storage-3a5871a4.js"></script><script defer src="../../static.files/src-script-8fee9dc5.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-4d63596a.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">atlased_sprite/</div>atlased_sprite.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
 <a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
@@ -180,7 +180,99 @@
 <a href="#179" id="179">179</a>
 <a href="#180" id="180">180</a>
 <a href="#181" id="181">181</a>
-<a href="#182" id="182">182</a></pre></div><pre class="rust"><code><span class="doccomment">//! Demonstrates showing a texture atlas-based image font text at both its
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
+<a href="#194" id="194">194</a>
+<a href="#195" id="195">195</a>
+<a href="#196" id="196">196</a>
+<a href="#197" id="197">197</a>
+<a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a>
+<a href="#224" id="224">224</a>
+<a href="#225" id="225">225</a>
+<a href="#226" id="226">226</a>
+<a href="#227" id="227">227</a>
+<a href="#228" id="228">228</a>
+<a href="#229" id="229">229</a>
+<a href="#230" id="230">230</a>
+<a href="#231" id="231">231</a>
+<a href="#232" id="232">232</a>
+<a href="#233" id="233">233</a>
+<a href="#234" id="234">234</a>
+<a href="#235" id="235">235</a>
+<a href="#236" id="236">236</a>
+<a href="#237" id="237">237</a>
+<a href="#238" id="238">238</a>
+<a href="#239" id="239">239</a>
+<a href="#240" id="240">240</a>
+<a href="#241" id="241">241</a>
+<a href="#242" id="242">242</a>
+<a href="#243" id="243">243</a>
+<a href="#244" id="244">244</a>
+<a href="#245" id="245">245</a>
+<a href="#246" id="246">246</a>
+<a href="#247" id="247">247</a>
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
+<a href="#250" id="250">250</a>
+<a href="#251" id="251">251</a>
+<a href="#252" id="252">252</a>
+<a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a></pre></div><pre class="rust"><code><span class="doccomment">//! Demonstrates showing a texture atlas-based image font text at both its
 //! 'native' height and a scaled-up height, also demonstrating use of its
 //! additional `color` value.
 
@@ -197,8 +289,8 @@
 <span class="kw">use </span>bevy::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>bevy::sprite::Anchor;
 <span class="kw">use </span>bevy_asset_loader::prelude::AssetCollectionApp <span class="kw">as _</span>;
-<span class="kw">use </span>bevy_image_font::atlas_sprites::{ImageFontSpriteText, LetterSpacing};
-<span class="kw">use </span>bevy_image_font::{ImageFontPlugin, ImageFontText};
+<span class="kw">use </span>bevy_image_font::atlas_sprites::ImageFontSpriteText;
+<span class="kw">use </span>bevy_image_font::{ImageFontPlugin, ImageFontText, LetterSpacing};
 
 <span class="kw">use </span><span class="kw">crate</span>::common::{DemoAssets, FONT_WIDTH, RAINBOW, TEXT};
 
@@ -211,8 +303,16 @@
             ImageFontPlugin,
         ))
         .init_collection::&lt;DemoAssets&gt;()
-        .add_systems(Startup, spawn_text)
-        .add_systems(Update, (animate_text, animate_color))
+        .add_systems(Startup, setup)
+        .add_systems(
+            Update,
+            (
+                animate_text,
+                animate_color,
+                <span class="attr">#[cfg(feature = <span class="string">"gizmos"</span>)]
+                </span>gizmos::toggle_gizmos,
+            ),
+        )
         .insert_resource(ClearColor(Color::srgb(<span class="number">0.2</span>, <span class="number">0.2</span>, <span class="number">0.2</span>)))
         .run();
 }
@@ -231,12 +331,15 @@
 </span><span class="attr">#[derive(Component)]
 </span><span class="kw">struct </span>AnimateColor(ColorCurve&lt;Srgba&gt;);
 
-<span class="doccomment">/// Spawns the text entities for the example.
-///
-/// This system creates two text entities:
-/// 1. A text entity rendered at a scaled height with animated colors.
-/// 2. A text entity rendered at its native height with animated content.
-</span><span class="kw">fn </span>spawn_text(<span class="kw-2">mut </span>commands: Commands, assets: Res&lt;DemoAssets&gt;) {
+<span class="doccomment">/// Spawns the text entities for the example and configures gizmo defaults.
+</span><span class="kw">fn </span>setup(
+    <span class="kw-2">mut </span>commands: Commands,
+    assets: Res&lt;DemoAssets&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"gizmos"</span>)] </span>store: ResMut&lt;GizmoConfigStore&gt;,
+) {
+    <span class="attr">#[cfg(feature = <span class="string">"gizmos"</span>)]
+    </span>gizmos::configure_gizmo_defaults(store);
+
     commands.spawn(Camera2d);
 
     commands.spawn((
@@ -244,7 +347,7 @@
         ImageFontSpriteText::default(),
         ImageFontText::default()
             .text(TEXT)
-            .font(assets.image_font.clone())
+            .font(assets.example.clone())
             .font_height(<span class="number">36.0</span>),
         <span class="comment">// Shift 0.5 pixels so our characters end up at integer pixel values. This is only
         // necessary because we're using a horizontally centered anchor combined with an
@@ -259,7 +362,7 @@
         </span>ImageFontSpriteText::default()
             .color(tailwind::AMBER_500)
             .anchor(Anchor::CenterLeft),
-        ImageFontText::default().font(assets.image_font.clone()),
+        ImageFontText::default().font(assets.example.clone()),
         <span class="attr">#[expect(
             clippy::cast_precision_loss,
             reason = <span class="string">"the magnitude of the numbers we're working on here are too small to lose \
@@ -278,7 +381,7 @@
             .letter_spacing(LetterSpacing::Pixel(<span class="number">2</span>)),
         ImageFontText::default()
             .text(TEXT)
-            .font(assets.image_font.clone())
+            .font(assets.example.clone())
             .font_height(<span class="number">36.0</span>),
         Transform::from_translation(Vec3::new(<span class="number">0.5</span>, -<span class="number">40.</span>, <span class="number">0.</span>)),
     ));
@@ -291,7 +394,7 @@
         ImageFontSpriteText::default().letter_spacing(LetterSpacing::Pixel(<span class="number">1</span>)),
         ImageFontText::default()
             .text(TEXT.to_uppercase())
-            .font(assets.variable_width_image_font.clone())
+            .font(assets.variable_width.clone())
             .font_height(<span class="number">32.0</span>),
         Transform::from_translation(Vec3::new(<span class="number">0.</span>, -<span class="number">120.</span>, <span class="number">0.</span>)),
     ));
@@ -359,6 +462,87 @@
                 </span>.sample(len - (animation_progress.fract() * len))
                 .expect(<span class="string">"fract() is [0,1) and `len` will always be within bounds"</span>)
                 .into();
+        }
+    }
+}
+
+<span class="doccomment">/// Gizmos related example code
+</span><span class="attr">#[cfg(feature = <span class="string">"gizmos"</span>)]
+</span><span class="kw">mod </span>gizmos {
+
+    <span class="kw">use </span>bevy_image_font::atlas_sprites::gizmos::AtlasSpritesGizmoConfigGroup;
+
+    <span class="kw">use super</span>::{ButtonInput, GizmoConfigStore, KeyCode, Res, ResMut};
+
+    <span class="doccomment">/// Configures default gizmo rendering settings.
+    ///
+    /// This function initializes the default visibility settings for
+    /// text-related gizmos, enabling anchor points and bounding box
+    /// rendering by default.
+    ///
+    /// # Default Behavior
+    /// - **Text anchor points**: Enabled (`render_text_anchor_point = true`).
+    /// - **Character anchor points**: Enabled (`render_character_anchor_point =
+    ///   true`).
+    /// - **Character bounding boxes**: Enabled (`render_character_box = true`).
+    ///
+    /// This function is called at startup to ensure gizmos are visible by
+    /// default.
+    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>configure_gizmo_defaults(<span class="kw-2">mut </span>store: ResMut&lt;<span class="lifetime">'_</span>, GizmoConfigStore&gt;) {
+        <span class="kw">let </span>(<span class="kw">_</span>, atlas_sprites_config) = store.config_mut::&lt;AtlasSpritesGizmoConfigGroup&gt;();
+        atlas_sprites_config.render_text_anchor_point = <span class="bool-val">true</span>;
+        atlas_sprites_config.render_character_anchor_point = <span class="bool-val">true</span>;
+        atlas_sprites_config.render_character_box = <span class="bool-val">true</span>;
+    }
+
+    <span class="doccomment">/// Handles keyboard input to toggle gizmo rendering settings.
+    ///
+    /// This function listens for key presses and updates the gizmo
+    /// configuration to enable or disable various debug visuals in real
+    /// time.
+    ///
+    /// # Parameters
+    /// - `input`: Reference to [`ButtonInput&lt;KeyCode&gt;`], used to detect key
+    ///   presses.
+    /// - `store`: Mutable reference to the [`GizmoConfigStore`] to update
+    ///   settings.
+    ///
+    /// # Keyboard Shortcuts
+    /// - **`G`**: Toggles all gizmo rendering on/off.
+    /// - **`A`**: Toggles character anchor point gizmos.
+    /// - **`B`**: Toggles character bounding box gizmos.
+    /// - **`T`**: Toggles text anchor point gizmos.
+    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>toggle_gizmos(
+        input: Res&lt;ButtonInput&lt;KeyCode&gt;&gt;,
+        <span class="kw-2">mut </span>store: ResMut&lt;GizmoConfigStore&gt;,
+    ) {
+        <span class="kw">let </span>(config, atlas_sprites_config) = store.config_mut::&lt;AtlasSpritesGizmoConfigGroup&gt;();
+        <span class="kw">if </span>input.just_pressed(KeyCode::KeyG) {
+            config.enabled = !config.enabled;
+            <span class="macro">println!</span>(<span class="string">"Gizmos enabled: {}"</span>, config.enabled);
+        }
+        <span class="kw">if </span>input.just_pressed(KeyCode::KeyA) {
+            atlas_sprites_config.render_character_anchor_point =
+                !atlas_sprites_config.render_character_anchor_point;
+            <span class="macro">println!</span>(
+                <span class="string">"Character anchor point gizmo enabled: {}"</span>,
+                atlas_sprites_config.render_character_anchor_point
+            );
+        }
+        <span class="kw">if </span>input.just_pressed(KeyCode::KeyB) {
+            atlas_sprites_config.render_character_box = !atlas_sprites_config.render_character_box;
+            <span class="macro">println!</span>(
+                <span class="string">"Character box gizmo enabled: {}"</span>,
+                atlas_sprites_config.render_character_box
+            );
+        }
+        <span class="kw">if </span>input.just_pressed(KeyCode::KeyT) {
+            atlas_sprites_config.render_text_anchor_point =
+                !atlas_sprites_config.render_text_anchor_point;
+            <span class="macro">println!</span>(
+                <span class="string">"Text anchor gizmo enabled: {}"</span>,
+                atlas_sprites_config.render_text_anchor_point
+            );
         }
     }
 }

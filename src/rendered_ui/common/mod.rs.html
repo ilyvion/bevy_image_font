@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `examples/common/mod.rs`."><title>mod.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e7950ecc.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rendered_ui" data-themes="" data-resource-suffix="" data-rustdoc-version="1.86.0-nightly (ae5de6c75 2025-01-29)" data-channel="nightly" data-search-js="search-2d513d54.js" data-settings-js="settings-5411db44.js" ><script src="../../../static.files/storage-c4642c8f.js"></script><script defer src="../../../static.files/src-script-8fee9dc5.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9b5d7e41.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">rendered_ui/common/</div>mod.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `examples/common/mod.rs`."><title>mod.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-cf3c48c1.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rendered_ui" data-themes="" data-resource-suffix="" data-rustdoc-version="1.86.0-nightly (a9730c3b5 2025-02-05)" data-channel="nightly" data-search-js="search-581efc7a.js" data-settings-js="settings-6dad6058.js" ><script src="../../../static.files/storage-3a5871a4.js"></script><script defer src="../../../static.files/src-script-8fee9dc5.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-4d63596a.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">rendered_ui/common/</div>mod.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
 <a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
@@ -65,7 +65,53 @@
 <a href="#64" id="64">64</a>
 <a href="#65" id="65">65</a>
 <a href="#66" id="66">66</a>
-<a href="#67" id="67">67</a></pre></div><pre class="rust"><code><span class="doccomment">//! Shared utilities and constants for example binaries.
+<a href="#67" id="67">67</a>
+<a href="#68" id="68">68</a>
+<a href="#69" id="69">69</a>
+<a href="#70" id="70">70</a>
+<a href="#71" id="71">71</a>
+<a href="#72" id="72">72</a>
+<a href="#73" id="73">73</a>
+<a href="#74" id="74">74</a>
+<a href="#75" id="75">75</a>
+<a href="#76" id="76">76</a>
+<a href="#77" id="77">77</a>
+<a href="#78" id="78">78</a>
+<a href="#79" id="79">79</a>
+<a href="#80" id="80">80</a>
+<a href="#81" id="81">81</a>
+<a href="#82" id="82">82</a>
+<a href="#83" id="83">83</a>
+<a href="#84" id="84">84</a>
+<a href="#85" id="85">85</a>
+<a href="#86" id="86">86</a>
+<a href="#87" id="87">87</a>
+<a href="#88" id="88">88</a>
+<a href="#89" id="89">89</a>
+<a href="#90" id="90">90</a>
+<a href="#91" id="91">91</a>
+<a href="#92" id="92">92</a>
+<a href="#93" id="93">93</a>
+<a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a></pre></div><pre class="rust"><code><span class="doccomment">//! Shared utilities and constants for example binaries.
 //!
 //! This module provides common functionality and configuration shared across
 //! the example binaries for the project. It includes reusable constants,
@@ -86,7 +132,8 @@
 
 </span><span class="attr">#![allow(
     dead_code,
-    reason = <span class="string">"private utility code that, depending on the activated feature set, will sometimes be missing uses"
+    reason = <span class="string">"private utility code that, depending on the activated feature set, \
+    will sometimes be missing uses"
 </span>)]
 
 </span><span class="kw">use </span>bevy::asset::Handle;
@@ -119,6 +166,42 @@
     tailwind::VIOLET_300,
 ];
 
+<span class="doccomment">/// A pangram or holoalphabetic sentence is a sentence using every letter of a
+/// given alphabet at least once. Here's a list of pangrams in various languages
+/// using various scripts.
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">static </span>PANGRAMS: [<span class="kw-2">&amp;</span>str; <span class="number">15</span>] = [
+    <span class="comment">// English
+    </span><span class="string">"The quick brown fox jumps over the lazy dog"</span>,
+    <span class="comment">// French
+    </span><span class="string">"Portez ce vieux whisky au juge blond qui fume"</span>,
+    <span class="comment">// German
+    </span><span class="string">"Victor jagt zwölf Boxkämpfer quer über den großen Sylter Deich"</span>,
+    <span class="comment">// Spanish
+    </span><span class="string">"El veloz murciélago hindú comía feliz cardillo y kiwi"</span>,
+    <span class="comment">// Italian
+    </span><span class="string">"Pranzo d'acqua fa volti sghembi"</span>,
+    <span class="comment">// Dutch
+    </span><span class="string">"Pa's wijze lynx bezag vroom het fikse aquaduct"</span>,
+    <span class="comment">// Danish
+    </span><span class="string">"Høj bly gom vandt fræk sexquiz på wc"</span>,
+    <span class="comment">// Norwegian
+    </span><span class="string">"Sær golfer med kølle vant sexquiz på wc i hjemby"</span>,
+    <span class="comment">// Polish
+    </span><span class="string">"Pchnąć w tę łódź jeża lub ośm skrzyń fig"</span>,
+    <span class="comment">// Czech
+    </span><span class="string">"Příliš žluťoučký kůň úpěl ďábelské ódy"</span>,
+    <span class="comment">// Arabic
+    </span><span class="string">"نص حكيم له سر قاطع وذو شأن عظيم مكتوب على ثوب أخضر ومغلف بجلد أزرق"</span>,
+    <span class="comment">// Hebrew
+    </span><span class="string">"דג סקרן שט בים, מאוכזב ולפתע מצא חברה"</span>,
+    <span class="comment">// Russian
+    </span><span class="string">"Съешь ещё этих мягких французских булок, да выпей же чаю"</span>,
+    <span class="comment">// Greek
+    </span><span class="string">"Ξεσκεπάζω την ψυχοφθόρα βδελυγμία"</span>,
+    <span class="comment">// Armenian
+    </span><span class="string">"Ֆիզիկոս Մկրտիչը օճառաջուր ցողելով բժշկում է գնդապետ Հայկի փքված ձախ թևը"</span>,
+];
+
 <span class="doccomment">/// A resource containing the image font asset used in this example.
 ///
 /// This struct uses `bevy_asset_loader`'s `AssetCollection` to load the image
@@ -127,9 +210,18 @@
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>DemoAssets {
     <span class="doccomment">/// The handle to the image font asset loaded from the specified RON file.
     </span><span class="attr">#[asset(path = <span class="string">"example_font.image_font.ron"</span>)]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) image_font: Handle&lt;ImageFont&gt;,
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) example: Handle&lt;ImageFont&gt;,
+    <span class="doccomment">/// The handle to the image font asset loaded from the specified FNT file.
+    </span><span class="attr">#[asset(path = <span class="string">"bmf.txt.fnt"</span>)]
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) bmf_txt: Handle&lt;ImageFont&gt;,
+    <span class="doccomment">/// The handle to the image font asset loaded from the specified FNT file.
+    </span><span class="attr">#[asset(path = <span class="string">"bmf.xml.fnt"</span>)]
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) bmf_xml: Handle&lt;ImageFont&gt;,
+    <span class="doccomment">/// The handle to the image font asset loaded from the specified FNT file.
+    </span><span class="attr">#[asset(path = <span class="string">"bmf.bin.fnt"</span>)]
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) bmf_bin: Handle&lt;ImageFont&gt;,
     <span class="doccomment">/// The handle to the image font asset loaded from the specified RON file.
     </span><span class="attr">#[asset(path = <span class="string">"example_variable_width_font.image_font.ron"</span>)]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) variable_width_image_font: Handle&lt;ImageFont&gt;,
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) variable_width: Handle&lt;ImageFont&gt;,
 }
 </code></pre></div></section></main></body></html>
