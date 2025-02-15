@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Text rendered using an `ImageFont`."><title>ImageFontText in bevy_image_font - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-cf3c48c1.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="bevy_image_font" data-themes="" data-resource-suffix="" data-rustdoc-version="1.86.0-nightly (a9730c3b5 2025-02-05)" data-channel="nightly" data-search-js="search-581efc7a.js" data-settings-js="settings-6dad6058.js" ><script src="../static.files/storage-3a5871a4.js"></script><script defer src="sidebar-items.js"></script><script defer src="../static.files/main-4d63596a.js"></script><script defer src="../static.files/scrape-examples-2ea993ec.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc struct"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../bevy_image_font/index.html">bevy_<wbr>image_<wbr>font</a><span class="version">0.8.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Image<wbr>Font<wbr>Text</a></h2><h3><a href="#fields">Fields</a></h3><ul class="block structfield"><li><a href="#structfield.font" title="font">font</a></li><li><a href="#structfield.font_height" title="font_height">font_height</a></li><li><a href="#structfield.text" title="text">text</a></li></ul><h3><a href="#implementations">Methods</a></h3><ul class="block method"><li><a href="#method.font" title="font">font</a></li><li><a href="#method.font_height" title="font_height">font_height</a></li><li><a href="#method.text" title="text">text</a></li></ul><h3><a href="#trait-implementations">Trait Implementations</a></h3><ul class="block trait-implementation"><li><a href="#impl-Clone-for-ImageFontText" title="Clone">Clone</a></li><li><a href="#impl-Component-for-ImageFontText" title="Component">Component</a></li><li><a href="#impl-Debug-for-ImageFontText" title="Debug">Debug</a></li><li><a href="#impl-Default-for-ImageFontText" title="Default">Default</a></li><li><a href="#impl-FromReflect-for-ImageFontText" title="FromReflect">FromReflect</a></li><li><a href="#impl-GetTypeRegistration-for-ImageFontText" title="GetTypeRegistration">GetTypeRegistration</a></li><li><a href="#impl-PartialReflect-for-ImageFontText" title="PartialReflect">PartialReflect</a></li><li><a href="#impl-Reflect-for-ImageFontText" title="Reflect">Reflect</a></li><li><a href="#impl-Struct-for-ImageFontText" title="Struct">Struct</a></li><li><a href="#impl-TypePath-for-ImageFontText" title="TypePath">TypePath</a></li><li><a href="#impl-Typed-for-ImageFontText" title="Typed">Typed</a></li></ul><h3><a href="#synthetic-implementations">Auto Trait Implementations</a></h3><ul class="block synthetic-implementation"><li><a href="#impl-RefUnwindSafe-for-ImageFontText" title="!RefUnwindSafe">!RefUnwindSafe</a></li><li><a href="#impl-UnwindSafe-for-ImageFontText" title="!UnwindSafe">!UnwindSafe</a></li><li><a href="#impl-Freeze-for-ImageFontText" title="Freeze">Freeze</a></li><li><a href="#impl-Send-for-ImageFontText" title="Send">Send</a></li><li><a href="#impl-Sync-for-ImageFontText" title="Sync">Sync</a></li><li><a href="#impl-Unpin-for-ImageFontText" title="Unpin">Unpin</a></li></ul><h3><a href="#blanket-implementations">Blanket Implementations</a></h3><ul class="block blanket-implementation"><li><a href="#impl-Any-for-T" title="Any">Any</a></li><li><a href="#impl-AsBindGroupShaderType%3CU%3E-for-T" title="AsBindGroupShaderType&#60;U&#62;">AsBindGroupShaderType&#60;U&#62;</a></li><li><a href="#impl-Borrow%3CT%3E-for-T" title="Borrow&#60;T&#62;">Borrow&#60;T&#62;</a></li><li><a href="#impl-BorrowMut%3CT%3E-for-T" title="BorrowMut&#60;T&#62;">BorrowMut&#60;T&#62;</a></li><li><a href="#impl-Bundle-for-C" title="Bundle">Bundle</a></li><li><a href="#impl-CloneToUninit-for-T" title="CloneToUninit">CloneToUninit</a></li><li><a href="#impl-ConditionalSend-for-T" title="ConditionalSend">ConditionalSend</a></li><li><a href="#impl-Downcast-for-T" title="Downcast">Downcast</a></li><li><a href="#impl-Downcast%3CT%3E-for-T" title="Downcast&#60;T&#62;">Downcast&#60;T&#62;</a></li><li><a href="#impl-DowncastSync-for-T" title="DowncastSync">DowncastSync</a></li><li><a href="#impl-DynamicBundle-for-C" title="DynamicBundle">DynamicBundle</a></li><li><a href="#impl-DynamicTypePath-for-T" title="DynamicTypePath">DynamicTypePath</a></li><li><a href="#impl-DynamicTyped-for-T" title="DynamicTyped">DynamicTyped</a></li><li><a href="#impl-From%3CT%3E-for-T" title="From&#60;T&#62;">From&#60;T&#62;</a></li><li><a href="#impl-FromWorld-for-T" title="FromWorld">FromWorld</a></li><li><a href="#impl-GetField-for-S" title="GetField">GetField</a></li><li><a href="#impl-GetPath-for-T" title="GetPath">GetPath</a></li><li><a href="#impl-Instrument-for-T" title="Instrument">Instrument</a></li><li><a href="#impl-Into%3CU%3E-for-T" title="Into&#60;U&#62;">Into&#60;U&#62;</a></li><li><a href="#impl-IntoEither-for-T" title="IntoEither">IntoEither</a></li><li><a href="#impl-Pointable-for-T" title="Pointable">Pointable</a></li><li><a href="#impl-Reflectable-for-T" title="Reflectable">Reflectable</a></li><li><a href="#impl-Settings-for-T" title="Settings">Settings</a></li><li><a href="#impl-ToOwned-for-T" title="ToOwned">ToOwned</a></li><li><a href="#impl-TryFrom%3CU%3E-for-T" title="TryFrom&#60;U&#62;">TryFrom&#60;U&#62;</a></li><li><a href="#impl-TryInto%3CU%3E-for-T" title="TryInto&#60;U&#62;">TryInto&#60;U&#62;</a></li><li><a href="#impl-TypeData-for-T" title="TypeData">TypeData</a></li><li><a href="#impl-Upcast%3CT%3E-for-T" title="Upcast&#60;T&#62;">Upcast&#60;T&#62;</a></li><li><a href="#impl-VZip%3CV%3E-for-T" title="VZip&#60;V&#62;">VZip&#60;V&#62;</a></li><li><a href="#impl-WasmNotSend-for-T" title="WasmNotSend">WasmNotSend</a></li><li><a href="#impl-WasmNotSendSync-for-T" title="WasmNotSendSync">WasmNotSendSync</a></li><li><a href="#impl-WasmNotSync-for-T" title="WasmNotSync">WasmNotSync</a></li><li><a href="#impl-WithSubscriber-for-T" title="WithSubscriber">WithSubscriber</a></li></ul></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="index.html">In crate bevy_<wbr>image_<wbr>font</a></h2></div></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="index.html">bevy_image_font</a></div><h1>Struct <span class="struct">ImageFontText</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/bevy_image_font/lib.rs.html#261-273">Source</a> </span></div><pre class="rust item-decl"><code><div class="code-attribute">#[non_exhaustive]</div>pub struct ImageFontText {
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Text rendered using an `ImageFont`."><title>ImageFontText in bevy_image_font - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-6c3ea77c.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="bevy_image_font" data-themes="" data-resource-suffix="" data-rustdoc-version="1.86.0-nightly (d8810e3e2 2025-02-14)" data-channel="nightly" data-search-js="search-581efc7a.js" data-settings-js="settings-6dad6058.js" ><script src="../static.files/storage-3a5871a4.js"></script><script defer src="sidebar-items.js"></script><script defer src="../static.files/main-4d63596a.js"></script><script defer src="../static.files/scrape-examples-5e967b76.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc struct"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../bevy_image_font/index.html">bevy_<wbr>image_<wbr>font</a><span class="version">0.8.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Image<wbr>Font<wbr>Text</a></h2><h3><a href="#fields">Fields</a></h3><ul class="block structfield"><li><a href="#structfield.font" title="font">font</a></li><li><a href="#structfield.font_height" title="font_height">font_height</a></li><li><a href="#structfield.text" title="text">text</a></li></ul><h3><a href="#implementations">Methods</a></h3><ul class="block method"><li><a href="#method.font" title="font">font</a></li><li><a href="#method.font_height" title="font_height">font_height</a></li><li><a href="#method.text" title="text">text</a></li></ul><h3><a href="#trait-implementations">Trait Implementations</a></h3><ul class="block trait-implementation"><li><a href="#impl-Clone-for-ImageFontText" title="Clone">Clone</a></li><li><a href="#impl-Component-for-ImageFontText" title="Component">Component</a></li><li><a href="#impl-Debug-for-ImageFontText" title="Debug">Debug</a></li><li><a href="#impl-Default-for-ImageFontText" title="Default">Default</a></li><li><a href="#impl-FromReflect-for-ImageFontText" title="FromReflect">FromReflect</a></li><li><a href="#impl-GetTypeRegistration-for-ImageFontText" title="GetTypeRegistration">GetTypeRegistration</a></li><li><a href="#impl-PartialReflect-for-ImageFontText" title="PartialReflect">PartialReflect</a></li><li><a href="#impl-Reflect-for-ImageFontText" title="Reflect">Reflect</a></li><li><a href="#impl-Struct-for-ImageFontText" title="Struct">Struct</a></li><li><a href="#impl-TypePath-for-ImageFontText" title="TypePath">TypePath</a></li><li><a href="#impl-Typed-for-ImageFontText" title="Typed">Typed</a></li></ul><h3><a href="#synthetic-implementations">Auto Trait Implementations</a></h3><ul class="block synthetic-implementation"><li><a href="#impl-RefUnwindSafe-for-ImageFontText" title="!RefUnwindSafe">!RefUnwindSafe</a></li><li><a href="#impl-UnwindSafe-for-ImageFontText" title="!UnwindSafe">!UnwindSafe</a></li><li><a href="#impl-Freeze-for-ImageFontText" title="Freeze">Freeze</a></li><li><a href="#impl-Send-for-ImageFontText" title="Send">Send</a></li><li><a href="#impl-Sync-for-ImageFontText" title="Sync">Sync</a></li><li><a href="#impl-Unpin-for-ImageFontText" title="Unpin">Unpin</a></li></ul><h3><a href="#blanket-implementations">Blanket Implementations</a></h3><ul class="block blanket-implementation"><li><a href="#impl-Any-for-T" title="Any">Any</a></li><li><a href="#impl-AsBindGroupShaderType%3CU%3E-for-T" title="AsBindGroupShaderType&#60;U&#62;">AsBindGroupShaderType&#60;U&#62;</a></li><li><a href="#impl-Borrow%3CT%3E-for-T" title="Borrow&#60;T&#62;">Borrow&#60;T&#62;</a></li><li><a href="#impl-BorrowMut%3CT%3E-for-T" title="BorrowMut&#60;T&#62;">BorrowMut&#60;T&#62;</a></li><li><a href="#impl-Bundle-for-C" title="Bundle">Bundle</a></li><li><a href="#impl-CloneToUninit-for-T" title="CloneToUninit">CloneToUninit</a></li><li><a href="#impl-ConditionalSend-for-T" title="ConditionalSend">ConditionalSend</a></li><li><a href="#impl-Downcast-for-T" title="Downcast">Downcast</a></li><li><a href="#impl-Downcast%3CT%3E-for-T" title="Downcast&#60;T&#62;">Downcast&#60;T&#62;</a></li><li><a href="#impl-DowncastSync-for-T" title="DowncastSync">DowncastSync</a></li><li><a href="#impl-DynamicBundle-for-C" title="DynamicBundle">DynamicBundle</a></li><li><a href="#impl-DynamicTypePath-for-T" title="DynamicTypePath">DynamicTypePath</a></li><li><a href="#impl-DynamicTyped-for-T" title="DynamicTyped">DynamicTyped</a></li><li><a href="#impl-From%3CT%3E-for-T" title="From&#60;T&#62;">From&#60;T&#62;</a></li><li><a href="#impl-FromWorld-for-T" title="FromWorld">FromWorld</a></li><li><a href="#impl-GetField-for-S" title="GetField">GetField</a></li><li><a href="#impl-GetPath-for-T" title="GetPath">GetPath</a></li><li><a href="#impl-Instrument-for-T" title="Instrument">Instrument</a></li><li><a href="#impl-Into%3CU%3E-for-T" title="Into&#60;U&#62;">Into&#60;U&#62;</a></li><li><a href="#impl-IntoEither-for-T" title="IntoEither">IntoEither</a></li><li><a href="#impl-Pointable-for-T" title="Pointable">Pointable</a></li><li><a href="#impl-Reflectable-for-T" title="Reflectable">Reflectable</a></li><li><a href="#impl-Settings-for-T" title="Settings">Settings</a></li><li><a href="#impl-ToOwned-for-T" title="ToOwned">ToOwned</a></li><li><a href="#impl-TryFrom%3CU%3E-for-T" title="TryFrom&#60;U&#62;">TryFrom&#60;U&#62;</a></li><li><a href="#impl-TryInto%3CU%3E-for-T" title="TryInto&#60;U&#62;">TryInto&#60;U&#62;</a></li><li><a href="#impl-TypeData-for-T" title="TypeData">TypeData</a></li><li><a href="#impl-Upcast%3CT%3E-for-T" title="Upcast&#60;T&#62;">Upcast&#60;T&#62;</a></li><li><a href="#impl-VZip%3CV%3E-for-T" title="VZip&#60;V&#62;">VZip&#60;V&#62;</a></li><li><a href="#impl-WasmNotSend-for-T" title="WasmNotSend">WasmNotSend</a></li><li><a href="#impl-WasmNotSendSync-for-T" title="WasmNotSendSync">WasmNotSendSync</a></li><li><a href="#impl-WasmNotSync-for-T" title="WasmNotSync">WasmNotSync</a></li><li><a href="#impl-WithSubscriber-for-T" title="WithSubscriber">WithSubscriber</a></li></ul></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="index.html">In crate bevy_<wbr>image_<wbr>font</a></h2></div></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="index.html">bevy_image_font</a></div><h1>Struct <span class="struct">ImageFontText</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/bevy_image_font/lib.rs.html#261-273">Source</a> </span></div><pre class="rust item-decl"><code><div class="code-attribute">#[non_exhaustive]</div>pub struct ImageFontText {
     pub text: <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>,
     pub font: Handle&lt;<a class="struct" href="struct.ImageFont.html" title="struct bevy_image_font::ImageFont">ImageFont</a>&gt;,
     pub font_height: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a>&gt;,
@@ -11,988 +11,493 @@ texture and atlas mapping determine how characters are displayed.</p>
 integer multiple of the ‘native’ height if you want pixel accuracy,
 but we allow float values for things like animations.</p>
 </div><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-ImageFontText" class="impl"><a class="src rightside" href="../src/bevy_image_font/lib.rs.html#258">Source</a><a href="#impl-ImageFontText" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.ImageFontText.html" title="struct bevy_image_font::ImageFontText">ImageFontText</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.text" class="method"><a class="src rightside" href="../src/bevy_image_font/lib.rs.html#258">Source</a><h4 class="code-header">pub fn <a href="#method.text" class="fn">text</a>(self, value: impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>&gt;) -&gt; Self</h4></section></summary><div class="docblock"><p>Sets the <a href="#structfield.text"><code>text</code></a> field of this struct.</p>
-</div><div class="docblock scraped-example-list"><span></span><h5 id="scraped-examples"><a href="#scraped-examples">Examples found in repository</a><a class="scrape-help" href="../scrape-examples-help.html">?</a></h5><div class="scraped-example" data-locs="[[[13,13],&#34;../src/bmf/bmf.rs.html#87&#34;,&#34;line 87&#34;]]"><div class="scraped-example-title">examples/bmf.rs (<a href="../src/bmf/bmf.rs.html#87">line 87</a>)</div><div class="example-wrap"><div class="src-line-numbers" data-nosnippet><pre>
-<span>74</span>
-<span>75</span>
-<span>76</span>
-<span>77</span>
-<span>78</span>
-<span>79</span>
-<span>80</span>
-<span>81</span>
-<span>82</span>
-<span>83</span>
-<span>84</span>
-<span>85</span>
-<span>86</span>
-<span>87</span>
-<span>88</span>
-<span>89</span>
-<span>90</span>
-<span>91</span>
-<span>92</span>
-<span>93</span>
-<span>94</span>
-<span>95</span>
-<span>96</span>
-<span>97</span>
-<span>98</span>
-<span>99</span>
-<span>100</span></pre></div><pre class="rust"><code><span class="kw">fn </span>spawn_text(<span class="kw-2">mut </span>commands: Commands, assets: Res&lt;DemoAssets&gt;) {
-    commands.spawn(Camera2d);
-
-    <span class="kw">for </span>(i, <span class="kw-2">&amp;</span>pangram) <span class="kw">in </span>PANGRAMS.iter().enumerate() {
-        <span class="kw">let </span>font = <span class="kw">match </span>i % <span class="number">3 </span>{
-            <span class="number">0 </span>=&gt; assets.bmf_txt.clone_weak(),
-            <span class="number">1 </span>=&gt; assets.bmf_xml.clone_weak(),
-            <span class="number">2 </span>=&gt; assets.bmf_bin.clone_weak(),
-            <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
-        };
-
-        commands.spawn((
-            ImageFontSpriteText::default(),
-            ImageFontText::default().<span class="highlight focus">text</span>(pangram).font(font),
-            <span class="attr">#[expect(
-                clippy::cast_precision_loss,
-                reason = <span class="string">"the magnitude of the numbers we're working on here are too small to lose \
-                anything"
-            </span>)]
-            </span>Transform::from_translation(Vec3::new(
-                <span class="number">0.</span>,
-                PANGRAMS.len() <span class="kw">as </span>f32 * <span class="number">20. </span>+ -(i <span class="kw">as </span>f32) * <span class="number">40.</span>,
-                <span class="number">0.</span>,
-            )),
-        ));
-    }
-}</code></pre></div></div><details class="toggle more-examples-toggle"><summary class="hideme"><span>More examples</span></summary><div class="hide-more">Hide additional examples</div><div class="more-scraped-examples"><div class="toggle-line"><div class="toggle-line-inner"></div></div><div class="scraped-example" data-locs="[[[21,21],&#34;../src/rendered_ui/rendered_ui.rs.html#74&#34;,&#34;line 74&#34;]]"><div class="scraped-example-title">examples/rendered_ui.rs (<a href="../src/rendered_ui/rendered_ui.rs.html#74">line 74</a>)</div><div class="example-wrap"><div class="src-line-numbers" data-nosnippet><pre>
-<span>53</span>
-<span>54</span>
-<span>55</span>
-<span>56</span>
-<span>57</span>
-<span>58</span>
-<span>59</span>
-<span>60</span>
-<span>61</span>
-<span>62</span>
-<span>63</span>
-<span>64</span>
-<span>65</span>
-<span>66</span>
-<span>67</span>
-<span>68</span>
-<span>69</span>
-<span>70</span>
-<span>71</span>
-<span>72</span>
-<span>73</span>
-<span>74</span>
-<span>75</span>
-<span>76</span>
-<span>77</span>
-<span>78</span>
-<span>79</span>
-<span>80</span>
-<span>81</span>
-<span>82</span>
-<span>83</span>
-<span>84</span>
-<span>85</span>
-<span>86</span>
-<span>87</span>
-<span>88</span>
-<span>89</span>
-<span>90</span>
-<span>91</span>
-<span>92</span>
-<span>93</span></pre></div><pre class="rust"><code><span class="kw">fn </span>spawn_ui(<span class="kw-2">mut </span>commands: Commands, assets: Res&lt;DemoAssets&gt;) {
-    commands.spawn(Camera2d);
-
-    <span class="comment">// root node
-    </span>commands
-        .spawn(Node {
-            width: Val::Percent(<span class="number">100.0</span>),
-            height: Val::Percent(<span class="number">100.0</span>),
-            align_items: AlignItems::Center,
-            justify_content: JustifyContent::Center,
-            ..default()
-        })
-        .with_children(|root| {
-            root.spawn((
-                ImageNode::default(),
-                Node {
-                    position_type: PositionType::Relative,
-                    ..default()
-                },
-                ImageFontPreRenderedUiText::default(),
-                ImageFontText::default()
-                    .<span class="highlight focus">text</span>(<span class="string">"Press SPACE to judge!"</span>)
-                    .font(assets.example.clone())
-                    .font_height(<span class="number">72.0</span>),
-            ));
-        });
-
-    commands.spawn((
-        VowsNode,
-        ImageNode::default(),
-        Node {
-            position_type: PositionType::Absolute,
-            left: Val::Auto,
-            right: Val::Px(<span class="number">0.0</span>),
-            ..default()
-        },
-        ImageFontText::default()
-            .font(assets.example.clone())
-            .font_height(<span class="number">72.0</span>),
-    ));
-}</code></pre></div></div><div class="scraped-example" data-locs="[[[6,6],&#34;../src/rendered_sprite/rendered_sprite.rs.html#44&#34;,&#34;line 44&#34;],[[18,18],&#34;../src/rendered_sprite/rendered_sprite.rs.html#56&#34;,&#34;line 56&#34;]]"><div class="scraped-example-title">examples/rendered_sprite.rs (<a href="../src/rendered_sprite/rendered_sprite.rs.html#44">line 44</a>)</div><div class="example-wrap"><div class="src-line-numbers" data-nosnippet><pre>
-<span>38</span>
-<span>39</span>
-<span>40</span>
-<span>41</span>
-<span>42</span>
-<span>43</span>
-<span>44</span>
-<span>45</span>
-<span>46</span>
-<span>47</span>
-<span>48</span>
-<span>49</span>
-<span>50</span>
-<span>51</span>
-<span>52</span>
-<span>53</span>
-<span>54</span>
-<span>55</span>
-<span>56</span>
-<span>57</span>
-<span>58</span>
-<span>59</span>
-<span>60</span>
-<span>61</span>
-<span>62</span>
-<span>63</span>
-<span>64</span>
-<span>65</span>
-<span>66</span>
-<span>67</span>
-<span>68</span>
-<span>69</span>
-<span>70</span>
-<span>71</span>
-<span>72</span>
-<span>73</span>
-<span>74</span>
-<span>75</span>
-<span>76</span></pre></div><pre class="rust"><code><span class="kw">fn </span>spawn_text(<span class="kw-2">mut </span>commands: Commands, assets: Res&lt;DemoAssets&gt;) {
-    commands.spawn(Camera2d);
-
-    commands.spawn((
-        ImageFontPreRenderedText::default(),
-        ImageFontText::default()
-            .<span class="highlight focus">text</span>(TEXT)
-            .font(assets.example.clone())
-            .font_height(<span class="number">36.0</span>),
-        <span class="comment">// Our font is 45 pixels wide per character, and with an odd number of characters, the
-        // text aligns to the middle of a pixel, causing imperfect rendering. Shifting the
-        // position by 0.5 pixels ensures alignment to pixel boundaries, resulting in crisp,
-        // pixel-perfect rendering.
-        </span>Transform::from_translation(Vec3::new(<span class="number">0.5</span>, <span class="number">0.</span>, <span class="number">0.</span>)),
-    ));
-    commands.spawn((
-        ImageFontPreRenderedText::default(),
-        ImageFontText::default()
-            .<span class="highlight">text</span>(TEXT)
-            .font(assets.example.clone()),
-        <span class="comment">// Instead of shifting the character by 0.5 pixels when the text lands in the middle of
-        // a pixel, we can anchor the sprite to an edge and move it by a whole number of pixels.
-        // To center it with the text above, we shift it left by half its width.
-        </span>Sprite {
-            anchor: Anchor::CenterLeft,
-            ..default()
-        },
-        <span class="attr">#[expect(
-            clippy::cast_precision_loss,
-            reason = <span class="string">"the magnitude of the numbers we're working on here are too small to lose \
-            anything"
-        </span>)]
-        </span>Transform::from_translation(Vec3::new(
-            -((TEXT.chars().count() * FONT_WIDTH / <span class="number">2</span>) <span class="kw">as </span>f32),
-            <span class="number">40.</span>,
-            <span class="number">0.</span>,
-        )),
-    ));
-}</code></pre></div></div><div class="scraped-example" data-locs="[[[14,14],&#34;../src/atlased_sprite/atlased_sprite.rs.html#75&#34;,&#34;line 75&#34;],[[48,48],&#34;../src/atlased_sprite/atlased_sprite.rs.html#109&#34;,&#34;line 109&#34;],[[61,61],&#34;../src/atlased_sprite/atlased_sprite.rs.html#122&#34;,&#34;line 122&#34;]]"><div class="scraped-example-title">examples/atlased_sprite.rs (<a href="../src/atlased_sprite/atlased_sprite.rs.html#75">line 75</a>)</div><div class="example-wrap"><div class="src-line-numbers" data-nosnippet><pre>
-<span>61</span>
-<span>62</span>
-<span>63</span>
-<span>64</span>
-<span>65</span>
-<span>66</span>
-<span>67</span>
-<span>68</span>
-<span>69</span>
-<span>70</span>
-<span>71</span>
-<span>72</span>
-<span>73</span>
-<span>74</span>
-<span>75</span>
-<span>76</span>
-<span>77</span>
-<span>78</span>
-<span>79</span>
-<span>80</span>
-<span>81</span>
-<span>82</span>
-<span>83</span>
-<span>84</span>
-<span>85</span>
-<span>86</span>
-<span>87</span>
-<span>88</span>
-<span>89</span>
-<span>90</span>
-<span>91</span>
-<span>92</span>
-<span>93</span>
-<span>94</span>
-<span>95</span>
-<span>96</span>
-<span>97</span>
-<span>98</span>
-<span>99</span>
-<span>100</span>
-<span>101</span>
-<span>102</span>
-<span>103</span>
-<span>104</span>
-<span>105</span>
-<span>106</span>
-<span>107</span>
-<span>108</span>
-<span>109</span>
-<span>110</span>
-<span>111</span>
-<span>112</span>
-<span>113</span>
-<span>114</span>
-<span>115</span>
-<span>116</span>
-<span>117</span>
-<span>118</span>
-<span>119</span>
-<span>120</span>
-<span>121</span>
-<span>122</span>
-<span>123</span>
-<span>124</span>
-<span>125</span>
-<span>126</span>
-<span>127</span></pre></div><pre class="rust"><code><span class="kw">fn </span>setup(
-    <span class="kw-2">mut </span>commands: Commands,
-    assets: Res&lt;DemoAssets&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">"gizmos"</span>)] </span>store: ResMut&lt;GizmoConfigStore&gt;,
-) {
-    <span class="attr">#[cfg(feature = <span class="string">"gizmos"</span>)]
-    </span>gizmos::configure_gizmo_defaults(store);
-
-    commands.spawn(Camera2d);
-
-    commands.spawn((
-        AnimateColor(ColorCurve::new(RAINBOW).expect(<span class="string">"RAINBOW contains at least two colors"</span>)),
-        ImageFontSpriteText::default(),
-        ImageFontText::default()
-            .<span class="highlight focus">text</span>(TEXT)
-            .font(assets.example.clone())
-            .font_height(<span class="number">36.0</span>),
-        <span class="comment">// Shift 0.5 pixels so our characters end up at integer pixel values. This is only
-        // necessary because we're using a horizontally centered anchor combined with an
-        // odd number of characters. If we used left or right alignment, we wouldn't need
-        // to do this, even with an odd number of characters.
-        </span>Transform::from_translation(Vec3::new(<span class="number">0.5</span>, <span class="number">0.</span>, <span class="number">0.</span>)),
-    ));
-    commands.spawn((
-        AnimateText(TEXT, <span class="number">0</span>),
-        <span class="comment">// This demonstrates using the `anchor` field on the `ImageFontSpriteText`.
-        // To still center it horizontally with the text above, we shift it left by half its width.
-        </span>ImageFontSpriteText::default()
-            .color(tailwind::AMBER_500)
-            .anchor(Anchor::CenterLeft),
-        ImageFontText::default().font(assets.example.clone()),
-        <span class="attr">#[expect(
-            clippy::cast_precision_loss,
-            reason = <span class="string">"the magnitude of the numbers we're working on here are too small to lose \
-            anything"
-        </span>)]
-        </span>Transform::from_translation(Vec3::new(
-            -((TEXT.chars().count() * FONT_WIDTH / <span class="number">2</span>) <span class="kw">as </span>f32),
-            <span class="number">40.</span>,
-            <span class="number">0.</span>,
-        )),
-    ));
-
-    commands.spawn((
-        ImageFontSpriteText::default()
-            .color(tailwind::ZINC_500)
-            .letter_spacing(LetterSpacing::Pixel(<span class="number">2</span>)),
-        ImageFontText::default()
-            .<span class="highlight">text</span>(TEXT)
-            .font(assets.example.clone())
-            .font_height(<span class="number">36.0</span>),
-        Transform::from_translation(Vec3::new(<span class="number">0.5</span>, -<span class="number">40.</span>, <span class="number">0.</span>)),
-    ));
-
-    <span class="comment">// This will currently render without spaces; I intend to add a new feature
-    // shortly that will allow a font to have space without needing to have a
-    // space in the font image itself.
-    </span>commands.spawn((
-        AnimateColor(ColorCurve::new(RAINBOW).expect(<span class="string">"RAINBOW contains at least two colors"</span>)),
-        ImageFontSpriteText::default().letter_spacing(LetterSpacing::Pixel(<span class="number">1</span>)),
-        ImageFontText::default()
-            .<span class="highlight">text</span>(TEXT.to_uppercase())
-            .font(assets.variable_width.clone())
-            .font_height(<span class="number">32.0</span>),
-        Transform::from_translation(Vec3::new(<span class="number">0.</span>, -<span class="number">120.</span>, <span class="number">0.</span>)),
-    ));
-}</code></pre></div></div></div></details></div></details><details class="toggle method-toggle" open><summary><section id="method.font" class="method"><a class="src rightside" href="../src/bevy_image_font/lib.rs.html#258">Source</a><h4 class="code-header">pub fn <a href="#method.font" class="fn">font</a>(self, value: impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;Handle&lt;<a class="struct" href="struct.ImageFont.html" title="struct bevy_image_font::ImageFont">ImageFont</a>&gt;&gt;) -&gt; Self</h4></section></summary><div class="docblock"><p>Sets the <a href="#structfield.font"><code>font</code></a> field of this struct.</p>
-</div><div class="docblock scraped-example-list"><span></span><h5 id="scraped-examples-1"><a href="#scraped-examples-1">Examples found in repository</a><a class="scrape-help" href="../scrape-examples-help.html">?</a></h5><div class="scraped-example" data-locs="[[[13,13],&#34;../src/bmf/bmf.rs.html#87&#34;,&#34;line 87&#34;]]"><div class="scraped-example-title">examples/bmf.rs (<a href="../src/bmf/bmf.rs.html#87">line 87</a>)</div><div class="example-wrap"><div class="src-line-numbers" data-nosnippet><pre>
-<span>74</span>
-<span>75</span>
-<span>76</span>
-<span>77</span>
-<span>78</span>
-<span>79</span>
-<span>80</span>
-<span>81</span>
-<span>82</span>
-<span>83</span>
-<span>84</span>
-<span>85</span>
-<span>86</span>
-<span>87</span>
-<span>88</span>
-<span>89</span>
-<span>90</span>
-<span>91</span>
-<span>92</span>
-<span>93</span>
-<span>94</span>
-<span>95</span>
-<span>96</span>
-<span>97</span>
-<span>98</span>
-<span>99</span>
-<span>100</span></pre></div><pre class="rust"><code><span class="kw">fn </span>spawn_text(<span class="kw-2">mut </span>commands: Commands, assets: Res&lt;DemoAssets&gt;) {
-    commands.spawn(Camera2d);
-
-    <span class="kw">for </span>(i, <span class="kw-2">&amp;</span>pangram) <span class="kw">in </span>PANGRAMS.iter().enumerate() {
-        <span class="kw">let </span>font = <span class="kw">match </span>i % <span class="number">3 </span>{
-            <span class="number">0 </span>=&gt; assets.bmf_txt.clone_weak(),
-            <span class="number">1 </span>=&gt; assets.bmf_xml.clone_weak(),
-            <span class="number">2 </span>=&gt; assets.bmf_bin.clone_weak(),
-            <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
-        };
-
-        commands.spawn((
-            ImageFontSpriteText::default(),
-            ImageFontText::default().text(pangram).<span class="highlight focus">font</span>(font),
-            <span class="attr">#[expect(
-                clippy::cast_precision_loss,
-                reason = <span class="string">"the magnitude of the numbers we're working on here are too small to lose \
-                anything"
-            </span>)]
-            </span>Transform::from_translation(Vec3::new(
-                <span class="number">0.</span>,
-                PANGRAMS.len() <span class="kw">as </span>f32 * <span class="number">20. </span>+ -(i <span class="kw">as </span>f32) * <span class="number">40.</span>,
-                <span class="number">0.</span>,
-            )),
-        ));
-    }
-}</code></pre></div></div><details class="toggle more-examples-toggle"><summary class="hideme"><span>More examples</span></summary><div class="hide-more">Hide additional examples</div><div class="more-scraped-examples"><div class="toggle-line"><div class="toggle-line-inner"></div></div><div class="scraped-example" data-locs="[[[22,22],&#34;../src/rendered_ui/rendered_ui.rs.html#75&#34;,&#34;line 75&#34;],[[37,37],&#34;../src/rendered_ui/rendered_ui.rs.html#90&#34;,&#34;line 90&#34;]]"><div class="scraped-example-title">examples/rendered_ui.rs (<a href="../src/rendered_ui/rendered_ui.rs.html#75">line 75</a>)</div><div class="example-wrap"><div class="src-line-numbers" data-nosnippet><pre>
-<span>53</span>
-<span>54</span>
-<span>55</span>
-<span>56</span>
-<span>57</span>
-<span>58</span>
-<span>59</span>
-<span>60</span>
-<span>61</span>
-<span>62</span>
-<span>63</span>
-<span>64</span>
-<span>65</span>
-<span>66</span>
-<span>67</span>
-<span>68</span>
-<span>69</span>
-<span>70</span>
-<span>71</span>
-<span>72</span>
-<span>73</span>
-<span>74</span>
-<span>75</span>
-<span>76</span>
-<span>77</span>
-<span>78</span>
-<span>79</span>
-<span>80</span>
-<span>81</span>
-<span>82</span>
-<span>83</span>
-<span>84</span>
-<span>85</span>
-<span>86</span>
-<span>87</span>
-<span>88</span>
-<span>89</span>
-<span>90</span>
-<span>91</span>
-<span>92</span>
-<span>93</span></pre></div><pre class="rust"><code><span class="kw">fn </span>spawn_ui(<span class="kw-2">mut </span>commands: Commands, assets: Res&lt;DemoAssets&gt;) {
-    commands.spawn(Camera2d);
-
-    <span class="comment">// root node
-    </span>commands
-        .spawn(Node {
-            width: Val::Percent(<span class="number">100.0</span>),
-            height: Val::Percent(<span class="number">100.0</span>),
-            align_items: AlignItems::Center,
-            justify_content: JustifyContent::Center,
-            ..default()
-        })
-        .with_children(|root| {
-            root.spawn((
-                ImageNode::default(),
-                Node {
-                    position_type: PositionType::Relative,
-                    ..default()
-                },
-                ImageFontPreRenderedUiText::default(),
-                ImageFontText::default()
-                    .text(<span class="string">"Press SPACE to judge!"</span>)
-                    .<span class="highlight focus">font</span>(assets.example.clone())
-                    .font_height(<span class="number">72.0</span>),
-            ));
-        });
-
-    commands.spawn((
-        VowsNode,
-        ImageNode::default(),
-        Node {
-            position_type: PositionType::Absolute,
-            left: Val::Auto,
-            right: Val::Px(<span class="number">0.0</span>),
-            ..default()
-        },
-        ImageFontText::default()
-            .<span class="highlight">font</span>(assets.example.clone())
-            .font_height(<span class="number">72.0</span>),
-    ));
-}</code></pre></div></div><div class="scraped-example" data-locs="[[[7,7],&#34;../src/rendered_sprite/rendered_sprite.rs.html#45&#34;,&#34;line 45&#34;],[[19,19],&#34;../src/rendered_sprite/rendered_sprite.rs.html#57&#34;,&#34;line 57&#34;]]"><div class="scraped-example-title">examples/rendered_sprite.rs (<a href="../src/rendered_sprite/rendered_sprite.rs.html#45">line 45</a>)</div><div class="example-wrap"><div class="src-line-numbers" data-nosnippet><pre>
-<span>38</span>
-<span>39</span>
-<span>40</span>
-<span>41</span>
-<span>42</span>
-<span>43</span>
-<span>44</span>
-<span>45</span>
-<span>46</span>
-<span>47</span>
-<span>48</span>
-<span>49</span>
-<span>50</span>
-<span>51</span>
-<span>52</span>
-<span>53</span>
-<span>54</span>
-<span>55</span>
-<span>56</span>
-<span>57</span>
-<span>58</span>
-<span>59</span>
-<span>60</span>
-<span>61</span>
-<span>62</span>
-<span>63</span>
-<span>64</span>
-<span>65</span>
-<span>66</span>
-<span>67</span>
-<span>68</span>
-<span>69</span>
-<span>70</span>
-<span>71</span>
-<span>72</span>
-<span>73</span>
-<span>74</span>
-<span>75</span>
-<span>76</span></pre></div><pre class="rust"><code><span class="kw">fn </span>spawn_text(<span class="kw-2">mut </span>commands: Commands, assets: Res&lt;DemoAssets&gt;) {
-    commands.spawn(Camera2d);
-
-    commands.spawn((
-        ImageFontPreRenderedText::default(),
-        ImageFontText::default()
-            .text(TEXT)
-            .<span class="highlight focus">font</span>(assets.example.clone())
-            .font_height(<span class="number">36.0</span>),
-        <span class="comment">// Our font is 45 pixels wide per character, and with an odd number of characters, the
-        // text aligns to the middle of a pixel, causing imperfect rendering. Shifting the
-        // position by 0.5 pixels ensures alignment to pixel boundaries, resulting in crisp,
-        // pixel-perfect rendering.
-        </span>Transform::from_translation(Vec3::new(<span class="number">0.5</span>, <span class="number">0.</span>, <span class="number">0.</span>)),
-    ));
-    commands.spawn((
-        ImageFontPreRenderedText::default(),
-        ImageFontText::default()
-            .text(TEXT)
-            .<span class="highlight">font</span>(assets.example.clone()),
-        <span class="comment">// Instead of shifting the character by 0.5 pixels when the text lands in the middle of
-        // a pixel, we can anchor the sprite to an edge and move it by a whole number of pixels.
-        // To center it with the text above, we shift it left by half its width.
-        </span>Sprite {
-            anchor: Anchor::CenterLeft,
-            ..default()
-        },
-        <span class="attr">#[expect(
-            clippy::cast_precision_loss,
-            reason = <span class="string">"the magnitude of the numbers we're working on here are too small to lose \
-            anything"
-        </span>)]
-        </span>Transform::from_translation(Vec3::new(
-            -((TEXT.chars().count() * FONT_WIDTH / <span class="number">2</span>) <span class="kw">as </span>f32),
-            <span class="number">40.</span>,
-            <span class="number">0.</span>,
-        )),
-    ));
-}</code></pre></div></div><div class="scraped-example" data-locs="[[[15,15],&#34;../src/atlased_sprite/atlased_sprite.rs.html#76&#34;,&#34;line 76&#34;],[[30,30],&#34;../src/atlased_sprite/atlased_sprite.rs.html#91&#34;,&#34;line 91&#34;],[[49,49],&#34;../src/atlased_sprite/atlased_sprite.rs.html#110&#34;,&#34;line 110&#34;],[[62,62],&#34;../src/atlased_sprite/atlased_sprite.rs.html#123&#34;,&#34;line 123&#34;]]"><div class="scraped-example-title">examples/atlased_sprite.rs (<a href="../src/atlased_sprite/atlased_sprite.rs.html#76">line 76</a>)</div><div class="example-wrap"><div class="src-line-numbers" data-nosnippet><pre>
-<span>61</span>
-<span>62</span>
-<span>63</span>
-<span>64</span>
-<span>65</span>
-<span>66</span>
-<span>67</span>
-<span>68</span>
-<span>69</span>
-<span>70</span>
-<span>71</span>
-<span>72</span>
-<span>73</span>
-<span>74</span>
-<span>75</span>
-<span>76</span>
-<span>77</span>
-<span>78</span>
-<span>79</span>
-<span>80</span>
-<span>81</span>
-<span>82</span>
-<span>83</span>
-<span>84</span>
-<span>85</span>
-<span>86</span>
-<span>87</span>
-<span>88</span>
-<span>89</span>
-<span>90</span>
-<span>91</span>
-<span>92</span>
-<span>93</span>
-<span>94</span>
-<span>95</span>
-<span>96</span>
-<span>97</span>
-<span>98</span>
-<span>99</span>
-<span>100</span>
-<span>101</span>
-<span>102</span>
-<span>103</span>
-<span>104</span>
-<span>105</span>
-<span>106</span>
-<span>107</span>
-<span>108</span>
-<span>109</span>
-<span>110</span>
-<span>111</span>
-<span>112</span>
-<span>113</span>
-<span>114</span>
-<span>115</span>
-<span>116</span>
-<span>117</span>
-<span>118</span>
-<span>119</span>
-<span>120</span>
-<span>121</span>
-<span>122</span>
-<span>123</span>
-<span>124</span>
-<span>125</span>
-<span>126</span>
-<span>127</span></pre></div><pre class="rust"><code><span class="kw">fn </span>setup(
-    <span class="kw-2">mut </span>commands: Commands,
-    assets: Res&lt;DemoAssets&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">"gizmos"</span>)] </span>store: ResMut&lt;GizmoConfigStore&gt;,
-) {
-    <span class="attr">#[cfg(feature = <span class="string">"gizmos"</span>)]
-    </span>gizmos::configure_gizmo_defaults(store);
-
-    commands.spawn(Camera2d);
-
-    commands.spawn((
-        AnimateColor(ColorCurve::new(RAINBOW).expect(<span class="string">"RAINBOW contains at least two colors"</span>)),
-        ImageFontSpriteText::default(),
-        ImageFontText::default()
-            .text(TEXT)
-            .<span class="highlight focus">font</span>(assets.example.clone())
-            .font_height(<span class="number">36.0</span>),
-        <span class="comment">// Shift 0.5 pixels so our characters end up at integer pixel values. This is only
-        // necessary because we're using a horizontally centered anchor combined with an
-        // odd number of characters. If we used left or right alignment, we wouldn't need
-        // to do this, even with an odd number of characters.
-        </span>Transform::from_translation(Vec3::new(<span class="number">0.5</span>, <span class="number">0.</span>, <span class="number">0.</span>)),
-    ));
-    commands.spawn((
-        AnimateText(TEXT, <span class="number">0</span>),
-        <span class="comment">// This demonstrates using the `anchor` field on the `ImageFontSpriteText`.
-        // To still center it horizontally with the text above, we shift it left by half its width.
-        </span>ImageFontSpriteText::default()
-            .color(tailwind::AMBER_500)
-            .anchor(Anchor::CenterLeft),
-        ImageFontText::default().<span class="highlight">font</span>(assets.example.clone()),
-        <span class="attr">#[expect(
-            clippy::cast_precision_loss,
-            reason = <span class="string">"the magnitude of the numbers we're working on here are too small to lose \
-            anything"
-        </span>)]
-        </span>Transform::from_translation(Vec3::new(
-            -((TEXT.chars().count() * FONT_WIDTH / <span class="number">2</span>) <span class="kw">as </span>f32),
-            <span class="number">40.</span>,
-            <span class="number">0.</span>,
-        )),
-    ));
-
-    commands.spawn((
-        ImageFontSpriteText::default()
-            .color(tailwind::ZINC_500)
-            .letter_spacing(LetterSpacing::Pixel(<span class="number">2</span>)),
-        ImageFontText::default()
-            .text(TEXT)
-            .<span class="highlight">font</span>(assets.example.clone())
-            .font_height(<span class="number">36.0</span>),
-        Transform::from_translation(Vec3::new(<span class="number">0.5</span>, -<span class="number">40.</span>, <span class="number">0.</span>)),
-    ));
-
-    <span class="comment">// This will currently render without spaces; I intend to add a new feature
-    // shortly that will allow a font to have space without needing to have a
-    // space in the font image itself.
-    </span>commands.spawn((
-        AnimateColor(ColorCurve::new(RAINBOW).expect(<span class="string">"RAINBOW contains at least two colors"</span>)),
-        ImageFontSpriteText::default().letter_spacing(LetterSpacing::Pixel(<span class="number">1</span>)),
-        ImageFontText::default()
-            .text(TEXT.to_uppercase())
-            .<span class="highlight">font</span>(assets.variable_width.clone())
-            .font_height(<span class="number">32.0</span>),
-        Transform::from_translation(Vec3::new(<span class="number">0.</span>, -<span class="number">120.</span>, <span class="number">0.</span>)),
-    ));
-}</code></pre></div></div></div></details></div></details><details class="toggle method-toggle" open><summary><section id="method.font_height" class="method"><a class="src rightside" href="../src/bevy_image_font/lib.rs.html#258">Source</a><h4 class="code-header">pub fn <a href="#method.font_height" class="fn">font_height</a>(self, value: impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a>&gt;&gt;) -&gt; Self</h4></section></summary><div class="docblock"><p>Sets the <a href="#structfield.font_height"><code>font_height</code></a> field of this struct.</p>
-</div><div class="docblock scraped-example-list"><span></span><h5 id="scraped-examples-2"><a href="#scraped-examples-2">Examples found in repository</a><a class="scrape-help" href="../scrape-examples-help.html">?</a></h5><div class="scraped-example" data-locs="[[[23,23],&#34;../src/rendered_ui/rendered_ui.rs.html#76&#34;,&#34;line 76&#34;],[[38,38],&#34;../src/rendered_ui/rendered_ui.rs.html#91&#34;,&#34;line 91&#34;]]"><div class="scraped-example-title">examples/rendered_ui.rs (<a href="../src/rendered_ui/rendered_ui.rs.html#76">line 76</a>)</div><div class="example-wrap"><div class="src-line-numbers" data-nosnippet><pre>
-<span>53</span>
-<span>54</span>
-<span>55</span>
-<span>56</span>
-<span>57</span>
-<span>58</span>
-<span>59</span>
-<span>60</span>
-<span>61</span>
-<span>62</span>
-<span>63</span>
-<span>64</span>
-<span>65</span>
-<span>66</span>
-<span>67</span>
-<span>68</span>
-<span>69</span>
-<span>70</span>
-<span>71</span>
-<span>72</span>
-<span>73</span>
-<span>74</span>
-<span>75</span>
-<span>76</span>
-<span>77</span>
-<span>78</span>
-<span>79</span>
-<span>80</span>
-<span>81</span>
-<span>82</span>
-<span>83</span>
-<span>84</span>
-<span>85</span>
-<span>86</span>
-<span>87</span>
-<span>88</span>
-<span>89</span>
-<span>90</span>
-<span>91</span>
-<span>92</span>
-<span>93</span></pre></div><pre class="rust"><code><span class="kw">fn </span>spawn_ui(<span class="kw-2">mut </span>commands: Commands, assets: Res&lt;DemoAssets&gt;) {
-    commands.spawn(Camera2d);
-
-    <span class="comment">// root node
-    </span>commands
-        .spawn(Node {
-            width: Val::Percent(<span class="number">100.0</span>),
-            height: Val::Percent(<span class="number">100.0</span>),
-            align_items: AlignItems::Center,
-            justify_content: JustifyContent::Center,
-            ..default()
-        })
-        .with_children(|root| {
-            root.spawn((
-                ImageNode::default(),
-                Node {
-                    position_type: PositionType::Relative,
-                    ..default()
-                },
-                ImageFontPreRenderedUiText::default(),
-                ImageFontText::default()
-                    .text(<span class="string">"Press SPACE to judge!"</span>)
-                    .font(assets.example.clone())
-                    .<span class="highlight focus">font_height</span>(<span class="number">72.0</span>),
-            ));
-        });
-
-    commands.spawn((
-        VowsNode,
-        ImageNode::default(),
-        Node {
-            position_type: PositionType::Absolute,
-            left: Val::Auto,
-            right: Val::Px(<span class="number">0.0</span>),
-            ..default()
-        },
-        ImageFontText::default()
-            .font(assets.example.clone())
-            .<span class="highlight">font_height</span>(<span class="number">72.0</span>),
-    ));
-}</code></pre></div></div><details class="toggle more-examples-toggle"><summary class="hideme"><span>More examples</span></summary><div class="hide-more">Hide additional examples</div><div class="more-scraped-examples"><div class="toggle-line"><div class="toggle-line-inner"></div></div><div class="scraped-example" data-locs="[[[8,8],&#34;../src/rendered_sprite/rendered_sprite.rs.html#46&#34;,&#34;line 46&#34;]]"><div class="scraped-example-title">examples/rendered_sprite.rs (<a href="../src/rendered_sprite/rendered_sprite.rs.html#46">line 46</a>)</div><div class="example-wrap"><div class="src-line-numbers" data-nosnippet><pre>
-<span>38</span>
-<span>39</span>
-<span>40</span>
-<span>41</span>
-<span>42</span>
-<span>43</span>
-<span>44</span>
-<span>45</span>
-<span>46</span>
-<span>47</span>
-<span>48</span>
-<span>49</span>
-<span>50</span>
-<span>51</span>
-<span>52</span>
-<span>53</span>
-<span>54</span>
-<span>55</span>
-<span>56</span>
-<span>57</span>
-<span>58</span>
-<span>59</span>
-<span>60</span>
-<span>61</span>
-<span>62</span>
-<span>63</span>
-<span>64</span>
-<span>65</span>
-<span>66</span>
-<span>67</span>
-<span>68</span>
-<span>69</span>
-<span>70</span>
-<span>71</span>
-<span>72</span>
-<span>73</span>
-<span>74</span>
-<span>75</span>
-<span>76</span></pre></div><pre class="rust"><code><span class="kw">fn </span>spawn_text(<span class="kw-2">mut </span>commands: Commands, assets: Res&lt;DemoAssets&gt;) {
-    commands.spawn(Camera2d);
-
-    commands.spawn((
-        ImageFontPreRenderedText::default(),
-        ImageFontText::default()
-            .text(TEXT)
-            .font(assets.example.clone())
-            .<span class="highlight focus">font_height</span>(<span class="number">36.0</span>),
-        <span class="comment">// Our font is 45 pixels wide per character, and with an odd number of characters, the
-        // text aligns to the middle of a pixel, causing imperfect rendering. Shifting the
-        // position by 0.5 pixels ensures alignment to pixel boundaries, resulting in crisp,
-        // pixel-perfect rendering.
-        </span>Transform::from_translation(Vec3::new(<span class="number">0.5</span>, <span class="number">0.</span>, <span class="number">0.</span>)),
-    ));
-    commands.spawn((
-        ImageFontPreRenderedText::default(),
-        ImageFontText::default()
-            .text(TEXT)
-            .font(assets.example.clone()),
-        <span class="comment">// Instead of shifting the character by 0.5 pixels when the text lands in the middle of
-        // a pixel, we can anchor the sprite to an edge and move it by a whole number of pixels.
-        // To center it with the text above, we shift it left by half its width.
-        </span>Sprite {
-            anchor: Anchor::CenterLeft,
-            ..default()
-        },
-        <span class="attr">#[expect(
-            clippy::cast_precision_loss,
-            reason = <span class="string">"the magnitude of the numbers we're working on here are too small to lose \
-            anything"
-        </span>)]
-        </span>Transform::from_translation(Vec3::new(
-            -((TEXT.chars().count() * FONT_WIDTH / <span class="number">2</span>) <span class="kw">as </span>f32),
-            <span class="number">40.</span>,
-            <span class="number">0.</span>,
-        )),
-    ));
-}</code></pre></div></div><div class="scraped-example" data-locs="[[[16,16],&#34;../src/atlased_sprite/atlased_sprite.rs.html#77&#34;,&#34;line 77&#34;],[[50,50],&#34;../src/atlased_sprite/atlased_sprite.rs.html#111&#34;,&#34;line 111&#34;],[[63,63],&#34;../src/atlased_sprite/atlased_sprite.rs.html#124&#34;,&#34;line 124&#34;]]"><div class="scraped-example-title">examples/atlased_sprite.rs (<a href="../src/atlased_sprite/atlased_sprite.rs.html#77">line 77</a>)</div><div class="example-wrap"><div class="src-line-numbers" data-nosnippet><pre>
-<span>61</span>
-<span>62</span>
-<span>63</span>
-<span>64</span>
-<span>65</span>
-<span>66</span>
-<span>67</span>
-<span>68</span>
-<span>69</span>
-<span>70</span>
-<span>71</span>
-<span>72</span>
-<span>73</span>
-<span>74</span>
-<span>75</span>
-<span>76</span>
-<span>77</span>
-<span>78</span>
-<span>79</span>
-<span>80</span>
-<span>81</span>
-<span>82</span>
-<span>83</span>
-<span>84</span>
-<span>85</span>
-<span>86</span>
-<span>87</span>
-<span>88</span>
-<span>89</span>
-<span>90</span>
-<span>91</span>
-<span>92</span>
-<span>93</span>
-<span>94</span>
-<span>95</span>
-<span>96</span>
-<span>97</span>
-<span>98</span>
-<span>99</span>
-<span>100</span>
-<span>101</span>
-<span>102</span>
-<span>103</span>
-<span>104</span>
-<span>105</span>
-<span>106</span>
-<span>107</span>
-<span>108</span>
-<span>109</span>
-<span>110</span>
-<span>111</span>
-<span>112</span>
-<span>113</span>
-<span>114</span>
-<span>115</span>
-<span>116</span>
-<span>117</span>
-<span>118</span>
-<span>119</span>
-<span>120</span>
-<span>121</span>
-<span>122</span>
-<span>123</span>
-<span>124</span>
-<span>125</span>
-<span>126</span>
-<span>127</span></pre></div><pre class="rust"><code><span class="kw">fn </span>setup(
-    <span class="kw-2">mut </span>commands: Commands,
-    assets: Res&lt;DemoAssets&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">"gizmos"</span>)] </span>store: ResMut&lt;GizmoConfigStore&gt;,
-) {
-    <span class="attr">#[cfg(feature = <span class="string">"gizmos"</span>)]
-    </span>gizmos::configure_gizmo_defaults(store);
-
-    commands.spawn(Camera2d);
-
-    commands.spawn((
-        AnimateColor(ColorCurve::new(RAINBOW).expect(<span class="string">"RAINBOW contains at least two colors"</span>)),
-        ImageFontSpriteText::default(),
-        ImageFontText::default()
-            .text(TEXT)
-            .font(assets.example.clone())
-            .<span class="highlight focus">font_height</span>(<span class="number">36.0</span>),
-        <span class="comment">// Shift 0.5 pixels so our characters end up at integer pixel values. This is only
-        // necessary because we're using a horizontally centered anchor combined with an
-        // odd number of characters. If we used left or right alignment, we wouldn't need
-        // to do this, even with an odd number of characters.
-        </span>Transform::from_translation(Vec3::new(<span class="number">0.5</span>, <span class="number">0.</span>, <span class="number">0.</span>)),
-    ));
-    commands.spawn((
-        AnimateText(TEXT, <span class="number">0</span>),
-        <span class="comment">// This demonstrates using the `anchor` field on the `ImageFontSpriteText`.
-        // To still center it horizontally with the text above, we shift it left by half its width.
-        </span>ImageFontSpriteText::default()
-            .color(tailwind::AMBER_500)
-            .anchor(Anchor::CenterLeft),
-        ImageFontText::default().font(assets.example.clone()),
-        <span class="attr">#[expect(
-            clippy::cast_precision_loss,
-            reason = <span class="string">"the magnitude of the numbers we're working on here are too small to lose \
-            anything"
-        </span>)]
-        </span>Transform::from_translation(Vec3::new(
-            -((TEXT.chars().count() * FONT_WIDTH / <span class="number">2</span>) <span class="kw">as </span>f32),
-            <span class="number">40.</span>,
-            <span class="number">0.</span>,
-        )),
-    ));
-
-    commands.spawn((
-        ImageFontSpriteText::default()
-            .color(tailwind::ZINC_500)
-            .letter_spacing(LetterSpacing::Pixel(<span class="number">2</span>)),
-        ImageFontText::default()
-            .text(TEXT)
-            .font(assets.example.clone())
-            .<span class="highlight">font_height</span>(<span class="number">36.0</span>),
-        Transform::from_translation(Vec3::new(<span class="number">0.5</span>, -<span class="number">40.</span>, <span class="number">0.</span>)),
-    ));
-
-    <span class="comment">// This will currently render without spaces; I intend to add a new feature
-    // shortly that will allow a font to have space without needing to have a
-    // space in the font image itself.
-    </span>commands.spawn((
-        AnimateColor(ColorCurve::new(RAINBOW).expect(<span class="string">"RAINBOW contains at least two colors"</span>)),
-        ImageFontSpriteText::default().letter_spacing(LetterSpacing::Pixel(<span class="number">1</span>)),
-        ImageFontText::default()
-            .text(TEXT.to_uppercase())
-            .font(assets.variable_width.clone())
-            .<span class="highlight">font_height</span>(<span class="number">32.0</span>),
-        Transform::from_translation(Vec3::new(<span class="number">0.</span>, -<span class="number">120.</span>, <span class="number">0.</span>)),
-    ));
-}</code></pre></div></div></div></details></div></details></div></details></div><h2 id="trait-implementations" class="section-header">Trait Implementations<a href="#trait-implementations" class="anchor">§</a></h2><div id="trait-implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-Clone-for-ImageFontText" class="impl"><a class="src rightside" href="../src/bevy_image_font/lib.rs.html#258">Source</a><a href="#impl-Clone-for-ImageFontText" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> for <a class="struct" href="struct.ImageFontText.html" title="struct bevy_image_font::ImageFontText">ImageFontText</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.clone" class="method trait-impl"><a class="src rightside" href="../src/bevy_image_font/lib.rs.html#258">Source</a><a href="#method.clone" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone" class="fn">clone</a>(&amp;self) -&gt; <a class="struct" href="struct.ImageFontText.html" title="struct bevy_image_font::ImageFontText">ImageFontText</a></h4></section></summary><div class='docblock'>Returns a copy of the value. <a href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.clone_from" class="method trait-impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="https://doc.rust-lang.org/nightly/src/core/clone.rs.html#174">Source</a></span><a href="#method.clone_from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from" class="fn">clone_from</a>(&amp;mut self, source: &amp;Self)</h4></section></summary><div class='docblock'>Performs copy-assignment from <code>source</code>. <a href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Component-for-ImageFontText" class="impl"><a class="src rightside" href="../src/bevy_image_font/lib.rs.html#258">Source</a><a href="#impl-Component-for-ImageFontText" class="anchor">§</a><h3 class="code-header">impl Component for <a class="struct" href="struct.ImageFontText.html" title="struct bevy_image_font::ImageFontText">ImageFontText</a><div class="where">where
+</div><div class="docblock scraped-example-list"><span></span><h5 id="scraped-examples"><a href="#scraped-examples">Examples found in repository</a><a class="scrape-help" href="../scrape-examples-help.html">?</a></h5><div class="scraped-example" data-locs="[[[13,13],&#34;../src/bmf/bmf.rs.html#87&#34;,&#34;line 87&#34;]]"><div class="scraped-example-title">examples/bmf.rs (<a href="../src/bmf/bmf.rs.html#87">line 87</a>)</div><div class="example-wrap digits-3"><pre class="rust"><code><span data-nosnippet>74</span><span class="kw">fn </span>spawn_text(<span class="kw-2">mut </span>commands: Commands, assets: Res&lt;DemoAssets&gt;) {
+<span data-nosnippet>75</span>    commands.spawn(Camera2d);
+<span data-nosnippet>76</span>
+<span data-nosnippet>77</span>    <span class="kw">for </span>(i, <span class="kw-2">&amp;</span>pangram) <span class="kw">in </span>PANGRAMS.iter().enumerate() {
+<span data-nosnippet>78</span>        <span class="kw">let </span>font = <span class="kw">match </span>i % <span class="number">3 </span>{
+<span data-nosnippet>79</span>            <span class="number">0 </span>=&gt; assets.bmf_txt.clone_weak(),
+<span data-nosnippet>80</span>            <span class="number">1 </span>=&gt; assets.bmf_xml.clone_weak(),
+<span data-nosnippet>81</span>            <span class="number">2 </span>=&gt; assets.bmf_bin.clone_weak(),
+<span data-nosnippet>82</span>            <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
+<span data-nosnippet>83</span>        };
+<span data-nosnippet>84</span>
+<span data-nosnippet>85</span>        commands.spawn((
+<span data-nosnippet>86</span>            ImageFontSpriteText::default(),
+<span data-nosnippet>87</span>            ImageFontText::default().<span class="highlight focus">text</span>(pangram).font(font),
+<span data-nosnippet>88</span>            <span class="attr">#[expect(
+<span data-nosnippet>89</span>                clippy::cast_precision_loss,
+<span data-nosnippet>90</span>                reason = <span class="string">"the magnitude of the numbers we're working on here are too small to lose \
+<span data-nosnippet>91</span>                anything"
+<span data-nosnippet>92</span>            </span>)]
+<span data-nosnippet>93</span>            </span>Transform::from_translation(Vec3::new(
+<span data-nosnippet>94</span>                <span class="number">0.</span>,
+<span data-nosnippet>95</span>                PANGRAMS.len() <span class="kw">as </span>f32 * <span class="number">20. </span>+ -(i <span class="kw">as </span>f32) * <span class="number">40.</span>,
+<span data-nosnippet>96</span>                <span class="number">0.</span>,
+<span data-nosnippet>97</span>            )),
+<span data-nosnippet>98</span>        ));
+<span data-nosnippet>99</span>    }
+<span data-nosnippet>100</span>}</code></pre></div></div><details class="toggle more-examples-toggle"><summary class="hideme"><span>More examples</span></summary><div class="hide-more">Hide additional examples</div><div class="more-scraped-examples"><div class="toggle-line"><div class="toggle-line-inner"></div></div><div class="scraped-example" data-locs="[[[21,21],&#34;../src/rendered_ui/rendered_ui.rs.html#74&#34;,&#34;line 74&#34;]]"><div class="scraped-example-title">examples/rendered_ui.rs (<a href="../src/rendered_ui/rendered_ui.rs.html#74">line 74</a>)</div><div class="example-wrap digits-2"><pre class="rust"><code><span data-nosnippet>53</span><span class="kw">fn </span>spawn_ui(<span class="kw-2">mut </span>commands: Commands, assets: Res&lt;DemoAssets&gt;) {
+<span data-nosnippet>54</span>    commands.spawn(Camera2d);
+<span data-nosnippet>55</span>
+<span data-nosnippet>56</span>    <span class="comment">// root node
+<span data-nosnippet>57</span>    </span>commands
+<span data-nosnippet>58</span>        .spawn(Node {
+<span data-nosnippet>59</span>            width: Val::Percent(<span class="number">100.0</span>),
+<span data-nosnippet>60</span>            height: Val::Percent(<span class="number">100.0</span>),
+<span data-nosnippet>61</span>            align_items: AlignItems::Center,
+<span data-nosnippet>62</span>            justify_content: JustifyContent::Center,
+<span data-nosnippet>63</span>            ..default()
+<span data-nosnippet>64</span>        })
+<span data-nosnippet>65</span>        .with_children(|root| {
+<span data-nosnippet>66</span>            root.spawn((
+<span data-nosnippet>67</span>                ImageNode::default(),
+<span data-nosnippet>68</span>                Node {
+<span data-nosnippet>69</span>                    position_type: PositionType::Relative,
+<span data-nosnippet>70</span>                    ..default()
+<span data-nosnippet>71</span>                },
+<span data-nosnippet>72</span>                ImageFontPreRenderedUiText::default(),
+<span data-nosnippet>73</span>                ImageFontText::default()
+<span data-nosnippet>74</span>                    .<span class="highlight focus">text</span>(<span class="string">"Press SPACE to judge!"</span>)
+<span data-nosnippet>75</span>                    .font(assets.example.clone())
+<span data-nosnippet>76</span>                    .font_height(<span class="number">72.0</span>),
+<span data-nosnippet>77</span>            ));
+<span data-nosnippet>78</span>        });
+<span data-nosnippet>79</span>
+<span data-nosnippet>80</span>    commands.spawn((
+<span data-nosnippet>81</span>        VowsNode,
+<span data-nosnippet>82</span>        ImageNode::default(),
+<span data-nosnippet>83</span>        Node {
+<span data-nosnippet>84</span>            position_type: PositionType::Absolute,
+<span data-nosnippet>85</span>            left: Val::Auto,
+<span data-nosnippet>86</span>            right: Val::Px(<span class="number">0.0</span>),
+<span data-nosnippet>87</span>            ..default()
+<span data-nosnippet>88</span>        },
+<span data-nosnippet>89</span>        ImageFontText::default()
+<span data-nosnippet>90</span>            .font(assets.example.clone())
+<span data-nosnippet>91</span>            .font_height(<span class="number">72.0</span>),
+<span data-nosnippet>92</span>    ));
+<span data-nosnippet>93</span>}</code></pre></div></div><div class="scraped-example" data-locs="[[[6,6],&#34;../src/rendered_sprite/rendered_sprite.rs.html#44&#34;,&#34;line 44&#34;],[[18,18],&#34;../src/rendered_sprite/rendered_sprite.rs.html#56&#34;,&#34;line 56&#34;]]"><div class="scraped-example-title">examples/rendered_sprite.rs (<a href="../src/rendered_sprite/rendered_sprite.rs.html#44">line 44</a>)</div><div class="example-wrap digits-2"><pre class="rust"><code><span data-nosnippet>38</span><span class="kw">fn </span>spawn_text(<span class="kw-2">mut </span>commands: Commands, assets: Res&lt;DemoAssets&gt;) {
+<span data-nosnippet>39</span>    commands.spawn(Camera2d);
+<span data-nosnippet>40</span>
+<span data-nosnippet>41</span>    commands.spawn((
+<span data-nosnippet>42</span>        ImageFontPreRenderedText::default(),
+<span data-nosnippet>43</span>        ImageFontText::default()
+<span data-nosnippet>44</span>            .<span class="highlight focus">text</span>(TEXT)
+<span data-nosnippet>45</span>            .font(assets.example.clone())
+<span data-nosnippet>46</span>            .font_height(<span class="number">36.0</span>),
+<span data-nosnippet>47</span>        <span class="comment">// Our font is 45 pixels wide per character, and with an odd number of characters, the
+<span data-nosnippet>48</span>        // text aligns to the middle of a pixel, causing imperfect rendering. Shifting the
+<span data-nosnippet>49</span>        // position by 0.5 pixels ensures alignment to pixel boundaries, resulting in crisp,
+<span data-nosnippet>50</span>        // pixel-perfect rendering.
+<span data-nosnippet>51</span>        </span>Transform::from_translation(Vec3::new(<span class="number">0.5</span>, <span class="number">0.</span>, <span class="number">0.</span>)),
+<span data-nosnippet>52</span>    ));
+<span data-nosnippet>53</span>    commands.spawn((
+<span data-nosnippet>54</span>        ImageFontPreRenderedText::default(),
+<span data-nosnippet>55</span>        ImageFontText::default()
+<span data-nosnippet>56</span>            .<span class="highlight">text</span>(TEXT)
+<span data-nosnippet>57</span>            .font(assets.example.clone()),
+<span data-nosnippet>58</span>        <span class="comment">// Instead of shifting the character by 0.5 pixels when the text lands in the middle of
+<span data-nosnippet>59</span>        // a pixel, we can anchor the sprite to an edge and move it by a whole number of pixels.
+<span data-nosnippet>60</span>        // To center it with the text above, we shift it left by half its width.
+<span data-nosnippet>61</span>        </span>Sprite {
+<span data-nosnippet>62</span>            anchor: Anchor::CenterLeft,
+<span data-nosnippet>63</span>            ..default()
+<span data-nosnippet>64</span>        },
+<span data-nosnippet>65</span>        <span class="attr">#[expect(
+<span data-nosnippet>66</span>            clippy::cast_precision_loss,
+<span data-nosnippet>67</span>            reason = <span class="string">"the magnitude of the numbers we're working on here are too small to lose \
+<span data-nosnippet>68</span>            anything"
+<span data-nosnippet>69</span>        </span>)]
+<span data-nosnippet>70</span>        </span>Transform::from_translation(Vec3::new(
+<span data-nosnippet>71</span>            -((TEXT.chars().count() * FONT_WIDTH / <span class="number">2</span>) <span class="kw">as </span>f32),
+<span data-nosnippet>72</span>            <span class="number">40.</span>,
+<span data-nosnippet>73</span>            <span class="number">0.</span>,
+<span data-nosnippet>74</span>        )),
+<span data-nosnippet>75</span>    ));
+<span data-nosnippet>76</span>}</code></pre></div></div><div class="scraped-example" data-locs="[[[14,14],&#34;../src/atlased_sprite/atlased_sprite.rs.html#75&#34;,&#34;line 75&#34;],[[48,48],&#34;../src/atlased_sprite/atlased_sprite.rs.html#109&#34;,&#34;line 109&#34;],[[61,61],&#34;../src/atlased_sprite/atlased_sprite.rs.html#122&#34;,&#34;line 122&#34;]]"><div class="scraped-example-title">examples/atlased_sprite.rs (<a href="../src/atlased_sprite/atlased_sprite.rs.html#75">line 75</a>)</div><div class="example-wrap digits-3"><pre class="rust"><code><span data-nosnippet>61</span><span class="kw">fn </span>setup(
+<span data-nosnippet>62</span>    <span class="kw-2">mut </span>commands: Commands,
+<span data-nosnippet>63</span>    assets: Res&lt;DemoAssets&gt;,
+<span data-nosnippet>64</span>    <span class="attr">#[cfg(feature = <span class="string">"gizmos"</span>)] </span>store: ResMut&lt;GizmoConfigStore&gt;,
+<span data-nosnippet>65</span>) {
+<span data-nosnippet>66</span>    <span class="attr">#[cfg(feature = <span class="string">"gizmos"</span>)]
+<span data-nosnippet>67</span>    </span>gizmos::configure_gizmo_defaults(store);
+<span data-nosnippet>68</span>
+<span data-nosnippet>69</span>    commands.spawn(Camera2d);
+<span data-nosnippet>70</span>
+<span data-nosnippet>71</span>    commands.spawn((
+<span data-nosnippet>72</span>        AnimateColor(ColorCurve::new(RAINBOW).expect(<span class="string">"RAINBOW contains at least two colors"</span>)),
+<span data-nosnippet>73</span>        ImageFontSpriteText::default(),
+<span data-nosnippet>74</span>        ImageFontText::default()
+<span data-nosnippet>75</span>            .<span class="highlight focus">text</span>(TEXT)
+<span data-nosnippet>76</span>            .font(assets.example.clone())
+<span data-nosnippet>77</span>            .font_height(<span class="number">36.0</span>),
+<span data-nosnippet>78</span>        <span class="comment">// Shift 0.5 pixels so our characters end up at integer pixel values. This is only
+<span data-nosnippet>79</span>        // necessary because we're using a horizontally centered anchor combined with an
+<span data-nosnippet>80</span>        // odd number of characters. If we used left or right alignment, we wouldn't need
+<span data-nosnippet>81</span>        // to do this, even with an odd number of characters.
+<span data-nosnippet>82</span>        </span>Transform::from_translation(Vec3::new(<span class="number">0.5</span>, <span class="number">0.</span>, <span class="number">0.</span>)),
+<span data-nosnippet>83</span>    ));
+<span data-nosnippet>84</span>    commands.spawn((
+<span data-nosnippet>85</span>        AnimateText(TEXT, <span class="number">0</span>),
+<span data-nosnippet>86</span>        <span class="comment">// This demonstrates using the `anchor` field on the `ImageFontSpriteText`.
+<span data-nosnippet>87</span>        // To still center it horizontally with the text above, we shift it left by half its width.
+<span data-nosnippet>88</span>        </span>ImageFontSpriteText::default()
+<span data-nosnippet>89</span>            .color(tailwind::AMBER_500)
+<span data-nosnippet>90</span>            .anchor(Anchor::CenterLeft),
+<span data-nosnippet>91</span>        ImageFontText::default().font(assets.example.clone()),
+<span data-nosnippet>92</span>        <span class="attr">#[expect(
+<span data-nosnippet>93</span>            clippy::cast_precision_loss,
+<span data-nosnippet>94</span>            reason = <span class="string">"the magnitude of the numbers we're working on here are too small to lose \
+<span data-nosnippet>95</span>            anything"
+<span data-nosnippet>96</span>        </span>)]
+<span data-nosnippet>97</span>        </span>Transform::from_translation(Vec3::new(
+<span data-nosnippet>98</span>            -((TEXT.chars().count() * FONT_WIDTH / <span class="number">2</span>) <span class="kw">as </span>f32),
+<span data-nosnippet>99</span>            <span class="number">40.</span>,
+<span data-nosnippet>100</span>            <span class="number">0.</span>,
+<span data-nosnippet>101</span>        )),
+<span data-nosnippet>102</span>    ));
+<span data-nosnippet>103</span>
+<span data-nosnippet>104</span>    commands.spawn((
+<span data-nosnippet>105</span>        ImageFontSpriteText::default()
+<span data-nosnippet>106</span>            .color(tailwind::ZINC_500)
+<span data-nosnippet>107</span>            .letter_spacing(LetterSpacing::Pixel(<span class="number">2</span>)),
+<span data-nosnippet>108</span>        ImageFontText::default()
+<span data-nosnippet>109</span>            .<span class="highlight">text</span>(TEXT)
+<span data-nosnippet>110</span>            .font(assets.example.clone())
+<span data-nosnippet>111</span>            .font_height(<span class="number">36.0</span>),
+<span data-nosnippet>112</span>        Transform::from_translation(Vec3::new(<span class="number">0.5</span>, -<span class="number">40.</span>, <span class="number">0.</span>)),
+<span data-nosnippet>113</span>    ));
+<span data-nosnippet>114</span>
+<span data-nosnippet>115</span>    <span class="comment">// This will currently render without spaces; I intend to add a new feature
+<span data-nosnippet>116</span>    // shortly that will allow a font to have space without needing to have a
+<span data-nosnippet>117</span>    // space in the font image itself.
+<span data-nosnippet>118</span>    </span>commands.spawn((
+<span data-nosnippet>119</span>        AnimateColor(ColorCurve::new(RAINBOW).expect(<span class="string">"RAINBOW contains at least two colors"</span>)),
+<span data-nosnippet>120</span>        ImageFontSpriteText::default().letter_spacing(LetterSpacing::Pixel(<span class="number">1</span>)),
+<span data-nosnippet>121</span>        ImageFontText::default()
+<span data-nosnippet>122</span>            .<span class="highlight">text</span>(TEXT.to_uppercase())
+<span data-nosnippet>123</span>            .font(assets.variable_width.clone())
+<span data-nosnippet>124</span>            .font_height(<span class="number">32.0</span>),
+<span data-nosnippet>125</span>        Transform::from_translation(Vec3::new(<span class="number">0.</span>, -<span class="number">120.</span>, <span class="number">0.</span>)),
+<span data-nosnippet>126</span>    ));
+<span data-nosnippet>127</span>}</code></pre></div></div></div></details></div></details><details class="toggle method-toggle" open><summary><section id="method.font" class="method"><a class="src rightside" href="../src/bevy_image_font/lib.rs.html#258">Source</a><h4 class="code-header">pub fn <a href="#method.font" class="fn">font</a>(self, value: impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;Handle&lt;<a class="struct" href="struct.ImageFont.html" title="struct bevy_image_font::ImageFont">ImageFont</a>&gt;&gt;) -&gt; Self</h4></section></summary><div class="docblock"><p>Sets the <a href="#structfield.font"><code>font</code></a> field of this struct.</p>
+</div><div class="docblock scraped-example-list"><span></span><h5 id="scraped-examples-1"><a href="#scraped-examples-1">Examples found in repository</a><a class="scrape-help" href="../scrape-examples-help.html">?</a></h5><div class="scraped-example" data-locs="[[[13,13],&#34;../src/bmf/bmf.rs.html#87&#34;,&#34;line 87&#34;]]"><div class="scraped-example-title">examples/bmf.rs (<a href="../src/bmf/bmf.rs.html#87">line 87</a>)</div><div class="example-wrap digits-3"><pre class="rust"><code><span data-nosnippet>74</span><span class="kw">fn </span>spawn_text(<span class="kw-2">mut </span>commands: Commands, assets: Res&lt;DemoAssets&gt;) {
+<span data-nosnippet>75</span>    commands.spawn(Camera2d);
+<span data-nosnippet>76</span>
+<span data-nosnippet>77</span>    <span class="kw">for </span>(i, <span class="kw-2">&amp;</span>pangram) <span class="kw">in </span>PANGRAMS.iter().enumerate() {
+<span data-nosnippet>78</span>        <span class="kw">let </span>font = <span class="kw">match </span>i % <span class="number">3 </span>{
+<span data-nosnippet>79</span>            <span class="number">0 </span>=&gt; assets.bmf_txt.clone_weak(),
+<span data-nosnippet>80</span>            <span class="number">1 </span>=&gt; assets.bmf_xml.clone_weak(),
+<span data-nosnippet>81</span>            <span class="number">2 </span>=&gt; assets.bmf_bin.clone_weak(),
+<span data-nosnippet>82</span>            <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
+<span data-nosnippet>83</span>        };
+<span data-nosnippet>84</span>
+<span data-nosnippet>85</span>        commands.spawn((
+<span data-nosnippet>86</span>            ImageFontSpriteText::default(),
+<span data-nosnippet>87</span>            ImageFontText::default().text(pangram).<span class="highlight focus">font</span>(font),
+<span data-nosnippet>88</span>            <span class="attr">#[expect(
+<span data-nosnippet>89</span>                clippy::cast_precision_loss,
+<span data-nosnippet>90</span>                reason = <span class="string">"the magnitude of the numbers we're working on here are too small to lose \
+<span data-nosnippet>91</span>                anything"
+<span data-nosnippet>92</span>            </span>)]
+<span data-nosnippet>93</span>            </span>Transform::from_translation(Vec3::new(
+<span data-nosnippet>94</span>                <span class="number">0.</span>,
+<span data-nosnippet>95</span>                PANGRAMS.len() <span class="kw">as </span>f32 * <span class="number">20. </span>+ -(i <span class="kw">as </span>f32) * <span class="number">40.</span>,
+<span data-nosnippet>96</span>                <span class="number">0.</span>,
+<span data-nosnippet>97</span>            )),
+<span data-nosnippet>98</span>        ));
+<span data-nosnippet>99</span>    }
+<span data-nosnippet>100</span>}</code></pre></div></div><details class="toggle more-examples-toggle"><summary class="hideme"><span>More examples</span></summary><div class="hide-more">Hide additional examples</div><div class="more-scraped-examples"><div class="toggle-line"><div class="toggle-line-inner"></div></div><div class="scraped-example" data-locs="[[[22,22],&#34;../src/rendered_ui/rendered_ui.rs.html#75&#34;,&#34;line 75&#34;],[[37,37],&#34;../src/rendered_ui/rendered_ui.rs.html#90&#34;,&#34;line 90&#34;]]"><div class="scraped-example-title">examples/rendered_ui.rs (<a href="../src/rendered_ui/rendered_ui.rs.html#75">line 75</a>)</div><div class="example-wrap digits-2"><pre class="rust"><code><span data-nosnippet>53</span><span class="kw">fn </span>spawn_ui(<span class="kw-2">mut </span>commands: Commands, assets: Res&lt;DemoAssets&gt;) {
+<span data-nosnippet>54</span>    commands.spawn(Camera2d);
+<span data-nosnippet>55</span>
+<span data-nosnippet>56</span>    <span class="comment">// root node
+<span data-nosnippet>57</span>    </span>commands
+<span data-nosnippet>58</span>        .spawn(Node {
+<span data-nosnippet>59</span>            width: Val::Percent(<span class="number">100.0</span>),
+<span data-nosnippet>60</span>            height: Val::Percent(<span class="number">100.0</span>),
+<span data-nosnippet>61</span>            align_items: AlignItems::Center,
+<span data-nosnippet>62</span>            justify_content: JustifyContent::Center,
+<span data-nosnippet>63</span>            ..default()
+<span data-nosnippet>64</span>        })
+<span data-nosnippet>65</span>        .with_children(|root| {
+<span data-nosnippet>66</span>            root.spawn((
+<span data-nosnippet>67</span>                ImageNode::default(),
+<span data-nosnippet>68</span>                Node {
+<span data-nosnippet>69</span>                    position_type: PositionType::Relative,
+<span data-nosnippet>70</span>                    ..default()
+<span data-nosnippet>71</span>                },
+<span data-nosnippet>72</span>                ImageFontPreRenderedUiText::default(),
+<span data-nosnippet>73</span>                ImageFontText::default()
+<span data-nosnippet>74</span>                    .text(<span class="string">"Press SPACE to judge!"</span>)
+<span data-nosnippet>75</span>                    .<span class="highlight focus">font</span>(assets.example.clone())
+<span data-nosnippet>76</span>                    .font_height(<span class="number">72.0</span>),
+<span data-nosnippet>77</span>            ));
+<span data-nosnippet>78</span>        });
+<span data-nosnippet>79</span>
+<span data-nosnippet>80</span>    commands.spawn((
+<span data-nosnippet>81</span>        VowsNode,
+<span data-nosnippet>82</span>        ImageNode::default(),
+<span data-nosnippet>83</span>        Node {
+<span data-nosnippet>84</span>            position_type: PositionType::Absolute,
+<span data-nosnippet>85</span>            left: Val::Auto,
+<span data-nosnippet>86</span>            right: Val::Px(<span class="number">0.0</span>),
+<span data-nosnippet>87</span>            ..default()
+<span data-nosnippet>88</span>        },
+<span data-nosnippet>89</span>        ImageFontText::default()
+<span data-nosnippet>90</span>            .<span class="highlight">font</span>(assets.example.clone())
+<span data-nosnippet>91</span>            .font_height(<span class="number">72.0</span>),
+<span data-nosnippet>92</span>    ));
+<span data-nosnippet>93</span>}</code></pre></div></div><div class="scraped-example" data-locs="[[[7,7],&#34;../src/rendered_sprite/rendered_sprite.rs.html#45&#34;,&#34;line 45&#34;],[[19,19],&#34;../src/rendered_sprite/rendered_sprite.rs.html#57&#34;,&#34;line 57&#34;]]"><div class="scraped-example-title">examples/rendered_sprite.rs (<a href="../src/rendered_sprite/rendered_sprite.rs.html#45">line 45</a>)</div><div class="example-wrap digits-2"><pre class="rust"><code><span data-nosnippet>38</span><span class="kw">fn </span>spawn_text(<span class="kw-2">mut </span>commands: Commands, assets: Res&lt;DemoAssets&gt;) {
+<span data-nosnippet>39</span>    commands.spawn(Camera2d);
+<span data-nosnippet>40</span>
+<span data-nosnippet>41</span>    commands.spawn((
+<span data-nosnippet>42</span>        ImageFontPreRenderedText::default(),
+<span data-nosnippet>43</span>        ImageFontText::default()
+<span data-nosnippet>44</span>            .text(TEXT)
+<span data-nosnippet>45</span>            .<span class="highlight focus">font</span>(assets.example.clone())
+<span data-nosnippet>46</span>            .font_height(<span class="number">36.0</span>),
+<span data-nosnippet>47</span>        <span class="comment">// Our font is 45 pixels wide per character, and with an odd number of characters, the
+<span data-nosnippet>48</span>        // text aligns to the middle of a pixel, causing imperfect rendering. Shifting the
+<span data-nosnippet>49</span>        // position by 0.5 pixels ensures alignment to pixel boundaries, resulting in crisp,
+<span data-nosnippet>50</span>        // pixel-perfect rendering.
+<span data-nosnippet>51</span>        </span>Transform::from_translation(Vec3::new(<span class="number">0.5</span>, <span class="number">0.</span>, <span class="number">0.</span>)),
+<span data-nosnippet>52</span>    ));
+<span data-nosnippet>53</span>    commands.spawn((
+<span data-nosnippet>54</span>        ImageFontPreRenderedText::default(),
+<span data-nosnippet>55</span>        ImageFontText::default()
+<span data-nosnippet>56</span>            .text(TEXT)
+<span data-nosnippet>57</span>            .<span class="highlight">font</span>(assets.example.clone()),
+<span data-nosnippet>58</span>        <span class="comment">// Instead of shifting the character by 0.5 pixels when the text lands in the middle of
+<span data-nosnippet>59</span>        // a pixel, we can anchor the sprite to an edge and move it by a whole number of pixels.
+<span data-nosnippet>60</span>        // To center it with the text above, we shift it left by half its width.
+<span data-nosnippet>61</span>        </span>Sprite {
+<span data-nosnippet>62</span>            anchor: Anchor::CenterLeft,
+<span data-nosnippet>63</span>            ..default()
+<span data-nosnippet>64</span>        },
+<span data-nosnippet>65</span>        <span class="attr">#[expect(
+<span data-nosnippet>66</span>            clippy::cast_precision_loss,
+<span data-nosnippet>67</span>            reason = <span class="string">"the magnitude of the numbers we're working on here are too small to lose \
+<span data-nosnippet>68</span>            anything"
+<span data-nosnippet>69</span>        </span>)]
+<span data-nosnippet>70</span>        </span>Transform::from_translation(Vec3::new(
+<span data-nosnippet>71</span>            -((TEXT.chars().count() * FONT_WIDTH / <span class="number">2</span>) <span class="kw">as </span>f32),
+<span data-nosnippet>72</span>            <span class="number">40.</span>,
+<span data-nosnippet>73</span>            <span class="number">0.</span>,
+<span data-nosnippet>74</span>        )),
+<span data-nosnippet>75</span>    ));
+<span data-nosnippet>76</span>}</code></pre></div></div><div class="scraped-example" data-locs="[[[15,15],&#34;../src/atlased_sprite/atlased_sprite.rs.html#76&#34;,&#34;line 76&#34;],[[30,30],&#34;../src/atlased_sprite/atlased_sprite.rs.html#91&#34;,&#34;line 91&#34;],[[49,49],&#34;../src/atlased_sprite/atlased_sprite.rs.html#110&#34;,&#34;line 110&#34;],[[62,62],&#34;../src/atlased_sprite/atlased_sprite.rs.html#123&#34;,&#34;line 123&#34;]]"><div class="scraped-example-title">examples/atlased_sprite.rs (<a href="../src/atlased_sprite/atlased_sprite.rs.html#76">line 76</a>)</div><div class="example-wrap digits-3"><pre class="rust"><code><span data-nosnippet>61</span><span class="kw">fn </span>setup(
+<span data-nosnippet>62</span>    <span class="kw-2">mut </span>commands: Commands,
+<span data-nosnippet>63</span>    assets: Res&lt;DemoAssets&gt;,
+<span data-nosnippet>64</span>    <span class="attr">#[cfg(feature = <span class="string">"gizmos"</span>)] </span>store: ResMut&lt;GizmoConfigStore&gt;,
+<span data-nosnippet>65</span>) {
+<span data-nosnippet>66</span>    <span class="attr">#[cfg(feature = <span class="string">"gizmos"</span>)]
+<span data-nosnippet>67</span>    </span>gizmos::configure_gizmo_defaults(store);
+<span data-nosnippet>68</span>
+<span data-nosnippet>69</span>    commands.spawn(Camera2d);
+<span data-nosnippet>70</span>
+<span data-nosnippet>71</span>    commands.spawn((
+<span data-nosnippet>72</span>        AnimateColor(ColorCurve::new(RAINBOW).expect(<span class="string">"RAINBOW contains at least two colors"</span>)),
+<span data-nosnippet>73</span>        ImageFontSpriteText::default(),
+<span data-nosnippet>74</span>        ImageFontText::default()
+<span data-nosnippet>75</span>            .text(TEXT)
+<span data-nosnippet>76</span>            .<span class="highlight focus">font</span>(assets.example.clone())
+<span data-nosnippet>77</span>            .font_height(<span class="number">36.0</span>),
+<span data-nosnippet>78</span>        <span class="comment">// Shift 0.5 pixels so our characters end up at integer pixel values. This is only
+<span data-nosnippet>79</span>        // necessary because we're using a horizontally centered anchor combined with an
+<span data-nosnippet>80</span>        // odd number of characters. If we used left or right alignment, we wouldn't need
+<span data-nosnippet>81</span>        // to do this, even with an odd number of characters.
+<span data-nosnippet>82</span>        </span>Transform::from_translation(Vec3::new(<span class="number">0.5</span>, <span class="number">0.</span>, <span class="number">0.</span>)),
+<span data-nosnippet>83</span>    ));
+<span data-nosnippet>84</span>    commands.spawn((
+<span data-nosnippet>85</span>        AnimateText(TEXT, <span class="number">0</span>),
+<span data-nosnippet>86</span>        <span class="comment">// This demonstrates using the `anchor` field on the `ImageFontSpriteText`.
+<span data-nosnippet>87</span>        // To still center it horizontally with the text above, we shift it left by half its width.
+<span data-nosnippet>88</span>        </span>ImageFontSpriteText::default()
+<span data-nosnippet>89</span>            .color(tailwind::AMBER_500)
+<span data-nosnippet>90</span>            .anchor(Anchor::CenterLeft),
+<span data-nosnippet>91</span>        ImageFontText::default().<span class="highlight">font</span>(assets.example.clone()),
+<span data-nosnippet>92</span>        <span class="attr">#[expect(
+<span data-nosnippet>93</span>            clippy::cast_precision_loss,
+<span data-nosnippet>94</span>            reason = <span class="string">"the magnitude of the numbers we're working on here are too small to lose \
+<span data-nosnippet>95</span>            anything"
+<span data-nosnippet>96</span>        </span>)]
+<span data-nosnippet>97</span>        </span>Transform::from_translation(Vec3::new(
+<span data-nosnippet>98</span>            -((TEXT.chars().count() * FONT_WIDTH / <span class="number">2</span>) <span class="kw">as </span>f32),
+<span data-nosnippet>99</span>            <span class="number">40.</span>,
+<span data-nosnippet>100</span>            <span class="number">0.</span>,
+<span data-nosnippet>101</span>        )),
+<span data-nosnippet>102</span>    ));
+<span data-nosnippet>103</span>
+<span data-nosnippet>104</span>    commands.spawn((
+<span data-nosnippet>105</span>        ImageFontSpriteText::default()
+<span data-nosnippet>106</span>            .color(tailwind::ZINC_500)
+<span data-nosnippet>107</span>            .letter_spacing(LetterSpacing::Pixel(<span class="number">2</span>)),
+<span data-nosnippet>108</span>        ImageFontText::default()
+<span data-nosnippet>109</span>            .text(TEXT)
+<span data-nosnippet>110</span>            .<span class="highlight">font</span>(assets.example.clone())
+<span data-nosnippet>111</span>            .font_height(<span class="number">36.0</span>),
+<span data-nosnippet>112</span>        Transform::from_translation(Vec3::new(<span class="number">0.5</span>, -<span class="number">40.</span>, <span class="number">0.</span>)),
+<span data-nosnippet>113</span>    ));
+<span data-nosnippet>114</span>
+<span data-nosnippet>115</span>    <span class="comment">// This will currently render without spaces; I intend to add a new feature
+<span data-nosnippet>116</span>    // shortly that will allow a font to have space without needing to have a
+<span data-nosnippet>117</span>    // space in the font image itself.
+<span data-nosnippet>118</span>    </span>commands.spawn((
+<span data-nosnippet>119</span>        AnimateColor(ColorCurve::new(RAINBOW).expect(<span class="string">"RAINBOW contains at least two colors"</span>)),
+<span data-nosnippet>120</span>        ImageFontSpriteText::default().letter_spacing(LetterSpacing::Pixel(<span class="number">1</span>)),
+<span data-nosnippet>121</span>        ImageFontText::default()
+<span data-nosnippet>122</span>            .text(TEXT.to_uppercase())
+<span data-nosnippet>123</span>            .<span class="highlight">font</span>(assets.variable_width.clone())
+<span data-nosnippet>124</span>            .font_height(<span class="number">32.0</span>),
+<span data-nosnippet>125</span>        Transform::from_translation(Vec3::new(<span class="number">0.</span>, -<span class="number">120.</span>, <span class="number">0.</span>)),
+<span data-nosnippet>126</span>    ));
+<span data-nosnippet>127</span>}</code></pre></div></div></div></details></div></details><details class="toggle method-toggle" open><summary><section id="method.font_height" class="method"><a class="src rightside" href="../src/bevy_image_font/lib.rs.html#258">Source</a><h4 class="code-header">pub fn <a href="#method.font_height" class="fn">font_height</a>(self, value: impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a>&gt;&gt;) -&gt; Self</h4></section></summary><div class="docblock"><p>Sets the <a href="#structfield.font_height"><code>font_height</code></a> field of this struct.</p>
+</div><div class="docblock scraped-example-list"><span></span><h5 id="scraped-examples-2"><a href="#scraped-examples-2">Examples found in repository</a><a class="scrape-help" href="../scrape-examples-help.html">?</a></h5><div class="scraped-example" data-locs="[[[23,23],&#34;../src/rendered_ui/rendered_ui.rs.html#76&#34;,&#34;line 76&#34;],[[38,38],&#34;../src/rendered_ui/rendered_ui.rs.html#91&#34;,&#34;line 91&#34;]]"><div class="scraped-example-title">examples/rendered_ui.rs (<a href="../src/rendered_ui/rendered_ui.rs.html#76">line 76</a>)</div><div class="example-wrap digits-2"><pre class="rust"><code><span data-nosnippet>53</span><span class="kw">fn </span>spawn_ui(<span class="kw-2">mut </span>commands: Commands, assets: Res&lt;DemoAssets&gt;) {
+<span data-nosnippet>54</span>    commands.spawn(Camera2d);
+<span data-nosnippet>55</span>
+<span data-nosnippet>56</span>    <span class="comment">// root node
+<span data-nosnippet>57</span>    </span>commands
+<span data-nosnippet>58</span>        .spawn(Node {
+<span data-nosnippet>59</span>            width: Val::Percent(<span class="number">100.0</span>),
+<span data-nosnippet>60</span>            height: Val::Percent(<span class="number">100.0</span>),
+<span data-nosnippet>61</span>            align_items: AlignItems::Center,
+<span data-nosnippet>62</span>            justify_content: JustifyContent::Center,
+<span data-nosnippet>63</span>            ..default()
+<span data-nosnippet>64</span>        })
+<span data-nosnippet>65</span>        .with_children(|root| {
+<span data-nosnippet>66</span>            root.spawn((
+<span data-nosnippet>67</span>                ImageNode::default(),
+<span data-nosnippet>68</span>                Node {
+<span data-nosnippet>69</span>                    position_type: PositionType::Relative,
+<span data-nosnippet>70</span>                    ..default()
+<span data-nosnippet>71</span>                },
+<span data-nosnippet>72</span>                ImageFontPreRenderedUiText::default(),
+<span data-nosnippet>73</span>                ImageFontText::default()
+<span data-nosnippet>74</span>                    .text(<span class="string">"Press SPACE to judge!"</span>)
+<span data-nosnippet>75</span>                    .font(assets.example.clone())
+<span data-nosnippet>76</span>                    .<span class="highlight focus">font_height</span>(<span class="number">72.0</span>),
+<span data-nosnippet>77</span>            ));
+<span data-nosnippet>78</span>        });
+<span data-nosnippet>79</span>
+<span data-nosnippet>80</span>    commands.spawn((
+<span data-nosnippet>81</span>        VowsNode,
+<span data-nosnippet>82</span>        ImageNode::default(),
+<span data-nosnippet>83</span>        Node {
+<span data-nosnippet>84</span>            position_type: PositionType::Absolute,
+<span data-nosnippet>85</span>            left: Val::Auto,
+<span data-nosnippet>86</span>            right: Val::Px(<span class="number">0.0</span>),
+<span data-nosnippet>87</span>            ..default()
+<span data-nosnippet>88</span>        },
+<span data-nosnippet>89</span>        ImageFontText::default()
+<span data-nosnippet>90</span>            .font(assets.example.clone())
+<span data-nosnippet>91</span>            .<span class="highlight">font_height</span>(<span class="number">72.0</span>),
+<span data-nosnippet>92</span>    ));
+<span data-nosnippet>93</span>}</code></pre></div></div><details class="toggle more-examples-toggle"><summary class="hideme"><span>More examples</span></summary><div class="hide-more">Hide additional examples</div><div class="more-scraped-examples"><div class="toggle-line"><div class="toggle-line-inner"></div></div><div class="scraped-example" data-locs="[[[8,8],&#34;../src/rendered_sprite/rendered_sprite.rs.html#46&#34;,&#34;line 46&#34;]]"><div class="scraped-example-title">examples/rendered_sprite.rs (<a href="../src/rendered_sprite/rendered_sprite.rs.html#46">line 46</a>)</div><div class="example-wrap digits-2"><pre class="rust"><code><span data-nosnippet>38</span><span class="kw">fn </span>spawn_text(<span class="kw-2">mut </span>commands: Commands, assets: Res&lt;DemoAssets&gt;) {
+<span data-nosnippet>39</span>    commands.spawn(Camera2d);
+<span data-nosnippet>40</span>
+<span data-nosnippet>41</span>    commands.spawn((
+<span data-nosnippet>42</span>        ImageFontPreRenderedText::default(),
+<span data-nosnippet>43</span>        ImageFontText::default()
+<span data-nosnippet>44</span>            .text(TEXT)
+<span data-nosnippet>45</span>            .font(assets.example.clone())
+<span data-nosnippet>46</span>            .<span class="highlight focus">font_height</span>(<span class="number">36.0</span>),
+<span data-nosnippet>47</span>        <span class="comment">// Our font is 45 pixels wide per character, and with an odd number of characters, the
+<span data-nosnippet>48</span>        // text aligns to the middle of a pixel, causing imperfect rendering. Shifting the
+<span data-nosnippet>49</span>        // position by 0.5 pixels ensures alignment to pixel boundaries, resulting in crisp,
+<span data-nosnippet>50</span>        // pixel-perfect rendering.
+<span data-nosnippet>51</span>        </span>Transform::from_translation(Vec3::new(<span class="number">0.5</span>, <span class="number">0.</span>, <span class="number">0.</span>)),
+<span data-nosnippet>52</span>    ));
+<span data-nosnippet>53</span>    commands.spawn((
+<span data-nosnippet>54</span>        ImageFontPreRenderedText::default(),
+<span data-nosnippet>55</span>        ImageFontText::default()
+<span data-nosnippet>56</span>            .text(TEXT)
+<span data-nosnippet>57</span>            .font(assets.example.clone()),
+<span data-nosnippet>58</span>        <span class="comment">// Instead of shifting the character by 0.5 pixels when the text lands in the middle of
+<span data-nosnippet>59</span>        // a pixel, we can anchor the sprite to an edge and move it by a whole number of pixels.
+<span data-nosnippet>60</span>        // To center it with the text above, we shift it left by half its width.
+<span data-nosnippet>61</span>        </span>Sprite {
+<span data-nosnippet>62</span>            anchor: Anchor::CenterLeft,
+<span data-nosnippet>63</span>            ..default()
+<span data-nosnippet>64</span>        },
+<span data-nosnippet>65</span>        <span class="attr">#[expect(
+<span data-nosnippet>66</span>            clippy::cast_precision_loss,
+<span data-nosnippet>67</span>            reason = <span class="string">"the magnitude of the numbers we're working on here are too small to lose \
+<span data-nosnippet>68</span>            anything"
+<span data-nosnippet>69</span>        </span>)]
+<span data-nosnippet>70</span>        </span>Transform::from_translation(Vec3::new(
+<span data-nosnippet>71</span>            -((TEXT.chars().count() * FONT_WIDTH / <span class="number">2</span>) <span class="kw">as </span>f32),
+<span data-nosnippet>72</span>            <span class="number">40.</span>,
+<span data-nosnippet>73</span>            <span class="number">0.</span>,
+<span data-nosnippet>74</span>        )),
+<span data-nosnippet>75</span>    ));
+<span data-nosnippet>76</span>}</code></pre></div></div><div class="scraped-example" data-locs="[[[16,16],&#34;../src/atlased_sprite/atlased_sprite.rs.html#77&#34;,&#34;line 77&#34;],[[50,50],&#34;../src/atlased_sprite/atlased_sprite.rs.html#111&#34;,&#34;line 111&#34;],[[63,63],&#34;../src/atlased_sprite/atlased_sprite.rs.html#124&#34;,&#34;line 124&#34;]]"><div class="scraped-example-title">examples/atlased_sprite.rs (<a href="../src/atlased_sprite/atlased_sprite.rs.html#77">line 77</a>)</div><div class="example-wrap digits-3"><pre class="rust"><code><span data-nosnippet>61</span><span class="kw">fn </span>setup(
+<span data-nosnippet>62</span>    <span class="kw-2">mut </span>commands: Commands,
+<span data-nosnippet>63</span>    assets: Res&lt;DemoAssets&gt;,
+<span data-nosnippet>64</span>    <span class="attr">#[cfg(feature = <span class="string">"gizmos"</span>)] </span>store: ResMut&lt;GizmoConfigStore&gt;,
+<span data-nosnippet>65</span>) {
+<span data-nosnippet>66</span>    <span class="attr">#[cfg(feature = <span class="string">"gizmos"</span>)]
+<span data-nosnippet>67</span>    </span>gizmos::configure_gizmo_defaults(store);
+<span data-nosnippet>68</span>
+<span data-nosnippet>69</span>    commands.spawn(Camera2d);
+<span data-nosnippet>70</span>
+<span data-nosnippet>71</span>    commands.spawn((
+<span data-nosnippet>72</span>        AnimateColor(ColorCurve::new(RAINBOW).expect(<span class="string">"RAINBOW contains at least two colors"</span>)),
+<span data-nosnippet>73</span>        ImageFontSpriteText::default(),
+<span data-nosnippet>74</span>        ImageFontText::default()
+<span data-nosnippet>75</span>            .text(TEXT)
+<span data-nosnippet>76</span>            .font(assets.example.clone())
+<span data-nosnippet>77</span>            .<span class="highlight focus">font_height</span>(<span class="number">36.0</span>),
+<span data-nosnippet>78</span>        <span class="comment">// Shift 0.5 pixels so our characters end up at integer pixel values. This is only
+<span data-nosnippet>79</span>        // necessary because we're using a horizontally centered anchor combined with an
+<span data-nosnippet>80</span>        // odd number of characters. If we used left or right alignment, we wouldn't need
+<span data-nosnippet>81</span>        // to do this, even with an odd number of characters.
+<span data-nosnippet>82</span>        </span>Transform::from_translation(Vec3::new(<span class="number">0.5</span>, <span class="number">0.</span>, <span class="number">0.</span>)),
+<span data-nosnippet>83</span>    ));
+<span data-nosnippet>84</span>    commands.spawn((
+<span data-nosnippet>85</span>        AnimateText(TEXT, <span class="number">0</span>),
+<span data-nosnippet>86</span>        <span class="comment">// This demonstrates using the `anchor` field on the `ImageFontSpriteText`.
+<span data-nosnippet>87</span>        // To still center it horizontally with the text above, we shift it left by half its width.
+<span data-nosnippet>88</span>        </span>ImageFontSpriteText::default()
+<span data-nosnippet>89</span>            .color(tailwind::AMBER_500)
+<span data-nosnippet>90</span>            .anchor(Anchor::CenterLeft),
+<span data-nosnippet>91</span>        ImageFontText::default().font(assets.example.clone()),
+<span data-nosnippet>92</span>        <span class="attr">#[expect(
+<span data-nosnippet>93</span>            clippy::cast_precision_loss,
+<span data-nosnippet>94</span>            reason = <span class="string">"the magnitude of the numbers we're working on here are too small to lose \
+<span data-nosnippet>95</span>            anything"
+<span data-nosnippet>96</span>        </span>)]
+<span data-nosnippet>97</span>        </span>Transform::from_translation(Vec3::new(
+<span data-nosnippet>98</span>            -((TEXT.chars().count() * FONT_WIDTH / <span class="number">2</span>) <span class="kw">as </span>f32),
+<span data-nosnippet>99</span>            <span class="number">40.</span>,
+<span data-nosnippet>100</span>            <span class="number">0.</span>,
+<span data-nosnippet>101</span>        )),
+<span data-nosnippet>102</span>    ));
+<span data-nosnippet>103</span>
+<span data-nosnippet>104</span>    commands.spawn((
+<span data-nosnippet>105</span>        ImageFontSpriteText::default()
+<span data-nosnippet>106</span>            .color(tailwind::ZINC_500)
+<span data-nosnippet>107</span>            .letter_spacing(LetterSpacing::Pixel(<span class="number">2</span>)),
+<span data-nosnippet>108</span>        ImageFontText::default()
+<span data-nosnippet>109</span>            .text(TEXT)
+<span data-nosnippet>110</span>            .font(assets.example.clone())
+<span data-nosnippet>111</span>            .<span class="highlight">font_height</span>(<span class="number">36.0</span>),
+<span data-nosnippet>112</span>        Transform::from_translation(Vec3::new(<span class="number">0.5</span>, -<span class="number">40.</span>, <span class="number">0.</span>)),
+<span data-nosnippet>113</span>    ));
+<span data-nosnippet>114</span>
+<span data-nosnippet>115</span>    <span class="comment">// This will currently render without spaces; I intend to add a new feature
+<span data-nosnippet>116</span>    // shortly that will allow a font to have space without needing to have a
+<span data-nosnippet>117</span>    // space in the font image itself.
+<span data-nosnippet>118</span>    </span>commands.spawn((
+<span data-nosnippet>119</span>        AnimateColor(ColorCurve::new(RAINBOW).expect(<span class="string">"RAINBOW contains at least two colors"</span>)),
+<span data-nosnippet>120</span>        ImageFontSpriteText::default().letter_spacing(LetterSpacing::Pixel(<span class="number">1</span>)),
+<span data-nosnippet>121</span>        ImageFontText::default()
+<span data-nosnippet>122</span>            .text(TEXT.to_uppercase())
+<span data-nosnippet>123</span>            .font(assets.variable_width.clone())
+<span data-nosnippet>124</span>            .<span class="highlight">font_height</span>(<span class="number">32.0</span>),
+<span data-nosnippet>125</span>        Transform::from_translation(Vec3::new(<span class="number">0.</span>, -<span class="number">120.</span>, <span class="number">0.</span>)),
+<span data-nosnippet>126</span>    ));
+<span data-nosnippet>127</span>}</code></pre></div></div></div></details></div></details></div></details></div><h2 id="trait-implementations" class="section-header">Trait Implementations<a href="#trait-implementations" class="anchor">§</a></h2><div id="trait-implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-Clone-for-ImageFontText" class="impl"><a class="src rightside" href="../src/bevy_image_font/lib.rs.html#258">Source</a><a href="#impl-Clone-for-ImageFontText" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> for <a class="struct" href="struct.ImageFontText.html" title="struct bevy_image_font::ImageFontText">ImageFontText</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.clone" class="method trait-impl"><a class="src rightside" href="../src/bevy_image_font/lib.rs.html#258">Source</a><a href="#method.clone" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone" class="fn">clone</a>(&amp;self) -&gt; <a class="struct" href="struct.ImageFontText.html" title="struct bevy_image_font::ImageFontText">ImageFontText</a></h4></section></summary><div class='docblock'>Returns a copy of the value. <a href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.clone_from" class="method trait-impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="https://doc.rust-lang.org/nightly/src/core/clone.rs.html#174">Source</a></span><a href="#method.clone_from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from" class="fn">clone_from</a>(&amp;mut self, source: &amp;Self)</h4></section></summary><div class='docblock'>Performs copy-assignment from <code>source</code>. <a href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Component-for-ImageFontText" class="impl"><a class="src rightside" href="../src/bevy_image_font/lib.rs.html#258">Source</a><a href="#impl-Component-for-ImageFontText" class="anchor">§</a><h3 class="code-header">impl Component for <a class="struct" href="struct.ImageFontText.html" title="struct bevy_image_font::ImageFontText">ImageFontText</a><div class="where">where
     Self: <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sync.html" title="trait core::marker::Sync">Sync</a> + 'static,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedconstant.STORAGE_TYPE" class="associatedconstant trait-impl"><a class="src rightside" href="../src/bevy_image_font/lib.rs.html#258">Source</a><a href="#associatedconstant.STORAGE_TYPE" class="anchor">§</a><h4 class="code-header">const <a class="constant">STORAGE_TYPE</a>: StorageType = bevy::ecs::component::StorageType::Table</h4></section></summary><div class='docblock'>A constant indicating the storage type used for this component.</div></details><details class="toggle method-toggle" open><summary><section id="method.register_required_components" class="method trait-impl"><a class="src rightside" href="../src/bevy_image_font/lib.rs.html#258">Source</a><a href="#method.register_required_components" class="anchor">§</a><h4 class="code-header">fn <a class="fn">register_required_components</a>(
     requiree: ComponentId,
     components: &amp;mut Components,
