@@ -26,7 +26,7 @@
 
 use std::fmt;
 
-use bevy::utils::HashMap;
+use bevy::platform::collections::HashMap;
 
 /// A wrapper type for filtering characters from a string based on a character
 /// map.

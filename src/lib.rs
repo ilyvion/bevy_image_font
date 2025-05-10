@@ -6,7 +6,7 @@
 
 use bevy::{
     prelude::*,
-    utils::{HashMap, HashSet},
+    platform::collections::{HashMap, HashSet},
 };
 use bevy_image::{Image, ImageSampler};
 use derive_setters::Setters;

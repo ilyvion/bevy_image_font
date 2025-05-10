@@ -8,7 +8,7 @@ use std::path::PathBuf;
 use bevy::{
     asset::{io::Reader, AssetLoader, LoadContext, LoadDirectError},
     prelude::*,
-    utils::HashMap,
+    platform::collections::HashMap,
 };
 use bevy_image::{Image, ImageSampler, ImageSamplerDescriptor};
 use camino::{Utf8Path, Utf8PathBuf};

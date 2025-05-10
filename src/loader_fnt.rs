@@ -4,10 +4,9 @@
 use bevy::{
     asset::{io::Reader, AssetLoader, AsyncReadExt as _, LoadContext},
     image::Image,
-    math::{URect, UVec2},
-    sprite::TextureAtlasLayout,
-    utils::HashMap,
+    math::{URect, UVec2}, platform::collections::HashMap
 };
+use bevy_image::TextureAtlasLayout;
 
 use crate::{
     loader::{

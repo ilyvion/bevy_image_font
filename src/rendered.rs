@@ -218,12 +218,15 @@ fn render_text_to_image(
         .map(|character| layout.textures[image_font.atlas_character_map[&character]].width())
         .reduce(|accumulator, value| accumulator + value)
         .expect("we've verified !text.is_empty() already");
+    let Some(data) = &font_texture.data else {
+        return Err(ImageFontRenderError::MissingTextureAsset);
+    };
 
     let mut output_image = image::RgbaImage::new(width, height);
     let font_texture: ImageBuffer<Rgba<u8>, _> = ImageBuffer::from_raw(
         font_texture.width(),
         font_texture.height(),
-        font_texture.data.as_slice(),
+        data.as_slice(),
     )
     .ok_or(ImageFontRenderError::UnknownError)?;
 
