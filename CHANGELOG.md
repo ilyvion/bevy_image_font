@@ -42,7 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `rendered::ImageFontPreRenderedText`
   - `rendered::ImageFontPreRenderedUiText`
 - Types have been moved:
-  - `bevy_image_font::atlas_sprites::ScalingMode` to `bevy_image_font::ScalingMode`
+  - `bevy_image_font::atlas_sprites::ScalingMode` to `bevy_image_font::ImageFontScalingMode`
   - `bevy_image_font::atlas_sprites::ImageFontGizmoData` to `bevy_image_font::atlas_sprites::gizmos::ImageFontGizmoData`
 - `bevy_image_font::atlas_sprites::render_sprite_gizmos` is no longer part of the public API.
 

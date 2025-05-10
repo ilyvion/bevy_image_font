@@ -28,8 +28,8 @@ use derive_setters::Setters;
 
 use crate::render_context::{RenderConfig, RenderContext};
 use crate::{
-    sync_texts_with_font_changes, ImageFont, ImageFontSet, ImageFontText, LetterSpacing,
-    ScalingMode,
+    sync_texts_with_font_changes, ImageFont, ImageFontScalingMode, ImageFontSet, ImageFontText,
+    LetterSpacing,
 };
 
 /// Internal plugin for conveniently organizing the code related to this
@@ -79,12 +79,12 @@ pub struct ImageFontSpriteText {
     /// them to match the desired font height.
     ///
     /// This field allows control over how fractional scaling values are
-    /// handled, using the [`ScalingMode`] enum. It provides options to
+    /// handled, using the [`ImageFontScalingMode`] enum. It provides options to
     /// truncate, round, or retain precise fractional values, depending on
     /// your rendering requirements.
     ///
-    /// The default value is `ScalingMode::Rounded`.
-    pub scaling_mode: ScalingMode,
+    /// The default value is `ImageFontScalingMode::Rounded`.
+    pub scaling_mode: ImageFontScalingMode,
 
     /// Determines a constant kerning between characters. The spacing is given
     /// at the font's native height and is scaled proportionally based on the
