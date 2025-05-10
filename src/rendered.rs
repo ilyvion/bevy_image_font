@@ -10,6 +10,7 @@
 //!   dynamically.
 //! - Integrates with the `image` crate for low-level image manipulation.
 
+use bevy::sprite::Anchor;
 use bevy::{
     prelude::*,
     render::{
@@ -24,7 +25,8 @@ use image::{
 };
 use thiserror::Error;
 
-use crate::{sync_texts_with_font_changes, ImageFont, ImageFontSet, ImageFontText};
+use crate::render_context::{RenderConfig, RenderContext};
+use crate::{sync_texts_with_font_changes, ImageFont, ImageFontSet, ImageFontText, ScalingMode};
 
 /// Internal plugin for conveniently organizing the code related to this
 /// module's feature.
@@ -62,6 +64,7 @@ impl Plugin for RenderedPlugin {
 /// on its `Sprite` component.
 #[derive(Component, Debug, Default, Clone, Reflect)]
 #[require(ImageFontText, Sprite)]
+#[non_exhaustive]
 pub struct ImageFontPreRenderedText;
 
 /// A component for displaying UI text that has been pre-rendered using an image
@@ -73,6 +76,7 @@ pub struct ImageFontPreRenderedText;
 #[derive(Component, Debug, Default, Clone, Reflect)]
 #[cfg(feature = "ui")]
 #[require(ImageFontText, ImageNode)]
+#[non_exhaustive]
 pub struct ImageFontPreRenderedUiText;
 
 /// System that renders each [`ImageFontText`] into its [`Sprite`]. This system
@@ -133,7 +137,8 @@ pub fn render_text_to_image_node(
 /// the handle to the newly created image.
 ///
 /// # Errors
-/// If text rendering fails for an item, an error message is logged, and the
+/// If text rendering fails for an item (e.g., due to missing font assets
+/// or invalid texture layouts), an error message is logged, and the
 /// corresponding holder is not updated.
 fn render_text_to_image_holder<'borrow>(
     font_text_to_image_iter: impl Iterator<
@@ -162,9 +167,33 @@ fn render_text_to_image_holder<'borrow>(
     }
 }
 
-/// Renders the text inside the [`ImageFontText`] to a single output image. You
-/// don't need to use this if you're using the built-in functionality, but if
-/// you want to use this for some other custom plugin/system, you can call this.
+/// Renders the text from an [`ImageFontText`] into a single image.
+///
+/// This function takes a reference to an [`ImageFontText`] component and
+/// generates an image representation of the text. It applies font-specific
+/// filtering, determines appropriate character placements, and composites the
+/// final output.
+///
+/// # Parameters
+/// - `image_font_text`: The text to render, along with its associated font.
+/// - `image_fonts`: The collection of available font assets.
+/// - `images`: The collection of image assets used to retrieve font textures.
+/// - `layouts`: The texture atlas layouts defining character positioning.
+///
+/// # Returns
+/// A [`Result<Image, ImageFontRenderError>`] containing the generated image if
+/// successful, or an error if rendering fails (e.g., due to missing assets).
+///
+/// # Behavior
+/// - If the text is empty, a **1x1 transparent image** is returned to avoid
+///   invalid texture sizes.
+/// - The function leverages [`RenderContext`] to compute character positions
+///   and generate the image.
+#[expect(
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss,
+    reason = "numbers are always positive and small enough"
+)]
 fn render_text_to_image(
     image_font_text: &ImageFontText,
     image_fonts: &Assets<ImageFont>,
@@ -174,18 +203,23 @@ fn render_text_to_image(
     let image_font = image_fonts
         .get(&image_font_text.font)
         .ok_or(ImageFontRenderError::MissingImageFontAsset)?;
-    let font_texture = images
-        .get(&image_font.texture)
-        .ok_or(ImageFontRenderError::MissingTextureAsset)?;
-    #[expect(clippy::expect_used, reason = "handle is kept alive by ImageFont")]
-    let layout = layouts
-        .get(&image_font.atlas_layout)
-        .expect("handle is kept alive by ImageFont");
+    let textures = image_font.textures(images);
 
-    let text = image_font.filter_string(&image_font_text.text);
+    let render_config = RenderConfig {
+        text_anchor: Anchor::Center,
+        offset_characters: false,
+        apply_scaling: false,
+        letter_spacing: 0.0,
+        scaling_mode: ScalingMode::Truncated,
+        color: Color::WHITE, // Currently unused for rendering to an image
+    };
 
-    if text.is_empty() {
-        // can't make a 0x0 image, so make a 1x1 transparent black pixel
+    let mut render_context =
+        RenderContext::new(image_font, image_font_text, render_config, layouts)
+            .ok_or(ImageFontRenderError::MissingTextureAsset)?;
+
+    if render_context.text().is_empty() {
+        // Can't make a 0x0 image, so make a 1x1 transparent black pixel
         return Ok(Image::new(
             Extent3d {
                 width: 1,
@@ -199,61 +233,60 @@ fn render_text_to_image(
         ));
     }
 
-    // as wide as the sum of all characters, as tall as the tallest one
-    #[expect(
-        clippy::expect_used,
-        reason = "we've verified !text.is_empty() already"
-    )]
-    let height = text
-        .filtered_chars()
-        .map(|character| layout.textures[image_font.atlas_character_map[&character]].height())
-        .reduce(u32::max)
-        .expect("we've verified !text.is_empty() already");
-    #[expect(
-        clippy::expect_used,
-        reason = "we've verified !text.is_empty() already"
-    )]
-    let width = text
-        .filtered_chars()
-        .map(|character| layout.textures[image_font.atlas_character_map[&character]].width())
-        .reduce(|accumulator, value| accumulator + value)
-        .expect("we've verified !text.is_empty() already");
-    let Some(data) = &font_texture.data else {
-        return Err(ImageFontRenderError::MissingTextureAsset);
-    };
+    let width = render_context.text_width() as u32;
+    let height = render_context.max_height();
 
     let mut output_image = image::RgbaImage::new(width, height);
-    let font_texture: ImageBuffer<Rgba<u8>, _> = ImageBuffer::from_raw(
-        font_texture.width(),
-        font_texture.height(),
-        data.as_slice(),
-    )
-    .ok_or(ImageFontRenderError::UnknownError)?;
+    let font_textures: Vec<ImageBuffer<Rgba<u8>, _>> = textures
+        .iter()
+        .map(|texture| {
+            ImageBuffer::from_raw(texture.width(), texture.height(), texture.data.as_slice())
+        })
+        .collect::<Option<_>>()
+        .ok_or(ImageFontRenderError::UnknownError)?;
 
-    let mut x = 0;
-    for character in text.filtered_chars() {
-        let rect = layout.textures[image_font.atlas_character_map[&character]];
-        let width = rect.width();
-        let height = rect.height();
+    let mut x_pos = 0.0;
+    let mut texture_atlas = render_context.font_texture_atlas(' ');
+    let mut color = Color::default();
+    for character in render_context.text().filtered_chars() {
+        let image_font_character = &image_font.atlas_character_map[&character];
+        render_context.update_render_values(character, &mut texture_atlas, &mut color);
+
+        #[expect(
+            clippy::expect_used,
+            reason = "we're using `filtered_chars()` which has only valid characters"
+        )]
+        let rect = texture_atlas
+            .texture_rect(layouts)
+            .expect("`filtered_chars()` guarantees valid characters");
+
         output_image.copy_from(
-            &*font_texture.view(rect.min.x, rect.min.y, width, height),
-            x,
+            &*font_textures[image_font_character.page_index].view(
+                rect.min.x,
+                rect.min.y,
+                rect.width(),
+                rect.height(),
+            ),
+            x_pos as u32,
             0,
         )?;
-        x += width;
+
+        // Let `transform()` handle x-position updates
+        render_context.transform(&mut x_pos, character);
     }
 
     #[expect(
         clippy::cast_possible_truncation,
-        clippy::cast_precision_loss,
         clippy::cast_sign_loss,
         reason = "the magnitude of the numbers we're working on here are too small to lose anything"
     )]
     if let Some(font_height) = image_font_text.font_height {
-        let width = output_image.width() as f32 * font_height / output_image.height() as f32;
+        render_context.render_config.apply_scaling = true;
+        let scaled_width = render_context.text_width();
+
         output_image = imageops::resize(
             &output_image,
-            width as u32,
+            scaled_width as u32,
             font_height as u32,
             FilterType::Nearest,
         );
@@ -261,7 +294,6 @@ fn render_text_to_image(
 
     let mut bevy_image = Image::new(
         Extent3d {
-            // these might have changed because of the resize
             width: output_image.width(),
             height: output_image.height(),
             depth_or_array_layers: 1,
@@ -272,6 +304,7 @@ fn render_text_to_image(
         RenderAssetUsages::RENDER_WORLD,
     );
     bevy_image.sampler = ImageSampler::nearest();
+
     Ok(bevy_image)
 }
 
@@ -306,7 +339,7 @@ pub enum ImageFontRenderError {
     /// Failed to copy a character from the source font image texture to the
     /// target rendered text sprite image texture. This error typically occurs
     /// when there is an issue with the image data or the copying process.
-    #[error("failed to copy from atlas")]
+    #[error("failed to copy from atlas: {0}")]
     CopyFailure(#[from] ImageError),
 }
 

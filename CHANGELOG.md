@@ -12,18 +12,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `LetterSpacing` enum to allow customizable kerning between characters.
 - `letter_spacing` field to `ImageFontSpriteText` for individual entity customization.
 - Example in `atlased_sprite` to demonstrate `LetterSpacing` usage.
-- Basic support for loading fonts from `.fnt` files.
-  - Introduced `ImageFntFontLoader` for parsing `.fnt` files into `ImageFont` assets.
-  - Added a new `fnt` feature flag to enable `.fnt` font loading.
+- Support for fonts that span multiple texture pages.
+- `BmFontLoader` for loading bitmap font file formats (`txt.fnt`, `xml.fnt`, `bin.fnt`).
+- Example (`bmf.rs`) for rendering bitmap fonts (`txt.fnt`, `xml.fnt`, `bin.fnt`). Uses multilingual pangrams to test font rendering in various scripts.
+- Introduced `AtlasSpritesGizmoConfigGroup` for global configuration of debug rendering options.
+- Gizmos can now be toggled per-entity via `ShowAtlasSpritesGizmos`.
 
 ### Changed
 
 - Crate updated to target Bevy 0.16.
 - Updated text rendering calculations to account for `letter_spacing`.
+- No longer repeatedly prints error for missing font assets.
+- `ImageFont` now supports multiple textures instead of a single one. (Currently only supported by `.fnt` definitions)
+- Gizmos are now governed by settings in `AtlasSpritesGizmoConfigGroup`.
+
+### Removed
+
+- `ImageFntFontLoader` font loader, replaced by `BmFontLoader`.
 
 ### Breaking Changes
 
-- Added `letter_spacing` field to `ImageFontSpriteText`, requiring updates to any initialization of this struct.
+- `ImageFont` had two fields change name and type, `atlas_layout`→`atlas_layouts` and `texture`→`textures` and are now `Vec`s of their former type.
+- Made most public types that are likely to be expanded with more values or variants in the near future `#[non_exhaustive]` to avoid that being a breaking change. These all implement `Default` and instances can thus still be created. Exact list of types changed below:
+  - `atlas_sprites::ImageFontSpriteText`
+  - `ImageFont`
+  - `ImageFontText`
+  - `loader::ImageFontLayout`
+  - `loader::ImageFontLoaderSettings`
+  - `rendered::ImageFontPreRenderedText`
+  - `rendered::ImageFontPreRenderedUiText`
+- Types have been moved:
+  - `bevy_image_font::atlas_sprites::ScalingMode` to `bevy_image_font::ScalingMode`
+  - `bevy_image_font::atlas_sprites::ImageFontGizmoData` to `bevy_image_font::atlas_sprites::gizmos::ImageFontGizmoData`
+- `bevy_image_font::atlas_sprites::render_sprite_gizmos` is no longer part of the public API.
 
 ## [0.8.0] - 2025-01-24
 

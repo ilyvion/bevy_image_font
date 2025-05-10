@@ -69,10 +69,10 @@ fn spawn_ui(mut commands: Commands, assets: Res<DemoAssets>) {
                     position_type: PositionType::Relative,
                     ..default()
                 },
-                ImageFontPreRenderedUiText,
+                ImageFontPreRenderedUiText::default(),
                 ImageFontText::default()
                     .text("Press SPACE to judge!")
-                    .font(assets.image_font.clone())
+                    .font(assets.example.clone())
                     .font_height(72.0),
             ));
         });
@@ -87,7 +87,7 @@ fn spawn_ui(mut commands: Commands, assets: Res<DemoAssets>) {
             ..default()
         },
         ImageFontText::default()
-            .font(assets.image_font.clone())
+            .font(assets.example.clone())
             .font_height(72.0),
     ));
 }

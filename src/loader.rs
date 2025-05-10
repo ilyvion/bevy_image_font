@@ -3,7 +3,6 @@
 #![expect(clippy::absolute_paths, reason = "false positives")]
 
 use std::io::Error as IoError;
-use std::path::PathBuf;
 
 use bevy::{
     asset::{io::Reader, AssetLoader, LoadContext, LoadDirectError},
@@ -11,15 +10,21 @@ use bevy::{
     platform::collections::HashMap,
 };
 use bevy_image::{Image, ImageSampler, ImageSamplerDescriptor};
-use camino::{Utf8Path, Utf8PathBuf};
+use camino::{FromPathError, Utf8Path, Utf8PathBuf};
 use ron::de::SpannedError;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::ImageFont;
+use crate::{ImageFont, ImageFontCharacter};
+
+#[cfg(feature = "bmf")]
+mod bmf;
+#[cfg(feature = "bmf")]
+pub use bmf::*;
 
 /// Human-readable way to specify where the characters in an image font are.
 #[derive(Debug, Serialize, Deserialize)]
+#[non_exhaustive]
 pub enum ImageFontLayout {
     /// Interprets the string as a "grid" and slices up the input image
     /// accordingly. Leading and trailing newlines are stripped, but spaces
@@ -331,7 +336,7 @@ impl ImageFontDescriptor {
 #[derive(Debug, Default)]
 pub struct ImageFontLoader;
 
-/// Errors that can show up during loading.
+/// Errors that can show up during font loading.
 #[derive(Debug, Error)]
 #[non_exhaustive]
 pub enum ImageFontLoadError {
@@ -370,7 +375,7 @@ pub enum ImageFontLoadError {
     /// may occur if the file is in an unsupported format or if the path is
     /// incorrect.
     #[error("Path is not valid UTF-8: {0:?}")]
-    InvalidPath(PathBuf),
+    InvalidPath(FromPathError),
 
     /// The asset path has no parent directory.
     #[error("Asset path has no parent directory")]
@@ -386,6 +391,7 @@ impl From<LoadDirectError> for ImageFontLoadError {
 
 /// Configuration settings for the `ImageFontLoader`.
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
+#[non_exhaustive]
 pub struct ImageFontLoaderSettings {
     /// The [`ImageSampler`] to use during font image rendering. Determines
     /// how the font's texture is sampled when scaling or transforming it.
@@ -436,9 +442,9 @@ impl AssetLoader for ImageFontLoader {
             .await?
             .take::<Image>()
         else {
-            let path = match Utf8PathBuf::from_path_buf(image_path) {
+            let path = match Utf8PathBuf::try_from(image_path) {
                 Ok(path) => path,
-                Err(image_path) => return Err(ImageFontLoadError::InvalidPath(image_path)),
+                Err(error) => return Err(ImageFontLoadError::InvalidPath(error.from_path_error())),
             };
             return Err(ImageFontLoadError::NotAnImage(path));
         };
@@ -452,10 +458,10 @@ impl AssetLoader for ImageFontLoader {
         let image_handle = load_context.add_labeled_asset(String::from("texture"), image);
         let layout_handle = load_context.add_labeled_asset(String::from("layout"), layout);
 
-        let image_font = ImageFont::from_mapped_atlas_layout(
-            image_handle,
+        let image_font = ImageFont::new(
+            vec![image_handle],
             atlas_character_map,
-            layout_handle,
+            vec![layout_handle],
             settings.image_sampler.clone(),
         );
         Ok(image_font)
@@ -526,10 +532,10 @@ async fn read_and_validate_font_descriptor(
 fn descriptor_to_character_map_and_layout(
     font_descriptor: ImageFontDescriptor,
     image_size: UVec2,
-) -> Result<(HashMap<char, usize>, TextureAtlasLayout), ImageFontLoadError> {
+) -> Result<(HashMap<char, ImageFontCharacter>, TextureAtlasLayout), ImageFontLoadError> {
     let rect_character_map = font_descriptor.layout.into_character_rect_map(image_size)?;
     let (atlas_character_map, layout) =
-        ImageFont::mapped_atlas_layout_from_char_map(image_size, &rect_character_map);
+        ImageFont::mapped_atlas_layout_from_char_map(0, image_size, rect_character_map.into_iter());
     Ok((atlas_character_map, layout))
 }
 

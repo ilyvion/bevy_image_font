@@ -19,7 +19,8 @@
 
 #![allow(
     dead_code,
-    reason = "private utility code that, depending on the activated feature set, will sometimes be missing uses"
+    reason = "private utility code that, depending on the activated feature set, \
+    will sometimes be missing uses"
 )]
 
 use bevy::asset::Handle;
@@ -38,7 +39,7 @@ pub(crate) const TEXT: &str = "Sphinx of black quartz, judge my vow!";
 /// The standard width of characters in the example font.
 ///
 /// This value is used to do math that involves the font width. Adjust as needed
-/// if the font is later changed.
+/// if the example font is later changed.
 pub(crate) const FONT_WIDTH: usize = 5;
 
 /// A vibrant palette of rainbow colors for visual effects in examples.
@@ -52,6 +53,42 @@ pub(crate) const RAINBOW: [Srgba; 7] = [
     tailwind::VIOLET_300,
 ];
 
+/// A pangram or holoalphabetic sentence is a sentence using every letter of a
+/// given alphabet at least once. Here's a list of pangrams in various languages
+/// using various scripts.
+pub(crate) static PANGRAMS: [&str; 15] = [
+    // English
+    "The quick brown fox jumps over the lazy dog",
+    // French
+    "Portez ce vieux whisky au juge blond qui fume",
+    // German
+    "Victor jagt zwölf Boxkämpfer quer über den großen Sylter Deich",
+    // Spanish
+    "El veloz murciélago hindú comía feliz cardillo y kiwi",
+    // Italian
+    "Pranzo d'acqua fa volti sghembi",
+    // Dutch
+    "Pa's wijze lynx bezag vroom het fikse aquaduct",
+    // Danish
+    "Høj bly gom vandt fræk sexquiz på wc",
+    // Norwegian
+    "Sær golfer med kølle vant sexquiz på wc i hjemby",
+    // Polish
+    "Pchnąć w tę łódź jeża lub ośm skrzyń fig",
+    // Czech
+    "Příliš žluťoučký kůň úpěl ďábelské ódy",
+    // Arabic
+    "نص حكيم له سر قاطع وذو شأن عظيم مكتوب على ثوب أخضر ومغلف بجلد أزرق",
+    // Hebrew
+    "דג סקרן שט בים, מאוכזב ולפתע מצא חברה",
+    // Russian
+    "Съешь ещё этих мягких французских булок, да выпей же чаю",
+    // Greek
+    "Ξεσκεπάζω την ψυχοφθόρα βδελυγμία",
+    // Armenian
+    "Ֆիզիկոս Մկրտիչը օճառաջուր ցողելով բժշկում է գնդապետ Հայկի փքված ձախ թևը",
+];
+
 /// A resource containing the image font asset used in this example.
 ///
 /// This struct uses `bevy_asset_loader`'s `AssetCollection` to load the image
@@ -60,5 +97,17 @@ pub(crate) const RAINBOW: [Srgba; 7] = [
 pub(crate) struct DemoAssets {
     /// The handle to the image font asset loaded from the specified RON file.
     #[asset(path = "example_font.image_font.ron")]
-    pub(crate) image_font: Handle<ImageFont>,
+    pub(crate) example: Handle<ImageFont>,
+    /// The handle to the image font asset loaded from the specified FNT file.
+    #[asset(path = "bmf.txt.fnt")]
+    pub(crate) bmf_txt: Handle<ImageFont>,
+    /// The handle to the image font asset loaded from the specified FNT file.
+    #[asset(path = "bmf.xml.fnt")]
+    pub(crate) bmf_xml: Handle<ImageFont>,
+    /// The handle to the image font asset loaded from the specified FNT file.
+    #[asset(path = "bmf.bin.fnt")]
+    pub(crate) bmf_bin: Handle<ImageFont>,
+    /// The handle to the image font asset loaded from the specified RON file.
+    #[asset(path = "example_variable_width_font.image_font.ron")]
+    pub(crate) variable_width: Handle<ImageFont>,
 }

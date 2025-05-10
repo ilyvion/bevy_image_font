@@ -7,6 +7,7 @@
 [![Docs main](https://img.shields.io/static/v1?label=docs&message=main&color=5479ab)](https://ilyvion.github.io/bevy_image_font/)
 [![Build Status](https://github.com/ilyvion/bevy_image_font/actions/workflows/CI.yml/badge.svg)](https://github.com/ilyvion/bevy_image_font/actions/workflows/CI.yml)
 [![codecov](https://codecov.io/gh/ilyvion/bevy_image_font/graph/badge.svg?token=52I416JLFZ)](https://codecov.io/gh/ilyvion/bevy_image_font)
+[![dependency status](https://deps.rs/repo/github/ilyvion/bevy_image_font/status.svg)](https://deps.rs/repo/github/ilyvion/bevy_image_font)
 
 `bevy_image_font` enables rendering fonts stored as single images (e.g., PNG), with each letter at a predefined position. This crate focuses specifically on image-based fonts, often called "pixel fonts," used in game development. The term "image font" was chosen for precision, as bitmap fonts in formats like OTB might also be referred to as "pixel fonts."
 
@@ -126,7 +127,8 @@ PRs to support the latest Bevy releases are welcome!
 
 ## Credits
 
-Sample font by [gnsh](https://opengameart.org/content/bitmap-font-0).
+- [`example_font`](https://opengameart.org/content/bitmap-font-0) by gnsh.
+- [`example_variable_width_font`](https://opengameart.org/content/boxy-bold-font) by [Clint Bellanger](http://clintbellanger.net).
 
 ## License
 

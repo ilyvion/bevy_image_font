@@ -29,8 +29,16 @@ fn main() {
             ImageFontPlugin,
         ))
         .init_collection::<DemoAssets>()
-        .add_systems(Startup, spawn_text)
-        .add_systems(Update, (animate_text, animate_color))
+        .add_systems(Startup, setup)
+        .add_systems(
+            Update,
+            (
+                animate_text,
+                animate_color,
+                #[cfg(feature = "gizmos")]
+                gizmos::toggle_gizmos,
+            ),
+        )
         .insert_resource(ClearColor(Color::srgb(0.2, 0.2, 0.2)))
         .run();
 }
@@ -49,12 +57,15 @@ struct AnimateText(&'static str, usize);
 #[derive(Component)]
 struct AnimateColor(ColorCurve<Srgba>);
 
-/// Spawns the text entities for the example.
-///
-/// This system creates two text entities:
-/// 1. A text entity rendered at a scaled height with animated colors.
-/// 2. A text entity rendered at its native height with animated content.
-fn spawn_text(mut commands: Commands, assets: Res<DemoAssets>) {
+/// Spawns the text entities for the example and configures gizmo defaults.
+fn setup(
+    mut commands: Commands,
+    assets: Res<DemoAssets>,
+    #[cfg(feature = "gizmos")] store: ResMut<GizmoConfigStore>,
+) {
+    #[cfg(feature = "gizmos")]
+    gizmos::configure_gizmo_defaults(store);
+
     commands.spawn(Camera2d);
 
     commands.spawn((
@@ -62,9 +73,13 @@ fn spawn_text(mut commands: Commands, assets: Res<DemoAssets>) {
         ImageFontSpriteText::default(),
         ImageFontText::default()
             .text(TEXT)
-            .font(assets.image_font.clone())
+            .font(assets.example.clone())
             .font_height(36.0),
-        Transform::from_translation(Vec3::new(0., 0., 0.)),
+        // Shift 0.5 pixels so our characters end up at integer pixel values. This is only
+        // necessary because we're using a horizontally centered anchor combined with an
+        // odd number of characters. If we used left or right alignment, we wouldn't need
+        // to do this, even with an odd number of characters.
+        Transform::from_translation(Vec3::new(0.5, 0., 0.)),
     ));
     commands.spawn((
         AnimateText(TEXT, 0),
@@ -73,7 +88,7 @@ fn spawn_text(mut commands: Commands, assets: Res<DemoAssets>) {
         ImageFontSpriteText::default()
             .color(tailwind::AMBER_500)
             .anchor(Anchor::CenterLeft),
-        ImageFontText::default().font(assets.image_font.clone()),
+        ImageFontText::default().font(assets.example.clone()),
         #[expect(
             clippy::cast_precision_loss,
             reason = "the magnitude of the numbers we're working on here are too small to lose \
@@ -92,9 +107,22 @@ fn spawn_text(mut commands: Commands, assets: Res<DemoAssets>) {
             .letter_spacing(LetterSpacing::Pixel(2)),
         ImageFontText::default()
             .text(TEXT)
-            .font(assets.image_font.clone())
+            .font(assets.example.clone())
             .font_height(36.0),
         Transform::from_translation(Vec3::new(0.5, -40., 0.)),
+    ));
+
+    // This will currently render without spaces; I intend to add a new feature
+    // shortly that will allow a font to have space without needing to have a
+    // space in the font image itself.
+    commands.spawn((
+        AnimateColor(ColorCurve::new(RAINBOW).expect("RAINBOW contains at least two colors")),
+        ImageFontSpriteText::default().letter_spacing(LetterSpacing::Pixel(1)),
+        ImageFontText::default()
+            .text(TEXT.to_uppercase())
+            .font(assets.variable_width.clone())
+            .font_height(32.0),
+        Transform::from_translation(Vec3::new(0., -120., 0.)),
     ));
 }
 
@@ -160,6 +188,87 @@ fn animate_color(mut query: Query<(&AnimateColor, &mut ImageFontSpriteText)>, ti
                 .sample(len - (animation_progress.fract() * len))
                 .expect("fract() is [0,1) and `len` will always be within bounds")
                 .into();
+        }
+    }
+}
+
+/// Gizmos related example code
+#[cfg(feature = "gizmos")]
+mod gizmos {
+
+    use bevy_image_font::atlas_sprites::gizmos::AtlasSpritesGizmoConfigGroup;
+
+    use super::{ButtonInput, GizmoConfigStore, KeyCode, Res, ResMut};
+
+    /// Configures default gizmo rendering settings.
+    ///
+    /// This function initializes the default visibility settings for
+    /// text-related gizmos, enabling anchor points and bounding box
+    /// rendering by default.
+    ///
+    /// # Default Behavior
+    /// - **Text anchor points**: Enabled (`render_text_anchor_point = true`).
+    /// - **Character anchor points**: Enabled (`render_character_anchor_point =
+    ///   true`).
+    /// - **Character bounding boxes**: Enabled (`render_character_box = true`).
+    ///
+    /// This function is called at startup to ensure gizmos are visible by
+    /// default.
+    pub(super) fn configure_gizmo_defaults(mut store: ResMut<'_, GizmoConfigStore>) {
+        let (_, atlas_sprites_config) = store.config_mut::<AtlasSpritesGizmoConfigGroup>();
+        atlas_sprites_config.render_text_anchor_point = true;
+        atlas_sprites_config.render_character_anchor_point = true;
+        atlas_sprites_config.render_character_box = true;
+    }
+
+    /// Handles keyboard input to toggle gizmo rendering settings.
+    ///
+    /// This function listens for key presses and updates the gizmo
+    /// configuration to enable or disable various debug visuals in real
+    /// time.
+    ///
+    /// # Parameters
+    /// - `input`: Reference to [`ButtonInput<KeyCode>`], used to detect key
+    ///   presses.
+    /// - `store`: Mutable reference to the [`GizmoConfigStore`] to update
+    ///   settings.
+    ///
+    /// # Keyboard Shortcuts
+    /// - **`G`**: Toggles all gizmo rendering on/off.
+    /// - **`A`**: Toggles character anchor point gizmos.
+    /// - **`B`**: Toggles character bounding box gizmos.
+    /// - **`T`**: Toggles text anchor point gizmos.
+    pub(super) fn toggle_gizmos(
+        input: Res<ButtonInput<KeyCode>>,
+        mut store: ResMut<GizmoConfigStore>,
+    ) {
+        let (config, atlas_sprites_config) = store.config_mut::<AtlasSpritesGizmoConfigGroup>();
+        if input.just_pressed(KeyCode::KeyG) {
+            config.enabled = !config.enabled;
+            println!("Gizmos enabled: {}", config.enabled);
+        }
+        if input.just_pressed(KeyCode::KeyA) {
+            atlas_sprites_config.render_character_anchor_point =
+                !atlas_sprites_config.render_character_anchor_point;
+            println!(
+                "Character anchor point gizmo enabled: {}",
+                atlas_sprites_config.render_character_anchor_point
+            );
+        }
+        if input.just_pressed(KeyCode::KeyB) {
+            atlas_sprites_config.render_character_box = !atlas_sprites_config.render_character_box;
+            println!(
+                "Character box gizmo enabled: {}",
+                atlas_sprites_config.render_character_box
+            );
+        }
+        if input.just_pressed(KeyCode::KeyT) {
+            atlas_sprites_config.render_text_anchor_point =
+                !atlas_sprites_config.render_text_anchor_point;
+            println!(
+                "Text anchor gizmo enabled: {}",
+                atlas_sprites_config.render_text_anchor_point
+            );
         }
     }
 }

@@ -28,6 +28,8 @@ use std::fmt;
 
 use bevy::platform::collections::HashMap;
 
+use crate::{ImageFont, ImageFontCharacter};
+
 /// A wrapper type for filtering characters from a string based on a character
 /// map.
 ///
@@ -49,7 +51,7 @@ pub(crate) struct FilteredString<'map, S: AsRef<str>> {
     /// This map determines which characters from `string` are retained during
     /// filtering. Only characters present as keys in this map will be included
     /// in the filtered output.
-    atlas_character_map: &'map HashMap<char, usize>,
+    atlas_character_map: &'map HashMap<char, ImageFontCharacter>,
 }
 
 impl<'map, S: AsRef<str>> FilteredString<'map, S> {
@@ -63,7 +65,10 @@ impl<'map, S: AsRef<str>> FilteredString<'map, S> {
     /// # Returns
     /// A `FilteredString` instance that can produce iterators over the filtered
     /// characters.
-    pub(crate) fn new(string: S, atlas_character_map: &'map HashMap<char, usize>) -> Self {
+    pub(crate) fn new(
+        string: S,
+        atlas_character_map: &'map HashMap<char, ImageFontCharacter>,
+    ) -> Self {
         Self {
             string,
             atlas_character_map,
@@ -101,6 +106,30 @@ impl<S: AsRef<str>> fmt::Display for FilteredString<'_, S> {
             write!(formatter, "{character}")?;
         }
         Ok(())
+    }
+}
+
+impl ImageFont {
+    /// Filters a string to include only characters present in the font's
+    /// character map.
+    ///
+    /// This function returns a
+    /// [`FilteredString`](filtered_string::FilteredString) containing only the
+    /// characters from the input string that exist in the font's
+    /// `atlas_character_map`. It ensures that unsupported characters are
+    /// excluded during rendering.
+    ///
+    /// # Parameters
+    /// - `string`: The input string to filter.
+    ///
+    /// # Returns
+    /// A `FilteredString` returning only characters supported by the font.
+    ///
+    /// # Notes
+    /// This function requires either the `rendered` or `atlas_sprites` feature
+    /// to be enabled.
+    pub(super) fn filter_string<S: AsRef<str>>(&self, string: S) -> FilteredString<'_, S> {
+        FilteredString::new(string, &self.atlas_character_map)
     }
 }
 
