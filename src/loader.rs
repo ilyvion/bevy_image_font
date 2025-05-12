@@ -6,8 +6,8 @@ use std::io::Error as IoError;
 
 use bevy::{
     asset::{io::Reader, AssetLoader, LoadContext, LoadDirectError},
+    platform::collections::HashMap,
     prelude::*,
-    utils::HashMap,
 };
 use bevy_image::{Image, ImageSampler, ImageSamplerDescriptor};
 use camino::{FromPathError, Utf8Path, Utf8PathBuf};

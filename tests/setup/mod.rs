@@ -13,10 +13,10 @@ use std::{
     time::Duration,
 };
 
+use bevy::ecs::system::ScheduleSystem;
 use bevy::log::LogPlugin;
 use bevy::render::graph::CameraDriverLabel;
 use bevy::render::texture::GpuImage;
-use bevy::window::ExitCondition;
 use bevy::winit::WinitPlugin;
 use bevy::{
     app::{AppExit, ScheduleRunnerPlugin},
@@ -27,8 +27,8 @@ use bevy::{
         render_asset::{RenderAssetUsages, RenderAssets},
         render_graph::{self, NodeRunError, RenderGraph, RenderGraphContext, RenderLabel},
         render_resource::{
-            Buffer, BufferDescriptor, BufferUsages, CommandEncoderDescriptor, Extent3d,
-            ImageCopyBuffer, ImageDataLayout, Maintain, MapMode, TextureDimension, TextureFormat,
+            Buffer, BufferDescriptor, BufferUsages, CommandEncoderDescriptor, Extent3d, Maintain,
+            MapMode, TexelCopyBufferInfo, TexelCopyBufferLayout, TextureDimension, TextureFormat,
             TextureUsages,
         },
         renderer::{RenderContext, RenderDevice, RenderQueue},
@@ -71,7 +71,7 @@ struct RenderWorldSender(Sender<Vec<u8>>);
 pub(crate) fn prepare_app<M>(
     category: impl Into<String>,
     image_name: impl Into<String>,
-    setup_system: impl IntoSystemConfigs<M>,
+    setup_system: impl IntoScheduleConfigs<ScheduleSystem, M>,
 ) {
     let mut app = App::new();
 
@@ -99,7 +99,6 @@ fn setup_plugins(app: &mut App) {
             .set(ImagePlugin::default_nearest())
             .set(WindowPlugin {
                 primary_window: None,
-                exit_condition: ExitCondition::DontExit,
                 ..default()
             })
             .disable::<WinitPlugin>()
@@ -254,7 +253,7 @@ fn setup_render_target(
     commands.spawn(ImageToSave(cpu_image_handle));
 
     scene_controller.name = scene_name;
-    RenderTarget::Image(render_target_image_handle)
+    RenderTarget::Image(render_target_image_handle.into())
 }
 
 fn create_render_target_image(images: &mut ResMut<Assets<Image>>, size: Extent3d) -> Handle<Image> {
@@ -378,20 +377,14 @@ impl render_graph::Node for ImageCopyDriver {
             // be little bit wider This should be taken into account at copy
             // from buffer stage
             let padded_bytes_per_row = RenderDevice::align_copy_bytes_per_row(
-                (src_image.size.x as usize / block_dimensions.0 as usize) * block_size as usize,
+                (src_image.size.width as usize / block_dimensions.0 as usize) * block_size as usize,
             );
-
-            let texture_extent = Extent3d {
-                width: src_image.size.x,
-                height: src_image.size.y,
-                depth_or_array_layers: 1,
-            };
 
             encoder.copy_texture_to_buffer(
                 src_image.texture.as_image_copy(),
-                ImageCopyBuffer {
+                TexelCopyBufferInfo {
                     buffer: &image_copier.buffer,
-                    layout: ImageDataLayout {
+                    layout: TexelCopyBufferLayout {
                         offset: 0,
                         #[expect(
                             clippy::cast_possible_truncation,
@@ -407,7 +400,7 @@ impl render_graph::Node for ImageCopyDriver {
                         rows_per_image: None,
                     },
                 },
-                texture_extent,
+                src_image.size,
             );
 
             let render_queue = world.get_resource::<RenderQueue>().unwrap();
@@ -554,7 +547,7 @@ fn render_scene(
         return;
     }
 
-    let image = images_to_save.single();
+    let image = images_to_save.single().unwrap();
     let img_bytes = images.get_mut(image.id()).unwrap();
     let img = prepare_image_buffer(image_data, img_bytes);
 
@@ -631,7 +624,7 @@ fn compare_images(paths: ImagePaths, mut app_exit_writer: EventWriter<'_, AppExi
 
     // Once we're done producing and comparing our images and we got this far, it's
     // time to exit with success to indicate nothing needs doing.
-    app_exit_writer.send(AppExit::Success);
+    app_exit_writer.write(AppExit::Success);
 }
 
 fn fetch_latest_image_data(receiver: &MainWorldReceiver) -> Vec<u8> {
@@ -641,6 +634,10 @@ fn fetch_latest_image_data(receiver: &MainWorldReceiver) -> Vec<u8> {
     receiver.try_iter().last().unwrap_or_default()
 }
 
+#[expect(
+    clippy::unwrap_used,
+    reason = "we want to panic if any of these go wrong"
+)]
 fn prepare_image_buffer(
     image_data: Vec<u8>,
     img_bytes: &mut Image,
@@ -655,15 +652,17 @@ fn prepare_image_buffer(
     // If row_bytes == aligned_row_bytes, we can copy directly. Otherwise, we must
     // adjust alignment.
     if row_bytes == aligned_row_bytes {
-        img_bytes.data.clone_from(&image_data);
+        img_bytes.data.as_mut().unwrap().clone_from(&image_data);
     } else {
         // Extract only the meaningful part of each row, ignoring padding
-        img_bytes.data = image_data
-            .chunks(aligned_row_bytes)
-            .take(img_bytes.height() as usize)
-            .flat_map(|row| &row[..row_bytes.min(row.len())])
-            .copied()
-            .collect();
+        img_bytes.data = Some(
+            image_data
+                .chunks(aligned_row_bytes)
+                .take(img_bytes.height() as usize)
+                .flat_map(|row| &row[..row_bytes.min(row.len())])
+                .copied()
+                .collect(),
+        );
     }
 
     // Create RGBA Image Buffer

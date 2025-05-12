@@ -42,7 +42,7 @@ use bevy::sprite::Anchor;
 
 use crate::render_context::anchors::{AnchorExt as _, AnchorOffsets, ComputeTransformParams};
 use crate::render_context::filtered_string::FilteredString;
-use crate::ScalingMode;
+use crate::ImageFontScalingMode;
 use crate::{ImageFont, ImageFontText};
 
 /// Groups font-related assets and configuration for rendering text sprites.
@@ -423,7 +423,7 @@ pub(crate) struct RenderConfig {
     /// This setting controls whether scaled dimensions are rounded, truncated,
     /// or left as floating-point values, influencing text rendering
     /// precision.
-    pub scaling_mode: ScalingMode,
+    pub scaling_mode: ImageFontScalingMode,
 
     /// The color applied to the rendered text.
     ///

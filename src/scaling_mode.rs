@@ -26,7 +26,7 @@ use bevy::prelude::*;
 /// truncating, rounding, or retaining precise values, offering flexibility
 /// based on the rendering requirements.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Reflect, Default)]
-pub enum ScalingMode {
+pub enum ImageFontScalingMode {
     /// Truncates fractional values during scaling.
     ///
     /// This mode ensures that the width and height of the glyph are always
@@ -55,7 +55,7 @@ pub enum ScalingMode {
     Smooth,
 }
 
-impl ScalingMode {
+impl ImageFontScalingMode {
     /// Applies the scaling mode to the provided value given a scale factor.
     ///
     /// # Parameters
@@ -68,9 +68,9 @@ impl ScalingMode {
     pub fn apply_scale(self, value: f32, scale_factor: f32) -> f32 {
         let scaled = value * scale_factor;
         match self {
-            ScalingMode::Truncated => scaled.trunc(),
-            ScalingMode::Rounded => scaled.round(),
-            ScalingMode::Smooth => scaled,
+            ImageFontScalingMode::Truncated => scaled.trunc(),
+            ImageFontScalingMode::Rounded => scaled.round(),
+            ImageFontScalingMode::Smooth => scaled,
         }
     }
 }
@@ -88,36 +88,36 @@ mod tests {
 
         // Test Truncated
         assert_float_eq!(
-            ScalingMode::Truncated.apply_scale(value, 2.0),
+            ImageFontScalingMode::Truncated.apply_scale(value, 2.0),
             21.0,
             abs <= COMPARISON_TOLERANCE
         );
         assert_float_eq!(
-            ScalingMode::Truncated.apply_scale(value, 0.5),
+            ImageFontScalingMode::Truncated.apply_scale(value, 0.5),
             5.0,
             abs <= COMPARISON_TOLERANCE
         );
 
         // Test Rounded
         assert_float_eq!(
-            ScalingMode::Rounded.apply_scale(value, 2.0),
+            ImageFontScalingMode::Rounded.apply_scale(value, 2.0),
             21.0,
             abs <= COMPARISON_TOLERANCE
         );
         assert_float_eq!(
-            ScalingMode::Rounded.apply_scale(value, 0.5),
+            ImageFontScalingMode::Rounded.apply_scale(value, 0.5),
             5.0,
             abs <= COMPARISON_TOLERANCE
         );
 
         // Test Smooth
         assert_float_eq!(
-            ScalingMode::Smooth.apply_scale(value, 2.0),
+            ImageFontScalingMode::Smooth.apply_scale(value, 2.0),
             21.0,
             abs <= COMPARISON_TOLERANCE
         );
         assert_float_eq!(
-            ScalingMode::Smooth.apply_scale(value, 0.5),
+            ImageFontScalingMode::Smooth.apply_scale(value, 0.5),
             5.25,
             abs <= COMPARISON_TOLERANCE
         );
@@ -129,17 +129,17 @@ mod tests {
 
         // Test with zero value
         assert_float_eq!(
-            ScalingMode::Truncated.apply_scale(value, 1.0),
+            ImageFontScalingMode::Truncated.apply_scale(value, 1.0),
             0.0,
             abs <= COMPARISON_TOLERANCE
         );
         assert_float_eq!(
-            ScalingMode::Rounded.apply_scale(value, 1.0),
+            ImageFontScalingMode::Rounded.apply_scale(value, 1.0),
             0.0,
             abs <= COMPARISON_TOLERANCE
         );
         assert_float_eq!(
-            ScalingMode::Smooth.apply_scale(value, 1.0),
+            ImageFontScalingMode::Smooth.apply_scale(value, 1.0),
             0.0,
             abs <= COMPARISON_TOLERANCE
         );
@@ -147,17 +147,17 @@ mod tests {
         // Test with zero scale factor
         let value = 10.0;
         assert_float_eq!(
-            ScalingMode::Truncated.apply_scale(value, 0.0),
+            ImageFontScalingMode::Truncated.apply_scale(value, 0.0),
             0.0,
             abs <= COMPARISON_TOLERANCE
         );
         assert_float_eq!(
-            ScalingMode::Rounded.apply_scale(value, 0.0),
+            ImageFontScalingMode::Rounded.apply_scale(value, 0.0),
             0.0,
             abs <= COMPARISON_TOLERANCE
         );
         assert_float_eq!(
-            ScalingMode::Smooth.apply_scale(value, 0.0),
+            ImageFontScalingMode::Smooth.apply_scale(value, 0.0),
             0.0,
             abs <= COMPARISON_TOLERANCE
         );
@@ -165,17 +165,17 @@ mod tests {
         // Test with negative scale factor
         let value = 10.5;
         assert_float_eq!(
-            ScalingMode::Truncated.apply_scale(value, -1.0),
+            ImageFontScalingMode::Truncated.apply_scale(value, -1.0),
             -10.0,
             abs <= COMPARISON_TOLERANCE
         );
         assert_float_eq!(
-            ScalingMode::Rounded.apply_scale(value, -1.0),
+            ImageFontScalingMode::Rounded.apply_scale(value, -1.0),
             -11.0,
             abs <= COMPARISON_TOLERANCE
         );
         assert_float_eq!(
-            ScalingMode::Smooth.apply_scale(value, -1.0),
+            ImageFontScalingMode::Smooth.apply_scale(value, -1.0),
             -10.5,
             abs <= COMPARISON_TOLERANCE
         );

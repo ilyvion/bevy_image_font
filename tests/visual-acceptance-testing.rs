@@ -27,7 +27,7 @@ macro_rules! test_cases {
         paste::paste! {
             $(
                 #[test]
-                #[cfg_attr(ci, ignore)]
+                #[cfg_attr(ci, ignore = "Does not work when headless")]
                 fn [< $category _ $name >]() {
                     prepare_app(stringify!($category), stringify!($name), [< setup _ $category _ $name >]);
                 }
@@ -38,7 +38,7 @@ macro_rules! test_cases {
         paste::paste! {
             $(
                 #[test]
-                #[cfg_attr(ci, ignore)]
+                #[cfg_attr(ci, ignore = "Does not work when headless")]
                 fn [< $category _ $name >]() {
                     prepare_app(
                         stringify!($category),
