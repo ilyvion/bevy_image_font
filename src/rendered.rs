@@ -242,9 +242,7 @@ fn render_text_to_image(
     let font_textures: Vec<ImageBuffer<Rgba<u8>, _>> = textures
         .iter()
         .map(|texture| {
-            let Some(data) = &texture.data else {
-                return None;
-            };
+            let data = texture.data.as_ref()?;
             ImageBuffer::from_raw(texture.width(), texture.height(), data.as_slice())
         })
         .collect::<Option<_>>()

@@ -4,6 +4,7 @@
     clippy::mod_module_files,
     reason = "if present as common.rs, cargo thinks it's an example binary"
 )]
+#![expect(clippy::expect_used, reason = "only used when panics can't happen")]
 
 use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 use bevy_asset_loader::prelude::AssetCollectionApp as _;
@@ -106,6 +107,8 @@ fn judge(mut vows: ResMut<VowsJudged>) {
 /// text displayed by the UI node marked with [`VowsNode`].
 fn update_vows_node(vows: Res<VowsJudged>, mut node: Query<&mut ImageFontText, With<VowsNode>>) {
     if vows.is_changed() {
-        node.single_mut().text = format!("Vows judged: {}", vows.0);
+        node.single_mut()
+            .expect("VowsNode only has one ImageFontText")
+            .text = format!("Vows judged: {}", vows.0);
     }
 }

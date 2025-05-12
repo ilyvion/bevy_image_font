@@ -282,28 +282,32 @@ fn render_gizmos(
             let height = data.gizmo_data.height;
 
             if gizmo_config_value!(gizmos, sprite_gizmos, render_character_box) {
+                let color = gizmo_config_value!(gizmos, sprite_gizmos, character_box_color);
                 gizmos.rect_2d(
                     Isometry2d::from_translation(child_global_transform.translation().truncate()),
                     Vec2::new(width, height),
-                    gizmo_config_value!(gizmos, sprite_gizmos, character_box_color),
+                    color,
                 );
             }
 
             if gizmo_config_value!(gizmos, sprite_gizmos, render_character_anchor_point) {
+                let color =
+                    gizmo_config_value!(gizmos, sprite_gizmos, character_anchor_point_color);
                 gizmos.cross_2d(
                     Isometry2d::from_translation(child_global_transform.translation().truncate()),
                     5.,
-                    gizmo_config_value!(gizmos, sprite_gizmos, character_anchor_point_color),
+                    color,
                 );
             }
         }
     }
 
     if gizmo_config_value!(gizmos, sprite_gizmos, render_text_anchor_point) {
+        let color = gizmo_config_value!(gizmos, sprite_gizmos, text_anchor_point_color);
         gizmos.cross_2d(
             Isometry2d::from_translation(global_transform.translation().truncate()),
             10.,
-            gizmo_config_value!(gizmos, sprite_gizmos, text_anchor_point_color),
+            color,
         );
     }
 }
