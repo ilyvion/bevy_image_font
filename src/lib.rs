@@ -282,7 +282,20 @@ pub fn sync_texts_with_font_changes(
     mut events: EventReader<AssetEvent<ImageFont>>,
     mut query: Query<&mut ImageFontText>,
     mut changed_fonts: Local<CachedHashSet>,
+    #[cfg(feature = "ui")] ui_scale: Res<UiScale>,
 ) {
+    #[cfg(feature = "ui")]
+    {
+        // If the UI scale changed, mark all texts as changed
+        if ui_scale.is_changed() && !ui_scale.is_added() {
+            for mut image_font_text in &mut query {
+                image_font_text.set_changed();
+            }
+            changed_fonts.clear();
+            return;
+        }
+    }
+
     // Extract relevant IDs from events
     for id in events.read().filter_map(extract_asset_id) {
         info!("Image font {id} finished loading; marking as dirty");

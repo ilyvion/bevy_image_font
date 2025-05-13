@@ -135,6 +135,33 @@ fn not_changed_on_irrelevant_events() {
     });
 }
 
+/// Test for issue #17: Text rendering doesn't update when `UiScale` changes
+#[test]
+#[cfg(feature = "ui")]
+fn text_not_changed_when_ui_scale_changes() {
+    use bevy::ui::UiScale;
+
+    let (mut app, mut system_state, _font_handle) = setup_app_system_state_and_entity();
+
+    // Insert UiScale resource
+    app.world_mut().insert_resource(UiScale(1.0));
+    clear_query_state(&mut app, &mut system_state);
+    app.update();
+
+    // Change UiScale (simulate user zooming UI)
+    app.world_mut().insert_resource(UiScale(2.0));
+    app.update();
+
+    // The bug: text is NOT marked as changed, even though UI scale changed
+    // This should fail if the bug is present
+    with_image_font_text(&mut app, &mut system_state, |image_font_text| {
+        assert!(
+            image_font_text.is_changed(),
+            "ImageFontText should be marked as changed when UiScale changes"
+        );
+    });
+}
+
 /// Helper function to set up the app, set up the `SystemState` we use for
 /// validating change and spawn an `ImageFontText` entity.
 fn setup_app_system_state_and_entity() -> (
@@ -145,6 +172,8 @@ fn setup_app_system_state_and_entity() -> (
     let mut app = App::new();
     app.add_event::<AssetEvent<ImageFont>>();
     app.add_systems(Update, sync_texts_with_font_changes);
+    #[cfg(feature = "ui")]
+    app.init_resource::<UiScale>();
 
     let font_handle = Handle::default();
     app.world_mut().spawn(ImageFontText {

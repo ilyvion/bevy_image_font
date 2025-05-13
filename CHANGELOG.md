@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed a bug where text rendered with `bevy_image_font` would not update its size when `UiScale` changed, unless the text itself was also changed ([#17]). Now, all text is properly re-rendered when the UI scale changes.
+
+[#17]: https://github.com/ilyvion/bevy_image_font/issues/17
+
 ## [0.9.0] - 2025-05-13
 
 ### Added

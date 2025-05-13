@@ -54,6 +54,9 @@ fn initialize_app_with_font(font_path: impl AsRef<Utf8Path>) -> (App, Handle<Ima
     app.add_plugins((MinimalPlugins, AssetPlugin::default(), LogPlugin::default()));
     app.add_plugins(ImageFontPlugin);
 
+    #[cfg(feature = "ui")]
+    app.init_resource::<UiScale>();
+
     app.register_asset_loader(ImageLoader::new(CompressedImageFormats::NONE))
         .init_asset::<TextureAtlasLayout>()
         .init_asset::<Image>();
