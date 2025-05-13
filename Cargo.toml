@@ -1,7 +1,7 @@
 [package]
 name = "bevy_image_font"
 version = "0.9.0"
-edition = "2021"
+edition = "2024"
 authors = [
     "Ash <ext0l@catgirl.ai>",
     "Alexander Krivács Schrøder <alexschrod@gmail.com>",

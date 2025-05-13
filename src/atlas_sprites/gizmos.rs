@@ -260,7 +260,7 @@ fn render_sprite_gizmos(
 /// - Otherwise, it falls back to the global configuration in
 ///   [`AtlasSpritesGizmoConfigGroup`].
 macro_rules! gizmo_config_value {
-    ($gizmos:expr, $sprite_gizmos:expr, $field:ident) => {
+    ($gizmos:expr_2021, $sprite_gizmos:expr_2021, $field:ident) => {
         $sprite_gizmos
             .and_then(|sprite_gizmos| sprite_gizmos.$field)
             .unwrap_or($gizmos.config_ext.$field)

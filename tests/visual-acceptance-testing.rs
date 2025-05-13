@@ -34,7 +34,7 @@ macro_rules! test_cases {
             )+
         }
     };
-    ($category:ident => {$($name:ident:$custom_name:ident:$val:expr,)+ }) => {
+    ($category:ident => {$($name:ident:$custom_name:ident:$val:expr_2021,)+ }) => {
         paste::paste! {
             $(
                 #[test]
