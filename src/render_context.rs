@@ -40,9 +40,9 @@ use std::fmt::Debug;
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
 
+use crate::ImageFontScalingMode;
 use crate::render_context::anchors::{AnchorExt as _, AnchorOffsets, ComputeTransformParams};
 use crate::render_context::filtered_string::FilteredString;
-use crate::ImageFontScalingMode;
 use crate::{ImageFont, ImageFontText};
 
 /// Groups font-related assets and configuration for rendering text sprites.

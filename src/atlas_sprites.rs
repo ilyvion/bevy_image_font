@@ -28,8 +28,8 @@ use derive_setters::Setters;
 
 use crate::render_context::{RenderConfig, RenderContext};
 use crate::{
-    sync_texts_with_font_changes, ImageFont, ImageFontScalingMode, ImageFontSet, ImageFontText,
-    LetterSpacing,
+    ImageFont, ImageFontScalingMode, ImageFontSet, ImageFontText, LetterSpacing,
+    sync_texts_with_font_changes,
 };
 
 /// Internal plugin for conveniently organizing the code related to this
@@ -318,7 +318,9 @@ fn update_existing_sprites(
         let (mut sprite, mut transform) = match child_query.get_mut(sprite_entity) {
             Ok(result) => result,
             Err(error) => {
-                error!("An ImageFontSpriteText unexpectedly failed: {error}. This will likely cause rendering bugs.");
+                error!(
+                    "An ImageFontSpriteText unexpectedly failed: {error}. This will likely cause rendering bugs."
+                );
                 continue;
             }
         };

@@ -5,7 +5,7 @@
 use std::io::Error as IoError;
 
 use bevy::{
-    asset::{io::Reader, AssetLoader, LoadContext, LoadDirectError},
+    asset::{AssetLoader, LoadContext, LoadDirectError, io::Reader},
     platform::collections::HashMap,
     prelude::*,
 };

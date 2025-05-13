@@ -4,7 +4,7 @@
 use std::any::TypeId;
 
 use super::*;
-use crate::tests::utils::{initialize_app_with_example_font, ExampleFont};
+use crate::tests::utils::{ExampleFont, initialize_app_with_example_font};
 
 mod sync_texts_with_font_changes;
 pub(crate) mod utils;

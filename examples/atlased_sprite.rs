@@ -10,8 +10,8 @@
 
 use std::time::Duration;
 
-use bevy::color::palettes::tailwind;
 use bevy::color::ColorCurve;
+use bevy::color::palettes::tailwind;
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
 use bevy_asset_loader::prelude::AssetCollectionApp as _;

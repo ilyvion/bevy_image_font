@@ -18,9 +18,9 @@ use std::fmt::Debug;
 use bevy::color::palettes::css;
 use bevy::prelude::*;
 
+use crate::ImageFontText;
 use crate::atlas_sprites::ImageFontTextData;
 use crate::render_context::RenderContext;
-use crate::ImageFontText;
 
 /// Initializes the debug gizmo system for `ImageFontSpriteText` components.
 ///

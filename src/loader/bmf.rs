@@ -13,7 +13,7 @@
 use bevy::log::warn;
 use bevy::math::Vec2;
 use bevy::{
-    asset::{io::Reader, AssetLoader, LoadContext},
+    asset::{AssetLoader, LoadContext, io::Reader},
     image::Image,
     math::{URect, UVec2},
     platform::collections::HashMap,
@@ -25,8 +25,8 @@ use thiserror::Error;
 
 use crate::ImageFontCharacter;
 use crate::{
-    loader::{ImageFontLoadError, ImageFontLoaderSettings},
     ImageFont,
+    loader::{ImageFontLoadError, ImageFontLoaderSettings},
 };
 
 /// Loader for [`ImageFont`]s.

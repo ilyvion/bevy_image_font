@@ -20,14 +20,14 @@ use bevy::{
 };
 use bevy_image::{Image, ImageSampler};
 use image::{
-    imageops::{self, FilterType},
     GenericImage as _, GenericImageView as _, ImageBuffer, ImageError, Rgba,
+    imageops::{self, FilterType},
 };
 use thiserror::Error;
 
 use crate::render_context::{RenderConfig, RenderContext};
 use crate::{
-    sync_texts_with_font_changes, ImageFont, ImageFontScalingMode, ImageFontSet, ImageFontText,
+    ImageFont, ImageFontScalingMode, ImageFontSet, ImageFontText, sync_texts_with_font_changes,
 };
 
 /// Internal plugin for conveniently organizing the code related to this

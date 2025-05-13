@@ -24,8 +24,8 @@
 )]
 
 use bevy::asset::Handle;
-use bevy::color::palettes::tailwind;
 use bevy::color::Srgba;
+use bevy::color::palettes::tailwind;
 use bevy::prelude::Resource;
 use bevy_asset_loader::asset_collection::AssetCollection;
 use bevy_image_font::ImageFont;

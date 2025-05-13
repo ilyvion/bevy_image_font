@@ -24,10 +24,10 @@
     reason = "if present as common.rs, cargo thinks it's an example binary"
 )]
 
+use bevy::log::LogPlugin;
+use bevy::log::tracing_subscriber::Layer as _;
 use bevy::log::tracing_subscriber::fmt::format::FmtSpan;
 use bevy::log::tracing_subscriber::fmt::layer;
-use bevy::log::tracing_subscriber::Layer as _;
-use bevy::log::LogPlugin;
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::AssetCollectionApp as _;
 use bevy_image_font::atlas_sprites::ImageFontSpriteText;

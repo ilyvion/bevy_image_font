@@ -3,9 +3,9 @@ use float_eq::assert_float_eq;
 
 use super::*;
 use crate::tests::utils::{
-    initialize_app_with_loaded_example_font, ExampleFont, COMPARISON_TOLERANCE,
-    MONOSPACE_FONT_HEIGHT, MONOSPACE_FONT_WIDTH, VARIABLE_WIDTH_FONT_CHARACTER_WIDTHS,
-    VARIABLE_WIDTH_FONT_HEIGHT,
+    COMPARISON_TOLERANCE, ExampleFont, MONOSPACE_FONT_HEIGHT, MONOSPACE_FONT_WIDTH,
+    VARIABLE_WIDTH_FONT_CHARACTER_WIDTHS, VARIABLE_WIDTH_FONT_HEIGHT,
+    initialize_app_with_loaded_example_font,
 };
 
 #[test]

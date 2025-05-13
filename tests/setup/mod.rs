@@ -7,8 +7,8 @@ use std::process::Command;
 use std::{
     path::PathBuf,
     sync::{
-        atomic::{AtomicBool, Ordering},
         Arc,
+        atomic::{AtomicBool, Ordering},
     },
     time::Duration,
 };
@@ -23,6 +23,7 @@ use bevy::{
     core_pipeline::tonemapping::Tonemapping,
     prelude::*,
     render::{
+        Extract, Render, RenderApp, RenderSet,
         camera::RenderTarget,
         render_asset::{RenderAssetUsages, RenderAssets},
         render_graph::{self, NodeRunError, RenderGraph, RenderGraphContext, RenderLabel},
@@ -32,7 +33,6 @@ use bevy::{
             TextureUsages,
         },
         renderer::{RenderContext, RenderDevice, RenderQueue},
-        Extract, Render, RenderApp, RenderSet,
     },
 };
 use bevy_asset_loader::asset_collection::AssetCollectionApp as _;
