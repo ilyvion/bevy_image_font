@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2025-05-13
+
 ### Added
 
 - `LetterSpacing` enum to allow customizable kerning between characters.
@@ -242,7 +244,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First public release; prior versions are not on Cargo.
 
-[unreleased]: https://github.com/ilyvion/bevy_image_font/compare/v0.8.0...HEAD
+[unreleased]: https://github.com/ilyvion/bevy_image_font/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/ilyvion/bevy_image_font/compare/HEAD...v0.9.0
 [0.8.0]: https://github.com/ilyvion/bevy_image_font/compare/HEAD...v0.8.0
 [0.7.1]: https://github.com/ilyvion/bevy_image_font/compare/HEAD...v0.7.1
 [0.7.0]: https://github.com/ilyvion/bevy_image_font/compare/v0.6.0...v0.7.0
