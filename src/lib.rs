@@ -342,19 +342,5 @@ fn extract_asset_id(event: &AssetEvent<ImageFont>) -> Option<AssetId<ImageFont>>
 #[derive(Default, Deref, DerefMut)]
 struct CachedHashSet(HashSet<AssetId<ImageFont>>);
 
-// #[derive(Debug, Clone, Copy, Reflect, Default)]
-// pub struct Padding {
-//     up: u8,
-//     right: u8,
-//     down: u8,
-//     left: u8,
-// }
-
-// #[derive(Debug, Clone, Copy, Reflect, Default)]
-// pub struct Spacing {
-//     horizontal: u8,
-//     vertical: u8,
-// }
-
 #[cfg(test)]
 mod tests;
