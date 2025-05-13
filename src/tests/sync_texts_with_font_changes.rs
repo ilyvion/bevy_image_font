@@ -138,7 +138,7 @@ fn not_changed_on_irrelevant_events() {
 /// Test for issue #17: Text rendering doesn't update when `UiScale` changes
 #[test]
 #[cfg(feature = "ui")]
-fn text_not_changed_when_ui_scale_changes() {
+fn text_changed_when_ui_scale_changes() {
     use bevy::ui::UiScale;
 
     let (mut app, mut system_state, _font_handle) = setup_app_system_state_and_entity();
