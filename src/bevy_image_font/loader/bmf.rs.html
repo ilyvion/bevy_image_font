@@ -13,7 +13,7 @@
 <a href=#13 id=13 data-nosnippet>13</a></span><span class="kw">use </span>bevy::log::warn;
 <a href=#14 id=14 data-nosnippet>14</a><span class="kw">use </span>bevy::math::Vec2;
 <a href=#15 id=15 data-nosnippet>15</a><span class="kw">use </span>bevy::{
-<a href=#16 id=16 data-nosnippet>16</a>    asset::{io::Reader, AssetLoader, LoadContext},
+<a href=#16 id=16 data-nosnippet>16</a>    asset::{AssetLoader, LoadContext, io::Reader},
 <a href=#17 id=17 data-nosnippet>17</a>    image::Image,
 <a href=#18 id=18 data-nosnippet>18</a>    math::{URect, UVec2},
 <a href=#19 id=19 data-nosnippet>19</a>    platform::collections::HashMap,
@@ -25,8 +25,8 @@
 <a href=#25 id=25 data-nosnippet>25</a>
 <a href=#26 id=26 data-nosnippet>26</a><span class="kw">use </span><span class="kw">crate</span>::ImageFontCharacter;
 <a href=#27 id=27 data-nosnippet>27</a><span class="kw">use crate</span>::{
-<a href=#28 id=28 data-nosnippet>28</a>    loader::{ImageFontLoadError, ImageFontLoaderSettings},
-<a href=#29 id=29 data-nosnippet>29</a>    ImageFont,
+<a href=#28 id=28 data-nosnippet>28</a>    ImageFont,
+<a href=#29 id=29 data-nosnippet>29</a>    loader::{ImageFontLoadError, ImageFontLoaderSettings},
 <a href=#30 id=30 data-nosnippet>30</a>};
 <a href=#31 id=31 data-nosnippet>31</a>
 <a href=#32 id=32 data-nosnippet>32</a><span class="doccomment">/// Loader for [`ImageFont`]s.

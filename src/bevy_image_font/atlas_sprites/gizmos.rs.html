@@ -18,9 +18,9 @@
 <a href=#18 id=18 data-nosnippet>18</a><span class="kw">use </span>bevy::color::palettes::css;
 <a href=#19 id=19 data-nosnippet>19</a><span class="kw">use </span>bevy::prelude::<span class="kw-2">*</span>;
 <a href=#20 id=20 data-nosnippet>20</a>
-<a href=#21 id=21 data-nosnippet>21</a><span class="kw">use </span><span class="kw">crate</span>::atlas_sprites::ImageFontTextData;
-<a href=#22 id=22 data-nosnippet>22</a><span class="kw">use </span><span class="kw">crate</span>::render_context::RenderContext;
-<a href=#23 id=23 data-nosnippet>23</a><span class="kw">use </span><span class="kw">crate</span>::ImageFontText;
+<a href=#21 id=21 data-nosnippet>21</a><span class="kw">use </span><span class="kw">crate</span>::ImageFontText;
+<a href=#22 id=22 data-nosnippet>22</a><span class="kw">use </span><span class="kw">crate</span>::atlas_sprites::ImageFontTextData;
+<a href=#23 id=23 data-nosnippet>23</a><span class="kw">use </span><span class="kw">crate</span>::render_context::RenderContext;
 <a href=#24 id=24 data-nosnippet>24</a>
 <a href=#25 id=25 data-nosnippet>25</a><span class="doccomment">/// Initializes the debug gizmo system for `ImageFontSpriteText` components.
 <a href=#26 id=26 data-nosnippet>26</a>///
@@ -260,7 +260,7 @@
 <a href=#260 id=260 data-nosnippet>260</a>/// - Otherwise, it falls back to the global configuration in
 <a href=#261 id=261 data-nosnippet>261</a>///   [`AtlasSpritesGizmoConfigGroup`].
 <a href=#262 id=262 data-nosnippet>262</a></span><span class="macro">macro_rules!</span> gizmo_config_value {
-<a href=#263 id=263 data-nosnippet>263</a>    (<span class="macro-nonterminal">$gizmos</span>:expr, <span class="macro-nonterminal">$sprite_gizmos</span>:expr, <span class="macro-nonterminal">$field</span>:ident) =&gt; {
+<a href=#263 id=263 data-nosnippet>263</a>    (<span class="macro-nonterminal">$gizmos</span>:expr_2021, <span class="macro-nonterminal">$sprite_gizmos</span>:expr_2021, <span class="macro-nonterminal">$field</span>:ident) =&gt; {
 <a href=#264 id=264 data-nosnippet>264</a>        <span class="macro-nonterminal">$sprite_gizmos
 <a href=#265 id=265 data-nosnippet>265</a>            </span>.and_then(|sprite_gizmos| sprite_gizmos.<span class="macro-nonterminal">$field</span>)
 <a href=#266 id=266 data-nosnippet>266</a>            .unwrap_or(<span class="macro-nonterminal">$gizmos</span>.config_ext.<span class="macro-nonterminal">$field</span>)
