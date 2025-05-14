@@ -36,7 +36,7 @@
 <a href=#36 id=36 data-nosnippet>36</a>                animate_text,
 <a href=#37 id=37 data-nosnippet>37</a>                animate_color,
 <a href=#38 id=38 data-nosnippet>38</a>                <span class="attr">#[cfg(feature = <span class="string">"gizmos"</span>)]
-<a href=#39 id=39 data-nosnippet>39</a>                </span>gizmos::toggle_gizmos,
+<a href=#39 id=39 data-nosnippet>39</a>                </span>common::gizmos::toggle_gizmos,
 <a href=#40 id=40 data-nosnippet>40</a>            ),
 <a href=#41 id=41 data-nosnippet>41</a>        )
 <a href=#42 id=42 data-nosnippet>42</a>        .insert_resource(ClearColor(Color::srgb(<span class="number">0.2</span>, <span class="number">0.2</span>, <span class="number">0.2</span>)))
@@ -64,7 +64,7 @@
 <a href=#64 id=64 data-nosnippet>64</a>    <span class="attr">#[cfg(feature = <span class="string">"gizmos"</span>)] </span>store: ResMut&lt;GizmoConfigStore&gt;,
 <a href=#65 id=65 data-nosnippet>65</a>) {
 <a href=#66 id=66 data-nosnippet>66</a>    <span class="attr">#[cfg(feature = <span class="string">"gizmos"</span>)]
-<a href=#67 id=67 data-nosnippet>67</a>    </span>gizmos::configure_gizmo_defaults(store);
+<a href=#67 id=67 data-nosnippet>67</a>    </span>common::gizmos::configure_gizmo_defaults(store);
 <a href=#68 id=68 data-nosnippet>68</a>
 <a href=#69 id=69 data-nosnippet>69</a>    commands.spawn(Camera2d);
 <a href=#70 id=70 data-nosnippet>70</a>
@@ -190,85 +190,4 @@
 <a href=#190 id=190 data-nosnippet>190</a>                .into();
 <a href=#191 id=191 data-nosnippet>191</a>        }
 <a href=#192 id=192 data-nosnippet>192</a>    }
-<a href=#193 id=193 data-nosnippet>193</a>}
-<a href=#194 id=194 data-nosnippet>194</a>
-<a href=#195 id=195 data-nosnippet>195</a><span class="doccomment">/// Gizmos related example code
-<a href=#196 id=196 data-nosnippet>196</a></span><span class="attr">#[cfg(feature = <span class="string">"gizmos"</span>)]
-<a href=#197 id=197 data-nosnippet>197</a></span><span class="kw">mod </span>gizmos {
-<a href=#198 id=198 data-nosnippet>198</a>
-<a href=#199 id=199 data-nosnippet>199</a>    <span class="kw">use </span>bevy_image_font::atlas_sprites::gizmos::AtlasSpritesGizmoConfigGroup;
-<a href=#200 id=200 data-nosnippet>200</a>
-<a href=#201 id=201 data-nosnippet>201</a>    <span class="kw">use super</span>::{ButtonInput, GizmoConfigStore, KeyCode, Res, ResMut};
-<a href=#202 id=202 data-nosnippet>202</a>
-<a href=#203 id=203 data-nosnippet>203</a>    <span class="doccomment">/// Configures default gizmo rendering settings.
-<a href=#204 id=204 data-nosnippet>204</a>    ///
-<a href=#205 id=205 data-nosnippet>205</a>    /// This function initializes the default visibility settings for
-<a href=#206 id=206 data-nosnippet>206</a>    /// text-related gizmos, enabling anchor points and bounding box
-<a href=#207 id=207 data-nosnippet>207</a>    /// rendering by default.
-<a href=#208 id=208 data-nosnippet>208</a>    ///
-<a href=#209 id=209 data-nosnippet>209</a>    /// # Default Behavior
-<a href=#210 id=210 data-nosnippet>210</a>    /// - **Text anchor points**: Enabled (`render_text_anchor_point = true`).
-<a href=#211 id=211 data-nosnippet>211</a>    /// - **Character anchor points**: Enabled (`render_character_anchor_point =
-<a href=#212 id=212 data-nosnippet>212</a>    ///   true`).
-<a href=#213 id=213 data-nosnippet>213</a>    /// - **Character bounding boxes**: Enabled (`render_character_box = true`).
-<a href=#214 id=214 data-nosnippet>214</a>    ///
-<a href=#215 id=215 data-nosnippet>215</a>    /// This function is called at startup to ensure gizmos are visible by
-<a href=#216 id=216 data-nosnippet>216</a>    /// default.
-<a href=#217 id=217 data-nosnippet>217</a>    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>configure_gizmo_defaults(<span class="kw-2">mut </span>store: ResMut&lt;<span class="lifetime">'_</span>, GizmoConfigStore&gt;) {
-<a href=#218 id=218 data-nosnippet>218</a>        <span class="kw">let </span>(<span class="kw">_</span>, atlas_sprites_config) = store.config_mut::&lt;AtlasSpritesGizmoConfigGroup&gt;();
-<a href=#219 id=219 data-nosnippet>219</a>        atlas_sprites_config.render_text_anchor_point = <span class="bool-val">true</span>;
-<a href=#220 id=220 data-nosnippet>220</a>        atlas_sprites_config.render_character_anchor_point = <span class="bool-val">true</span>;
-<a href=#221 id=221 data-nosnippet>221</a>        atlas_sprites_config.render_character_box = <span class="bool-val">true</span>;
-<a href=#222 id=222 data-nosnippet>222</a>    }
-<a href=#223 id=223 data-nosnippet>223</a>
-<a href=#224 id=224 data-nosnippet>224</a>    <span class="doccomment">/// Handles keyboard input to toggle gizmo rendering settings.
-<a href=#225 id=225 data-nosnippet>225</a>    ///
-<a href=#226 id=226 data-nosnippet>226</a>    /// This function listens for key presses and updates the gizmo
-<a href=#227 id=227 data-nosnippet>227</a>    /// configuration to enable or disable various debug visuals in real
-<a href=#228 id=228 data-nosnippet>228</a>    /// time.
-<a href=#229 id=229 data-nosnippet>229</a>    ///
-<a href=#230 id=230 data-nosnippet>230</a>    /// # Parameters
-<a href=#231 id=231 data-nosnippet>231</a>    /// - `input`: Reference to [`ButtonInput&lt;KeyCode&gt;`], used to detect key
-<a href=#232 id=232 data-nosnippet>232</a>    ///   presses.
-<a href=#233 id=233 data-nosnippet>233</a>    /// - `store`: Mutable reference to the [`GizmoConfigStore`] to update
-<a href=#234 id=234 data-nosnippet>234</a>    ///   settings.
-<a href=#235 id=235 data-nosnippet>235</a>    ///
-<a href=#236 id=236 data-nosnippet>236</a>    /// # Keyboard Shortcuts
-<a href=#237 id=237 data-nosnippet>237</a>    /// - **`G`**: Toggles all gizmo rendering on/off.
-<a href=#238 id=238 data-nosnippet>238</a>    /// - **`A`**: Toggles character anchor point gizmos.
-<a href=#239 id=239 data-nosnippet>239</a>    /// - **`B`**: Toggles character bounding box gizmos.
-<a href=#240 id=240 data-nosnippet>240</a>    /// - **`T`**: Toggles text anchor point gizmos.
-<a href=#241 id=241 data-nosnippet>241</a>    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>toggle_gizmos(
-<a href=#242 id=242 data-nosnippet>242</a>        input: Res&lt;ButtonInput&lt;KeyCode&gt;&gt;,
-<a href=#243 id=243 data-nosnippet>243</a>        <span class="kw-2">mut </span>store: ResMut&lt;GizmoConfigStore&gt;,
-<a href=#244 id=244 data-nosnippet>244</a>    ) {
-<a href=#245 id=245 data-nosnippet>245</a>        <span class="kw">let </span>(config, atlas_sprites_config) = store.config_mut::&lt;AtlasSpritesGizmoConfigGroup&gt;();
-<a href=#246 id=246 data-nosnippet>246</a>        <span class="kw">if </span>input.just_pressed(KeyCode::KeyG) {
-<a href=#247 id=247 data-nosnippet>247</a>            config.enabled = !config.enabled;
-<a href=#248 id=248 data-nosnippet>248</a>            <span class="macro">println!</span>(<span class="string">"Gizmos enabled: {}"</span>, config.enabled);
-<a href=#249 id=249 data-nosnippet>249</a>        }
-<a href=#250 id=250 data-nosnippet>250</a>        <span class="kw">if </span>input.just_pressed(KeyCode::KeyA) {
-<a href=#251 id=251 data-nosnippet>251</a>            atlas_sprites_config.render_character_anchor_point =
-<a href=#252 id=252 data-nosnippet>252</a>                !atlas_sprites_config.render_character_anchor_point;
-<a href=#253 id=253 data-nosnippet>253</a>            <span class="macro">println!</span>(
-<a href=#254 id=254 data-nosnippet>254</a>                <span class="string">"Character anchor point gizmo enabled: {}"</span>,
-<a href=#255 id=255 data-nosnippet>255</a>                atlas_sprites_config.render_character_anchor_point
-<a href=#256 id=256 data-nosnippet>256</a>            );
-<a href=#257 id=257 data-nosnippet>257</a>        }
-<a href=#258 id=258 data-nosnippet>258</a>        <span class="kw">if </span>input.just_pressed(KeyCode::KeyB) {
-<a href=#259 id=259 data-nosnippet>259</a>            atlas_sprites_config.render_character_box = !atlas_sprites_config.render_character_box;
-<a href=#260 id=260 data-nosnippet>260</a>            <span class="macro">println!</span>(
-<a href=#261 id=261 data-nosnippet>261</a>                <span class="string">"Character box gizmo enabled: {}"</span>,
-<a href=#262 id=262 data-nosnippet>262</a>                atlas_sprites_config.render_character_box
-<a href=#263 id=263 data-nosnippet>263</a>            );
-<a href=#264 id=264 data-nosnippet>264</a>        }
-<a href=#265 id=265 data-nosnippet>265</a>        <span class="kw">if </span>input.just_pressed(KeyCode::KeyT) {
-<a href=#266 id=266 data-nosnippet>266</a>            atlas_sprites_config.render_text_anchor_point =
-<a href=#267 id=267 data-nosnippet>267</a>                !atlas_sprites_config.render_text_anchor_point;
-<a href=#268 id=268 data-nosnippet>268</a>            <span class="macro">println!</span>(
-<a href=#269 id=269 data-nosnippet>269</a>                <span class="string">"Text anchor gizmo enabled: {}"</span>,
-<a href=#270 id=270 data-nosnippet>270</a>                atlas_sprites_config.render_text_anchor_point
-<a href=#271 id=271 data-nosnippet>271</a>            );
-<a href=#272 id=272 data-nosnippet>272</a>        }
-<a href=#273 id=273 data-nosnippet>273</a>    }
-<a href=#274 id=274 data-nosnippet>274</a>}</code></pre></div></section></main></body></html>
+<a href=#193 id=193 data-nosnippet>193</a>}</code></pre></div></section></main></body></html>

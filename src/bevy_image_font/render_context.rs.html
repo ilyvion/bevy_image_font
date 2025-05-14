@@ -264,223 +264,255 @@
 <a href=#264 id=264 data-nosnippet>264</a>        image_font_character.x_advance
 <a href=#265 id=265 data-nosnippet>265</a>    }
 <a href=#266 id=266 data-nosnippet>266</a>
-<a href=#267 id=267 data-nosnippet>267</a>    <span class="doccomment">/// Retrieves the handle to the font texture image.
-<a href=#268 id=268 data-nosnippet>268</a>    ///
-<a href=#269 id=269 data-nosnippet>269</a>    /// This handle is used to assign the appropriate image to a text sprite.
-<a href=#270 id=270 data-nosnippet>270</a>    </span><span class="attr">#[inline]
-<a href=#271 id=271 data-nosnippet>271</a>    #[cfg(feature = <span class="string">"atlas_sprites"</span>)]
-<a href=#272 id=272 data-nosnippet>272</a>    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>font_image(<span class="kw-2">&amp;</span><span class="self">self</span>, character: char) -&gt; Handle&lt;Image&gt; {
-<a href=#273 id=273 data-nosnippet>273</a>        <span class="kw">let </span>image_font_character = <span class="kw-2">&amp;</span><span class="self">self</span>.image_font.atlas_character_map[<span class="kw-2">&amp;</span>character];
-<a href=#274 id=274 data-nosnippet>274</a>
-<a href=#275 id=275 data-nosnippet>275</a>        <span class="self">self</span>.image_font.textures[image_font_character.page_index].clone_weak()
-<a href=#276 id=276 data-nosnippet>276</a>    }
-<a href=#277 id=277 data-nosnippet>277</a>
-<a href=#278 id=278 data-nosnippet>278</a>    <span class="doccomment">/// Constructs the texture atlas entry for a specific character.
-<a href=#279 id=279 data-nosnippet>279</a>    ///
-<a href=#280 id=280 data-nosnippet>280</a>    /// This method provides the texture atlas layout and the character's index
-<a href=#281 id=281 data-nosnippet>281</a>    /// within the atlas.
-<a href=#282 id=282 data-nosnippet>282</a>    ///
-<a href=#283 id=283 data-nosnippet>283</a>    /// # Parameters
-<a href=#284 id=284 data-nosnippet>284</a>    /// - `character`: The character whose texture atlas entry is needed.
-<a href=#285 id=285 data-nosnippet>285</a>    ///
-<a href=#286 id=286 data-nosnippet>286</a>    /// # Returns
-<a href=#287 id=287 data-nosnippet>287</a>    /// A [`TextureAtlas`] structure containing the layout and character index.
-<a href=#288 id=288 data-nosnippet>288</a>    </span><span class="attr">#[inline]
-<a href=#289 id=289 data-nosnippet>289</a>    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>font_texture_atlas(<span class="kw-2">&amp;</span><span class="self">self</span>, character: char) -&gt; TextureAtlas {
-<a href=#290 id=290 data-nosnippet>290</a>        <span class="kw">let </span>image_font_character = <span class="kw-2">&amp;</span><span class="self">self</span>.image_font.atlas_character_map[<span class="kw-2">&amp;</span>character];
-<a href=#291 id=291 data-nosnippet>291</a>        TextureAtlas {
-<a href=#292 id=292 data-nosnippet>292</a>            layout: <span class="self">self</span>.image_font.atlas_layouts[image_font_character.page_index].clone_weak(),
-<a href=#293 id=293 data-nosnippet>293</a>            index: image_font_character.character_index,
-<a href=#294 id=294 data-nosnippet>294</a>        }
-<a href=#295 id=295 data-nosnippet>295</a>    }
+<a href=#267 id=267 data-nosnippet>267</a>    <span class="doccomment">/// Retrieves the kerning value between two characters, if defined in the
+<a href=#268 id=268 data-nosnippet>268</a>    /// font.
+<a href=#269 id=269 data-nosnippet>269</a>    ///
+<a href=#270 id=270 data-nosnippet>270</a>    /// Kerning adjusts the spacing between specific pairs of characters to
+<a href=#271 id=271 data-nosnippet>271</a>    /// improve the visual appearance of text. This function looks up the
+<a href=#272 id=272 data-nosnippet>272</a>    /// kerning value for the given character pair, returning the adjustment
+<a href=#273 id=273 data-nosnippet>273</a>    /// amount if it exists.
+<a href=#274 id=274 data-nosnippet>274</a>    ///
+<a href=#275 id=275 data-nosnippet>275</a>    /// # Parameters
+<a href=#276 id=276 data-nosnippet>276</a>    /// - `character`: The current character in the text.
+<a href=#277 id=277 data-nosnippet>277</a>    /// - `next_character`: The character immediately following `character`.
+<a href=#278 id=278 data-nosnippet>278</a>    ///
+<a href=#279 id=279 data-nosnippet>279</a>    /// # Returns
+<a href=#280 id=280 data-nosnippet>280</a>    /// - `Some(f32)`: The kerning adjustment to apply between the two
+<a href=#281 id=281 data-nosnippet>281</a>    ///   characters, if defined.
+<a href=#282 id=282 data-nosnippet>282</a>    /// - `None`: If no kerning adjustment is specified for the character pair.
+<a href=#283 id=283 data-nosnippet>283</a>    </span><span class="attr">#[inline]
+<a href=#284 id=284 data-nosnippet>284</a>    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>character_kerning(<span class="kw-2">&amp;</span><span class="self">self</span>, character: char, next_character: char) -&gt; <span class="prelude-ty">Option</span>&lt;f32&gt; {
+<a href=#285 id=285 data-nosnippet>285</a>        <span class="kw">let </span>image_font_character = <span class="kw-2">&amp;</span><span class="self">self</span>.image_font.atlas_character_map[<span class="kw-2">&amp;</span>character];
+<a href=#286 id=286 data-nosnippet>286</a>        image_font_character.kernings.get(<span class="kw-2">&amp;</span>next_character).copied()
+<a href=#287 id=287 data-nosnippet>287</a>    }
+<a href=#288 id=288 data-nosnippet>288</a>
+<a href=#289 id=289 data-nosnippet>289</a>    <span class="doccomment">/// Retrieves the handle to the font texture image.
+<a href=#290 id=290 data-nosnippet>290</a>    ///
+<a href=#291 id=291 data-nosnippet>291</a>    /// This handle is used to assign the appropriate image to a text sprite.
+<a href=#292 id=292 data-nosnippet>292</a>    </span><span class="attr">#[inline]
+<a href=#293 id=293 data-nosnippet>293</a>    #[cfg(feature = <span class="string">"atlas_sprites"</span>)]
+<a href=#294 id=294 data-nosnippet>294</a>    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>font_image(<span class="kw-2">&amp;</span><span class="self">self</span>, character: char) -&gt; Handle&lt;Image&gt; {
+<a href=#295 id=295 data-nosnippet>295</a>        <span class="kw">let </span>image_font_character = <span class="kw-2">&amp;</span><span class="self">self</span>.image_font.atlas_character_map[<span class="kw-2">&amp;</span>character];
 <a href=#296 id=296 data-nosnippet>296</a>
-<a href=#297 id=297 data-nosnippet>297</a>    <span class="doccomment">/// Returns the filtered text, which includes only characters supported by
-<a href=#298 id=298 data-nosnippet>298</a>    /// the font.
-<a href=#299 id=299 data-nosnippet>299</a>    ///
-<a href=#300 id=300 data-nosnippet>300</a>    /// The filtered text excludes unsupported or invalid characters, ensuring
-<a href=#301 id=301 data-nosnippet>301</a>    /// that only renderable glyphs are processed.
-<a href=#302 id=302 data-nosnippet>302</a>    </span><span class="attr">#[inline]
-<a href=#303 id=303 data-nosnippet>303</a>    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>text(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>FilteredString&lt;<span class="lifetime">'_</span>, <span class="kw-2">&amp;</span>String&gt; {
-<a href=#304 id=304 data-nosnippet>304</a>        <span class="kw-2">&amp;</span><span class="self">self</span>.filtered_text
-<a href=#305 id=305 data-nosnippet>305</a>    }
-<a href=#306 id=306 data-nosnippet>306</a>
-<a href=#307 id=307 data-nosnippet>307</a>    <span class="doccomment">/// Updates the texture index for the specified character and assigns the
-<a href=#308 id=308 data-nosnippet>308</a>    /// configured color.
-<a href=#309 id=309 data-nosnippet>309</a>    ///
-<a href=#310 id=310 data-nosnippet>310</a>    /// This function assigns the correct glyph index from the font atlas to
-<a href=#311 id=311 data-nosnippet>311</a>    /// `texture_atlas`, ensuring that the correct character is selected for
-<a href=#312 id=312 data-nosnippet>312</a>    /// rendering. Additionally, it assigns the configured text color from
-<a href=#313 id=313 data-nosnippet>313</a>    /// `RenderConfig` to `color`.
-<a href=#314 id=314 data-nosnippet>314</a>    ///
-<a href=#315 id=315 data-nosnippet>315</a>    /// # Parameters
-<a href=#316 id=316 data-nosnippet>316</a>    /// - `character`: The character whose corresponding glyph should be used.
-<a href=#317 id=317 data-nosnippet>317</a>    /// - `texture_atlas`: The texture atlas entry that will be updated with the
-<a href=#318 id=318 data-nosnippet>318</a>    ///   character's index.
-<a href=#319 id=319 data-nosnippet>319</a>    /// - `color`: The variable that will be assigned the value of
-<a href=#320 id=320 data-nosnippet>320</a>    ///   `RenderConfig::color`.
-<a href=#321 id=321 data-nosnippet>321</a>    </span><span class="attr">#[inline]
-<a href=#322 id=322 data-nosnippet>322</a>    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>update_render_values(
-<a href=#323 id=323 data-nosnippet>323</a>        <span class="kw-2">&amp;</span><span class="self">self</span>,
-<a href=#324 id=324 data-nosnippet>324</a>        character: char,
-<a href=#325 id=325 data-nosnippet>325</a>        texture_atlas: <span class="kw-2">&amp;mut </span>TextureAtlas,
-<a href=#326 id=326 data-nosnippet>326</a>        color: <span class="kw-2">&amp;mut </span>Color,
-<a href=#327 id=327 data-nosnippet>327</a>    ) {
-<a href=#328 id=328 data-nosnippet>328</a>        texture_atlas.index = <span class="self">self</span>.image_font.atlas_character_map[<span class="kw-2">&amp;</span>character].character_index;
-<a href=#329 id=329 data-nosnippet>329</a>        <span class="kw-2">*</span>color = <span class="self">self</span>.render_config.color;
-<a href=#330 id=330 data-nosnippet>330</a>    }
-<a href=#331 id=331 data-nosnippet>331</a>
-<a href=#332 id=332 data-nosnippet>332</a>    <span class="doccomment">/// Computes or retrieves the cached anchor offsets for the text and glyph
-<a href=#333 id=333 data-nosnippet>333</a>    /// alignment.
-<a href=#334 id=334 data-nosnippet>334</a>    ///
-<a href=#335 id=335 data-nosnippet>335</a>    /// The computed offsets depend on the `render_config.offset_characters`
-<a href=#336 id=336 data-nosnippet>336</a>    /// setting:
-<a href=#337 id=337 data-nosnippet>337</a>    /// - If `true`, per-character offsets are applied to adjust positioning.
-<a href=#338 id=338 data-nosnippet>338</a>    /// - If `false`, glyphs are aligned strictly according to the text anchor.
-<a href=#339 id=339 data-nosnippet>339</a>    ///
-<a href=#340 id=340 data-nosnippet>340</a>    /// # Returns
-<a href=#341 id=341 data-nosnippet>341</a>    /// An [`AnchorOffsets`] struct containing:
-<a href=#342 id=342 data-nosnippet>342</a>    /// - `whole`: Offset for aligning the entire text block.
-<a href=#343 id=343 data-nosnippet>343</a>    /// - `individual`: Offset for aligning each individual glyph.
-<a href=#344 id=344 data-nosnippet>344</a>    </span><span class="attr">#[inline]
-<a href=#345 id=345 data-nosnippet>345</a>    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>anchor_offsets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AnchorOffsets {
-<a href=#346 id=346 data-nosnippet>346</a>        <span class="self">self</span>.render_config
-<a href=#347 id=347 data-nosnippet>347</a>            .text_anchor
-<a href=#348 id=348 data-nosnippet>348</a>            .to_anchor_offsets(<span class="self">self</span>.render_config.offset_characters)
-<a href=#349 id=349 data-nosnippet>349</a>    }
-<a href=#350 id=350 data-nosnippet>350</a>
-<a href=#351 id=351 data-nosnippet>351</a>    <span class="doccomment">/// Computes the transform for positioning and scaling a text sprite.
-<a href=#352 id=352 data-nosnippet>352</a>    ///
-<a href=#353 id=353 data-nosnippet>353</a>    /// This method calculates the sprite's translation and scale based on:
-<a href=#354 id=354 data-nosnippet>354</a>    /// - The x-position of the sprite.
-<a href=#355 id=355 data-nosnippet>355</a>    /// - The dimensions of the character's glyph.
-<a href=#356 id=356 data-nosnippet>356</a>    /// - The alignment offsets and scaling configuration.
-<a href=#357 id=357 data-nosnippet>357</a>    ///
-<a href=#358 id=358 data-nosnippet>358</a>    /// # Parameters
-<a href=#359 id=359 data-nosnippet>359</a>    /// - `x_pos`: A mutable reference to the current x-position of the sprite.
-<a href=#360 id=360 data-nosnippet>360</a>    ///   This value is updated to reflect the position of the next sprite.
-<a href=#361 id=361 data-nosnippet>361</a>    /// - `character`: The character associated with the sprite.
-<a href=#362 id=362 data-nosnippet>362</a>    ///
-<a href=#363 id=363 data-nosnippet>363</a>    /// # Returns
-<a href=#364 id=364 data-nosnippet>364</a>    /// A [`Transform`] representing the position and scale of the sprite.
-<a href=#365 id=365 data-nosnippet>365</a>    </span><span class="attr">#[inline]
-<a href=#366 id=366 data-nosnippet>366</a>    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>transform(<span class="kw-2">&amp;</span><span class="self">self</span>, x_pos: <span class="kw-2">&amp;mut </span>f32, character: char) -&gt; Transform {
-<a href=#367 id=367 data-nosnippet>367</a>        <span class="kw">let </span>x = <span class="kw-2">*</span>x_pos;
-<a href=#368 id=368 data-nosnippet>368</a>        <span class="kw">let </span>(width, height) = <span class="self">self</span>.character_dimensions(character);
-<a href=#369 id=369 data-nosnippet>369</a>        <span class="kw-2">*</span>x_pos += <span class="self">self</span>.character_x_advance(character).unwrap_or(width);
-<a href=#370 id=370 data-nosnippet>370</a>
-<a href=#371 id=371 data-nosnippet>371</a>        <span class="kw">let </span>params = ComputeTransformParams {
-<a href=#372 id=372 data-nosnippet>372</a>            x_pos: x,
-<a href=#373 id=373 data-nosnippet>373</a>            scaled_text_width: <span class="self">self</span>.text_width(),
-<a href=#374 id=374 data-nosnippet>374</a>            scaled_width: width,
-<a href=#375 id=375 data-nosnippet>375</a>            scaled_height: height,
-<a href=#376 id=376 data-nosnippet>376</a>            max_height: <span class="self">self</span>.max_height(),
-<a href=#377 id=377 data-nosnippet>377</a>            character_offsets: <span class="self">self</span>.character_offsets(character),
-<a href=#378 id=378 data-nosnippet>378</a>            scale: <span class="self">self</span>.scale(),
-<a href=#379 id=379 data-nosnippet>379</a>        };
-<a href=#380 id=380 data-nosnippet>380</a>        <span class="self">self</span>.anchor_offsets().compute_transform(params)
-<a href=#381 id=381 data-nosnippet>381</a>    }
-<a href=#382 id=382 data-nosnippet>382</a>}
-<a href=#383 id=383 data-nosnippet>383</a>
-<a href=#384 id=384 data-nosnippet>384</a><span class="doccomment">/// Configuration settings for rendering text using an `ImageFont`.
-<a href=#385 id=385 data-nosnippet>385</a>///
-<a href=#386 id=386 data-nosnippet>386</a>/// This struct controls how text is rendered, including alignment, spacing,
-<a href=#387 id=387 data-nosnippet>387</a>/// scaling, and color settings. It is passed to `RenderContext` to determine
-<a href=#388 id=388 data-nosnippet>388</a>/// rendering behavior.
-<a href=#389 id=389 data-nosnippet>389</a></span><span class="attr">#[derive(Clone, Copy, Debug, Default)]
-<a href=#390 id=390 data-nosnippet>390</a></span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>RenderConfig {
-<a href=#391 id=391 data-nosnippet>391</a>    <span class="doccomment">/// The anchor point used to align the rendered text.
-<a href=#392 id=392 data-nosnippet>392</a>    ///
-<a href=#393 id=393 data-nosnippet>393</a>    /// This defines how the text is positioned relative to its origin.
-<a href=#394 id=394 data-nosnippet>394</a>    /// For example, `Anchor::TopLeft` aligns the text's top-left corner to its
-<a href=#395 id=395 data-nosnippet>395</a>    /// position.
-<a href=#396 id=396 data-nosnippet>396</a>    </span><span class="kw">pub </span>text_anchor: Anchor,
+<a href=#297 id=297 data-nosnippet>297</a>        <span class="self">self</span>.image_font.textures[image_font_character.page_index].clone_weak()
+<a href=#298 id=298 data-nosnippet>298</a>    }
+<a href=#299 id=299 data-nosnippet>299</a>
+<a href=#300 id=300 data-nosnippet>300</a>    <span class="doccomment">/// Constructs the texture atlas entry for a specific character.
+<a href=#301 id=301 data-nosnippet>301</a>    ///
+<a href=#302 id=302 data-nosnippet>302</a>    /// This method provides the texture atlas layout and the character's index
+<a href=#303 id=303 data-nosnippet>303</a>    /// within the atlas.
+<a href=#304 id=304 data-nosnippet>304</a>    ///
+<a href=#305 id=305 data-nosnippet>305</a>    /// # Parameters
+<a href=#306 id=306 data-nosnippet>306</a>    /// - `character`: The character whose texture atlas entry is needed.
+<a href=#307 id=307 data-nosnippet>307</a>    ///
+<a href=#308 id=308 data-nosnippet>308</a>    /// # Returns
+<a href=#309 id=309 data-nosnippet>309</a>    /// A [`TextureAtlas`] structure containing the layout and character index.
+<a href=#310 id=310 data-nosnippet>310</a>    </span><span class="attr">#[inline]
+<a href=#311 id=311 data-nosnippet>311</a>    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>font_texture_atlas(<span class="kw-2">&amp;</span><span class="self">self</span>, character: char) -&gt; TextureAtlas {
+<a href=#312 id=312 data-nosnippet>312</a>        <span class="kw">let </span>image_font_character = <span class="kw-2">&amp;</span><span class="self">self</span>.image_font.atlas_character_map[<span class="kw-2">&amp;</span>character];
+<a href=#313 id=313 data-nosnippet>313</a>        TextureAtlas {
+<a href=#314 id=314 data-nosnippet>314</a>            layout: <span class="self">self</span>.image_font.atlas_layouts[image_font_character.page_index].clone_weak(),
+<a href=#315 id=315 data-nosnippet>315</a>            index: image_font_character.character_index,
+<a href=#316 id=316 data-nosnippet>316</a>        }
+<a href=#317 id=317 data-nosnippet>317</a>    }
+<a href=#318 id=318 data-nosnippet>318</a>
+<a href=#319 id=319 data-nosnippet>319</a>    <span class="doccomment">/// Returns the filtered text, which includes only characters supported by
+<a href=#320 id=320 data-nosnippet>320</a>    /// the font.
+<a href=#321 id=321 data-nosnippet>321</a>    ///
+<a href=#322 id=322 data-nosnippet>322</a>    /// The filtered text excludes unsupported or invalid characters, ensuring
+<a href=#323 id=323 data-nosnippet>323</a>    /// that only renderable glyphs are processed.
+<a href=#324 id=324 data-nosnippet>324</a>    </span><span class="attr">#[inline]
+<a href=#325 id=325 data-nosnippet>325</a>    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>text(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>FilteredString&lt;<span class="lifetime">'_</span>, <span class="kw-2">&amp;</span>String&gt; {
+<a href=#326 id=326 data-nosnippet>326</a>        <span class="kw-2">&amp;</span><span class="self">self</span>.filtered_text
+<a href=#327 id=327 data-nosnippet>327</a>    }
+<a href=#328 id=328 data-nosnippet>328</a>
+<a href=#329 id=329 data-nosnippet>329</a>    <span class="doccomment">/// Updates the texture index for the specified character and assigns the
+<a href=#330 id=330 data-nosnippet>330</a>    /// configured color.
+<a href=#331 id=331 data-nosnippet>331</a>    ///
+<a href=#332 id=332 data-nosnippet>332</a>    /// This function assigns the correct glyph index from the font atlas to
+<a href=#333 id=333 data-nosnippet>333</a>    /// `texture_atlas`, ensuring that the correct character is selected for
+<a href=#334 id=334 data-nosnippet>334</a>    /// rendering. Additionally, it assigns the configured text color from
+<a href=#335 id=335 data-nosnippet>335</a>    /// `RenderConfig` to `color`.
+<a href=#336 id=336 data-nosnippet>336</a>    ///
+<a href=#337 id=337 data-nosnippet>337</a>    /// # Parameters
+<a href=#338 id=338 data-nosnippet>338</a>    /// - `character`: The character whose corresponding glyph should be used.
+<a href=#339 id=339 data-nosnippet>339</a>    /// - `texture_atlas`: The texture atlas entry that will be updated with the
+<a href=#340 id=340 data-nosnippet>340</a>    ///   character's index.
+<a href=#341 id=341 data-nosnippet>341</a>    /// - `color`: The variable that will be assigned the value of
+<a href=#342 id=342 data-nosnippet>342</a>    ///   `RenderConfig::color`.
+<a href=#343 id=343 data-nosnippet>343</a>    </span><span class="attr">#[inline]
+<a href=#344 id=344 data-nosnippet>344</a>    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>update_render_values(
+<a href=#345 id=345 data-nosnippet>345</a>        <span class="kw-2">&amp;</span><span class="self">self</span>,
+<a href=#346 id=346 data-nosnippet>346</a>        character: char,
+<a href=#347 id=347 data-nosnippet>347</a>        texture_atlas: <span class="kw-2">&amp;mut </span>TextureAtlas,
+<a href=#348 id=348 data-nosnippet>348</a>        color: <span class="kw-2">&amp;mut </span>Color,
+<a href=#349 id=349 data-nosnippet>349</a>    ) {
+<a href=#350 id=350 data-nosnippet>350</a>        texture_atlas.index = <span class="self">self</span>.image_font.atlas_character_map[<span class="kw-2">&amp;</span>character].character_index;
+<a href=#351 id=351 data-nosnippet>351</a>        <span class="kw-2">*</span>color = <span class="self">self</span>.render_config.color;
+<a href=#352 id=352 data-nosnippet>352</a>    }
+<a href=#353 id=353 data-nosnippet>353</a>
+<a href=#354 id=354 data-nosnippet>354</a>    <span class="doccomment">/// Computes or retrieves the cached anchor offsets for the text and glyph
+<a href=#355 id=355 data-nosnippet>355</a>    /// alignment.
+<a href=#356 id=356 data-nosnippet>356</a>    ///
+<a href=#357 id=357 data-nosnippet>357</a>    /// The computed offsets depend on the `render_config.offset_characters`
+<a href=#358 id=358 data-nosnippet>358</a>    /// setting:
+<a href=#359 id=359 data-nosnippet>359</a>    /// - If `true`, per-character offsets are applied to adjust positioning.
+<a href=#360 id=360 data-nosnippet>360</a>    /// - If `false`, glyphs are aligned strictly according to the text anchor.
+<a href=#361 id=361 data-nosnippet>361</a>    ///
+<a href=#362 id=362 data-nosnippet>362</a>    /// # Returns
+<a href=#363 id=363 data-nosnippet>363</a>    /// An [`AnchorOffsets`] struct containing:
+<a href=#364 id=364 data-nosnippet>364</a>    /// - `whole`: Offset for aligning the entire text block.
+<a href=#365 id=365 data-nosnippet>365</a>    /// - `individual`: Offset for aligning each individual glyph.
+<a href=#366 id=366 data-nosnippet>366</a>    </span><span class="attr">#[inline]
+<a href=#367 id=367 data-nosnippet>367</a>    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>anchor_offsets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AnchorOffsets {
+<a href=#368 id=368 data-nosnippet>368</a>        <span class="self">self</span>.render_config
+<a href=#369 id=369 data-nosnippet>369</a>            .text_anchor
+<a href=#370 id=370 data-nosnippet>370</a>            .to_anchor_offsets(<span class="self">self</span>.render_config.offset_characters)
+<a href=#371 id=371 data-nosnippet>371</a>    }
+<a href=#372 id=372 data-nosnippet>372</a>
+<a href=#373 id=373 data-nosnippet>373</a>    <span class="doccomment">/// Computes the transform for positioning and scaling a text sprite.
+<a href=#374 id=374 data-nosnippet>374</a>    ///
+<a href=#375 id=375 data-nosnippet>375</a>    /// This method calculates the sprite's translation and scale based on:
+<a href=#376 id=376 data-nosnippet>376</a>    /// - The x-position of the sprite.
+<a href=#377 id=377 data-nosnippet>377</a>    /// - The dimensions of the character's glyph.
+<a href=#378 id=378 data-nosnippet>378</a>    /// - The alignment offsets and scaling configuration.
+<a href=#379 id=379 data-nosnippet>379</a>    ///
+<a href=#380 id=380 data-nosnippet>380</a>    /// # Parameters
+<a href=#381 id=381 data-nosnippet>381</a>    /// - `x_pos`: A mutable reference to the current x-position of the sprite.
+<a href=#382 id=382 data-nosnippet>382</a>    ///   This value is updated to reflect the position of the next sprite.
+<a href=#383 id=383 data-nosnippet>383</a>    /// - `character`: The character associated with the sprite.
+<a href=#384 id=384 data-nosnippet>384</a>    ///
+<a href=#385 id=385 data-nosnippet>385</a>    /// # Returns
+<a href=#386 id=386 data-nosnippet>386</a>    /// A [`Transform`] representing the position and scale of the sprite.
+<a href=#387 id=387 data-nosnippet>387</a>    </span><span class="attr">#[inline]
+<a href=#388 id=388 data-nosnippet>388</a>    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>transform(
+<a href=#389 id=389 data-nosnippet>389</a>        <span class="kw-2">&amp;</span><span class="self">self</span>,
+<a href=#390 id=390 data-nosnippet>390</a>        x_pos: <span class="kw-2">&amp;mut </span>f32,
+<a href=#391 id=391 data-nosnippet>391</a>        character: char,
+<a href=#392 id=392 data-nosnippet>392</a>        next_character: <span class="prelude-ty">Option</span>&lt;char&gt;,
+<a href=#393 id=393 data-nosnippet>393</a>    ) -&gt; Transform {
+<a href=#394 id=394 data-nosnippet>394</a>        <span class="kw">let </span>x = <span class="kw-2">*</span>x_pos;
+<a href=#395 id=395 data-nosnippet>395</a>        <span class="kw">let </span>(width, height) = <span class="self">self</span>.character_dimensions(character);
+<a href=#396 id=396 data-nosnippet>396</a>        <span class="kw-2">*</span>x_pos += <span class="self">self</span>.character_x_advance(character).unwrap_or(width);
 <a href=#397 id=397 data-nosnippet>397</a>
-<a href=#398 id=398 data-nosnippet>398</a>    <span class="doccomment">/// Determines whether individual characters should have per-character
-<a href=#399 id=399 data-nosnippet>399</a>    /// offsets applied.
-<a href=#400 id=400 data-nosnippet>400</a>    ///
-<a href=#401 id=401 data-nosnippet>401</a>    /// When `true`, additional spacing adjustments are made based on each
-<a href=#402 id=402 data-nosnippet>402</a>    /// character's properties. This setting affects how characters are
-<a href=#403 id=403 data-nosnippet>403</a>    /// positioned relative to each other.
-<a href=#404 id=404 data-nosnippet>404</a>    </span><span class="kw">pub </span>offset_characters: bool,
-<a href=#405 id=405 data-nosnippet>405</a>
-<a href=#406 id=406 data-nosnippet>406</a>    <span class="doccomment">/// Controls whether glyph dimensions should be scaled when a specific font
-<a href=#407 id=407 data-nosnippet>407</a>    /// height is set.
-<a href=#408 id=408 data-nosnippet>408</a>    ///
-<a href=#409 id=409 data-nosnippet>409</a>    /// When `true`, glyphs are scaled proportionally based on the desired font
-<a href=#410 id=410 data-nosnippet>410</a>    /// height. The scaling behavior is further influenced by the
-<a href=#411 id=411 data-nosnippet>411</a>    /// `scaling_mode` setting.
-<a href=#412 id=412 data-nosnippet>412</a>    </span><span class="kw">pub </span>apply_scaling: bool,
-<a href=#413 id=413 data-nosnippet>413</a>
-<a href=#414 id=414 data-nosnippet>414</a>    <span class="doccomment">/// The amount of space added between characters when rendering text.
-<a href=#415 id=415 data-nosnippet>415</a>    ///
-<a href=#416 id=416 data-nosnippet>416</a>    /// This value is specified at the font’s native height and is scaled
-<a href=#417 id=417 data-nosnippet>417</a>    /// accordingly when the text is resized.
-<a href=#418 id=418 data-nosnippet>418</a>    </span><span class="kw">pub </span>letter_spacing: f32,
-<a href=#419 id=419 data-nosnippet>419</a>
-<a href=#420 id=420 data-nosnippet>420</a>    <span class="doccomment">/// Determines how fractional values are handled when scaling glyph
-<a href=#421 id=421 data-nosnippet>421</a>    /// dimensions.
-<a href=#422 id=422 data-nosnippet>422</a>    ///
-<a href=#423 id=423 data-nosnippet>423</a>    /// This setting controls whether scaled dimensions are rounded, truncated,
-<a href=#424 id=424 data-nosnippet>424</a>    /// or left as floating-point values, influencing text rendering
-<a href=#425 id=425 data-nosnippet>425</a>    /// precision.
-<a href=#426 id=426 data-nosnippet>426</a>    </span><span class="kw">pub </span>scaling_mode: ImageFontScalingMode,
-<a href=#427 id=427 data-nosnippet>427</a>
-<a href=#428 id=428 data-nosnippet>428</a>    <span class="doccomment">/// The color applied to the rendered text.
-<a href=#429 id=429 data-nosnippet>429</a>    ///
-<a href=#430 id=430 data-nosnippet>430</a>    /// This affects all glyphs uniformly, allowing text to be tinted or styled
-<a href=#431 id=431 data-nosnippet>431</a>    /// dynamically.
-<a href=#432 id=432 data-nosnippet>432</a>    </span><span class="kw">pub </span>color: Color,
-<a href=#433 id=433 data-nosnippet>433</a>}
-<a href=#434 id=434 data-nosnippet>434</a>
-<a href=#435 id=435 data-nosnippet>435</a><span class="doccomment">/// A lightweight wrapper around a [`Cell&lt;Option&lt;T&gt;&gt;`] for caching values.
-<a href=#436 id=436 data-nosnippet>436</a>///
-<a href=#437 id=437 data-nosnippet>437</a>/// This utility type provides a mechanism to lazily compute and cache a value
-<a href=#438 id=438 data-nosnippet>438</a>/// using a factory function. It is ideal for scenarios where a value is
-<a href=#439 id=439 data-nosnippet>439</a>/// expensive to compute but may not always be needed.
-<a href=#440 id=440 data-nosnippet>440</a>///
-<a href=#441 id=441 data-nosnippet>441</a>/// # Features
-<a href=#442 id=442 data-nosnippet>442</a>/// - Lazily initializes the cached value when accessed for the first time.
-<a href=#443 id=443 data-nosnippet>443</a>/// - Ensures the cached value is reused across multiple accesses.
-<a href=#444 id=444 data-nosnippet>444</a>/// - Supports types that implement the [`Copy`] trait.
-<a href=#445 id=445 data-nosnippet>445</a></span><span class="kw">struct </span>CacheCell&lt;T&gt;(Cell&lt;<span class="prelude-ty">Option</span>&lt;T&gt;&gt;);
-<a href=#446 id=446 data-nosnippet>446</a>
-<a href=#447 id=447 data-nosnippet>447</a><span class="kw">impl</span>&lt;T&gt; CacheCell&lt;T&gt; {
-<a href=#448 id=448 data-nosnippet>448</a>    <span class="doccomment">/// Retrieves the cached value, computing it if necessary.
-<a href=#449 id=449 data-nosnippet>449</a>    ///
-<a href=#450 id=450 data-nosnippet>450</a>    /// If the value is already cached, this method returns it directly. If not,
-<a href=#451 id=451 data-nosnippet>451</a>    /// it invokes the provided factory function to compute the value, caches
-<a href=#452 id=452 data-nosnippet>452</a>    /// it, and then returns it.
-<a href=#453 id=453 data-nosnippet>453</a>    ///
-<a href=#454 id=454 data-nosnippet>454</a>    /// # Parameters
-<a href=#455 id=455 data-nosnippet>455</a>    /// - `factory`: A closure that computes the value if it is not already
-<a href=#456 id=456 data-nosnippet>456</a>    ///   cached.
-<a href=#457 id=457 data-nosnippet>457</a>    ///
-<a href=#458 id=458 data-nosnippet>458</a>    /// # Returns
-<a href=#459 id=459 data-nosnippet>459</a>    /// The cached value, or the newly computed value if the cache was empty.
-<a href=#460 id=460 data-nosnippet>460</a>    </span><span class="kw">fn </span>get_or_insert_with&lt;F&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, factory: F) -&gt; T
-<a href=#461 id=461 data-nosnippet>461</a>    <span class="kw">where
-<a href=#462 id=462 data-nosnippet>462</a>        </span>T: Copy,
-<a href=#463 id=463 data-nosnippet>463</a>        F: FnOnce() -&gt; T,
-<a href=#464 id=464 data-nosnippet>464</a>    {
-<a href=#465 id=465 data-nosnippet>465</a>        <span class="kw">if let </span><span class="prelude-val">Some</span>(value) = <span class="self">self</span>.<span class="number">0</span>.get() {
-<a href=#466 id=466 data-nosnippet>466</a>            value
-<a href=#467 id=467 data-nosnippet>467</a>        } <span class="kw">else </span>{
-<a href=#468 id=468 data-nosnippet>468</a>            <span class="kw">let </span>value = factory();
-<a href=#469 id=469 data-nosnippet>469</a>            <span class="self">self</span>.<span class="number">0</span>.set(<span class="prelude-val">Some</span>(value));
-<a href=#470 id=470 data-nosnippet>470</a>            value
-<a href=#471 id=471 data-nosnippet>471</a>        }
-<a href=#472 id=472 data-nosnippet>472</a>    }
-<a href=#473 id=473 data-nosnippet>473</a>}
-<a href=#474 id=474 data-nosnippet>474</a>
-<a href=#475 id=475 data-nosnippet>475</a><span class="kw">impl</span>&lt;T&gt; Default <span class="kw">for </span>CacheCell&lt;T&gt; {
-<a href=#476 id=476 data-nosnippet>476</a>    <span class="doccomment">/// Creates a new, empty `CacheCell`.
-<a href=#477 id=477 data-nosnippet>477</a>    ///
-<a href=#478 id=478 data-nosnippet>478</a>    /// The cache will initialize with no value and will compute the value on
-<a href=#479 id=479 data-nosnippet>479</a>    /// first access via `get_or_insert_with`.
-<a href=#480 id=480 data-nosnippet>480</a>    </span><span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
-<a href=#481 id=481 data-nosnippet>481</a>        <span class="self">Self</span>(default())
-<a href=#482 id=482 data-nosnippet>482</a>    }
-<a href=#483 id=483 data-nosnippet>483</a>}
-<a href=#484 id=484 data-nosnippet>484</a>
-<a href=#485 id=485 data-nosnippet>485</a><span class="attr">#[cfg(test)]
-<a href=#486 id=486 data-nosnippet>486</a></span><span class="kw">mod </span>tests;</code></pre></div></section></main></body></html>
+<a href=#398 id=398 data-nosnippet>398</a>        <span class="kw">let </span>params = ComputeTransformParams {
+<a href=#399 id=399 data-nosnippet>399</a>            x_pos: x,
+<a href=#400 id=400 data-nosnippet>400</a>            scaled_text_width: <span class="self">self</span>.text_width(),
+<a href=#401 id=401 data-nosnippet>401</a>            scaled_width: width,
+<a href=#402 id=402 data-nosnippet>402</a>            scaled_height: height,
+<a href=#403 id=403 data-nosnippet>403</a>            max_height: <span class="self">self</span>.max_height(),
+<a href=#404 id=404 data-nosnippet>404</a>            character_offsets: <span class="self">self</span>.character_offsets(character),
+<a href=#405 id=405 data-nosnippet>405</a>            scale: <span class="self">self</span>.scale(),
+<a href=#406 id=406 data-nosnippet>406</a>        };
+<a href=#407 id=407 data-nosnippet>407</a>        <span class="kw">if let </span><span class="prelude-val">Some</span>(next_character) = next_character {
+<a href=#408 id=408 data-nosnippet>408</a>            <span class="kw">if let </span><span class="prelude-val">Some</span>(kerning) = <span class="self">self</span>.character_kerning(character, next_character) {
+<a href=#409 id=409 data-nosnippet>409</a>                <span class="kw-2">*</span>x_pos += kerning;
+<a href=#410 id=410 data-nosnippet>410</a>            }
+<a href=#411 id=411 data-nosnippet>411</a>        }
+<a href=#412 id=412 data-nosnippet>412</a>        <span class="self">self</span>.anchor_offsets().compute_transform(params)
+<a href=#413 id=413 data-nosnippet>413</a>    }
+<a href=#414 id=414 data-nosnippet>414</a>}
+<a href=#415 id=415 data-nosnippet>415</a>
+<a href=#416 id=416 data-nosnippet>416</a><span class="doccomment">/// Configuration settings for rendering text using an `ImageFont`.
+<a href=#417 id=417 data-nosnippet>417</a>///
+<a href=#418 id=418 data-nosnippet>418</a>/// This struct controls how text is rendered, including alignment, spacing,
+<a href=#419 id=419 data-nosnippet>419</a>/// scaling, and color settings. It is passed to `RenderContext` to determine
+<a href=#420 id=420 data-nosnippet>420</a>/// rendering behavior.
+<a href=#421 id=421 data-nosnippet>421</a></span><span class="attr">#[derive(Clone, Copy, Debug, Default)]
+<a href=#422 id=422 data-nosnippet>422</a></span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>RenderConfig {
+<a href=#423 id=423 data-nosnippet>423</a>    <span class="doccomment">/// The anchor point used to align the rendered text.
+<a href=#424 id=424 data-nosnippet>424</a>    ///
+<a href=#425 id=425 data-nosnippet>425</a>    /// This defines how the text is positioned relative to its origin.
+<a href=#426 id=426 data-nosnippet>426</a>    /// For example, `Anchor::TopLeft` aligns the text's top-left corner to its
+<a href=#427 id=427 data-nosnippet>427</a>    /// position.
+<a href=#428 id=428 data-nosnippet>428</a>    </span><span class="kw">pub </span>text_anchor: Anchor,
+<a href=#429 id=429 data-nosnippet>429</a>
+<a href=#430 id=430 data-nosnippet>430</a>    <span class="doccomment">/// Determines whether individual characters should have per-character
+<a href=#431 id=431 data-nosnippet>431</a>    /// offsets applied.
+<a href=#432 id=432 data-nosnippet>432</a>    ///
+<a href=#433 id=433 data-nosnippet>433</a>    /// When `true`, additional spacing adjustments are made based on each
+<a href=#434 id=434 data-nosnippet>434</a>    /// character's properties. This setting affects how characters are
+<a href=#435 id=435 data-nosnippet>435</a>    /// positioned relative to each other.
+<a href=#436 id=436 data-nosnippet>436</a>    </span><span class="kw">pub </span>offset_characters: bool,
+<a href=#437 id=437 data-nosnippet>437</a>
+<a href=#438 id=438 data-nosnippet>438</a>    <span class="doccomment">/// Controls whether glyph dimensions should be scaled when a specific font
+<a href=#439 id=439 data-nosnippet>439</a>    /// height is set.
+<a href=#440 id=440 data-nosnippet>440</a>    ///
+<a href=#441 id=441 data-nosnippet>441</a>    /// When `true`, glyphs are scaled proportionally based on the desired font
+<a href=#442 id=442 data-nosnippet>442</a>    /// height. The scaling behavior is further influenced by the
+<a href=#443 id=443 data-nosnippet>443</a>    /// `scaling_mode` setting.
+<a href=#444 id=444 data-nosnippet>444</a>    </span><span class="kw">pub </span>apply_scaling: bool,
+<a href=#445 id=445 data-nosnippet>445</a>
+<a href=#446 id=446 data-nosnippet>446</a>    <span class="doccomment">/// The amount of space added between characters when rendering text.
+<a href=#447 id=447 data-nosnippet>447</a>    ///
+<a href=#448 id=448 data-nosnippet>448</a>    /// This value is specified at the font’s native height and is scaled
+<a href=#449 id=449 data-nosnippet>449</a>    /// accordingly when the text is resized.
+<a href=#450 id=450 data-nosnippet>450</a>    </span><span class="kw">pub </span>letter_spacing: f32,
+<a href=#451 id=451 data-nosnippet>451</a>
+<a href=#452 id=452 data-nosnippet>452</a>    <span class="doccomment">/// Determines how fractional values are handled when scaling glyph
+<a href=#453 id=453 data-nosnippet>453</a>    /// dimensions.
+<a href=#454 id=454 data-nosnippet>454</a>    ///
+<a href=#455 id=455 data-nosnippet>455</a>    /// This setting controls whether scaled dimensions are rounded, truncated,
+<a href=#456 id=456 data-nosnippet>456</a>    /// or left as floating-point values, influencing text rendering
+<a href=#457 id=457 data-nosnippet>457</a>    /// precision.
+<a href=#458 id=458 data-nosnippet>458</a>    </span><span class="kw">pub </span>scaling_mode: ImageFontScalingMode,
+<a href=#459 id=459 data-nosnippet>459</a>
+<a href=#460 id=460 data-nosnippet>460</a>    <span class="doccomment">/// The color applied to the rendered text.
+<a href=#461 id=461 data-nosnippet>461</a>    ///
+<a href=#462 id=462 data-nosnippet>462</a>    /// This affects all glyphs uniformly, allowing text to be tinted or styled
+<a href=#463 id=463 data-nosnippet>463</a>    /// dynamically.
+<a href=#464 id=464 data-nosnippet>464</a>    </span><span class="kw">pub </span>color: Color,
+<a href=#465 id=465 data-nosnippet>465</a>}
+<a href=#466 id=466 data-nosnippet>466</a>
+<a href=#467 id=467 data-nosnippet>467</a><span class="doccomment">/// A lightweight wrapper around a [`Cell&lt;Option&lt;T&gt;&gt;`] for caching values.
+<a href=#468 id=468 data-nosnippet>468</a>///
+<a href=#469 id=469 data-nosnippet>469</a>/// This utility type provides a mechanism to lazily compute and cache a value
+<a href=#470 id=470 data-nosnippet>470</a>/// using a factory function. It is ideal for scenarios where a value is
+<a href=#471 id=471 data-nosnippet>471</a>/// expensive to compute but may not always be needed.
+<a href=#472 id=472 data-nosnippet>472</a>///
+<a href=#473 id=473 data-nosnippet>473</a>/// # Features
+<a href=#474 id=474 data-nosnippet>474</a>/// - Lazily initializes the cached value when accessed for the first time.
+<a href=#475 id=475 data-nosnippet>475</a>/// - Ensures the cached value is reused across multiple accesses.
+<a href=#476 id=476 data-nosnippet>476</a>/// - Supports types that implement the [`Copy`] trait.
+<a href=#477 id=477 data-nosnippet>477</a></span><span class="kw">struct </span>CacheCell&lt;T&gt;(Cell&lt;<span class="prelude-ty">Option</span>&lt;T&gt;&gt;);
+<a href=#478 id=478 data-nosnippet>478</a>
+<a href=#479 id=479 data-nosnippet>479</a><span class="kw">impl</span>&lt;T&gt; CacheCell&lt;T&gt; {
+<a href=#480 id=480 data-nosnippet>480</a>    <span class="doccomment">/// Retrieves the cached value, computing it if necessary.
+<a href=#481 id=481 data-nosnippet>481</a>    ///
+<a href=#482 id=482 data-nosnippet>482</a>    /// If the value is already cached, this method returns it directly. If not,
+<a href=#483 id=483 data-nosnippet>483</a>    /// it invokes the provided factory function to compute the value, caches
+<a href=#484 id=484 data-nosnippet>484</a>    /// it, and then returns it.
+<a href=#485 id=485 data-nosnippet>485</a>    ///
+<a href=#486 id=486 data-nosnippet>486</a>    /// # Parameters
+<a href=#487 id=487 data-nosnippet>487</a>    /// - `factory`: A closure that computes the value if it is not already
+<a href=#488 id=488 data-nosnippet>488</a>    ///   cached.
+<a href=#489 id=489 data-nosnippet>489</a>    ///
+<a href=#490 id=490 data-nosnippet>490</a>    /// # Returns
+<a href=#491 id=491 data-nosnippet>491</a>    /// The cached value, or the newly computed value if the cache was empty.
+<a href=#492 id=492 data-nosnippet>492</a>    </span><span class="kw">fn </span>get_or_insert_with&lt;F&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, factory: F) -&gt; T
+<a href=#493 id=493 data-nosnippet>493</a>    <span class="kw">where
+<a href=#494 id=494 data-nosnippet>494</a>        </span>T: Copy,
+<a href=#495 id=495 data-nosnippet>495</a>        F: FnOnce() -&gt; T,
+<a href=#496 id=496 data-nosnippet>496</a>    {
+<a href=#497 id=497 data-nosnippet>497</a>        <span class="kw">if let </span><span class="prelude-val">Some</span>(value) = <span class="self">self</span>.<span class="number">0</span>.get() {
+<a href=#498 id=498 data-nosnippet>498</a>            value
+<a href=#499 id=499 data-nosnippet>499</a>        } <span class="kw">else </span>{
+<a href=#500 id=500 data-nosnippet>500</a>            <span class="kw">let </span>value = factory();
+<a href=#501 id=501 data-nosnippet>501</a>            <span class="self">self</span>.<span class="number">0</span>.set(<span class="prelude-val">Some</span>(value));
+<a href=#502 id=502 data-nosnippet>502</a>            value
+<a href=#503 id=503 data-nosnippet>503</a>        }
+<a href=#504 id=504 data-nosnippet>504</a>    }
+<a href=#505 id=505 data-nosnippet>505</a>}
+<a href=#506 id=506 data-nosnippet>506</a>
+<a href=#507 id=507 data-nosnippet>507</a><span class="kw">impl</span>&lt;T&gt; Default <span class="kw">for </span>CacheCell&lt;T&gt; {
+<a href=#508 id=508 data-nosnippet>508</a>    <span class="doccomment">/// Creates a new, empty `CacheCell`.
+<a href=#509 id=509 data-nosnippet>509</a>    ///
+<a href=#510 id=510 data-nosnippet>510</a>    /// The cache will initialize with no value and will compute the value on
+<a href=#511 id=511 data-nosnippet>511</a>    /// first access via `get_or_insert_with`.
+<a href=#512 id=512 data-nosnippet>512</a>    </span><span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+<a href=#513 id=513 data-nosnippet>513</a>        <span class="self">Self</span>(default())
+<a href=#514 id=514 data-nosnippet>514</a>    }
+<a href=#515 id=515 data-nosnippet>515</a>}
+<a href=#516 id=516 data-nosnippet>516</a>
+<a href=#517 id=517 data-nosnippet>517</a><span class="attr">#[cfg(test)]
+<a href=#518 id=518 data-nosnippet>518</a></span><span class="kw">mod </span>tests;</code></pre></div></section></main></body></html>
