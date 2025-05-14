@@ -264,6 +264,28 @@ impl<'assets> RenderContext<'assets> {
         image_font_character.x_advance
     }
 
+    /// Retrieves the kerning value between two characters, if defined in the
+    /// font.
+    ///
+    /// Kerning adjusts the spacing between specific pairs of characters to
+    /// improve the visual appearance of text. This function looks up the
+    /// kerning value for the given character pair, returning the adjustment
+    /// amount if it exists.
+    ///
+    /// # Parameters
+    /// - `character`: The current character in the text.
+    /// - `next_character`: The character immediately following `character`.
+    ///
+    /// # Returns
+    /// - `Some(f32)`: The kerning adjustment to apply between the two
+    ///   characters, if defined.
+    /// - `None`: If no kerning adjustment is specified for the character pair.
+    #[inline]
+    pub(crate) fn character_kerning(&self, character: char, next_character: char) -> Option<f32> {
+        let image_font_character = &self.image_font.atlas_character_map[&character];
+        image_font_character.kernings.get(&next_character).copied()
+    }
+
     /// Retrieves the handle to the font texture image.
     ///
     /// This handle is used to assign the appropriate image to a text sprite.
@@ -363,7 +385,12 @@ impl<'assets> RenderContext<'assets> {
     /// # Returns
     /// A [`Transform`] representing the position and scale of the sprite.
     #[inline]
-    pub(crate) fn transform(&self, x_pos: &mut f32, character: char) -> Transform {
+    pub(crate) fn transform(
+        &self,
+        x_pos: &mut f32,
+        character: char,
+        next_character: Option<char>,
+    ) -> Transform {
         let x = *x_pos;
         let (width, height) = self.character_dimensions(character);
         *x_pos += self.character_x_advance(character).unwrap_or(width);
@@ -377,6 +404,11 @@ impl<'assets> RenderContext<'assets> {
             character_offsets: self.character_offsets(character),
             scale: self.scale(),
         };
+        if let Some(next_character) = next_character {
+            if let Some(kerning) = self.character_kerning(character, next_character) {
+                *x_pos += kerning;
+            }
+        }
         self.anchor_offsets().compute_transform(params)
     }
 }

@@ -252,6 +252,10 @@ pub struct ImageFontCharacter {
     /// How much to advance the x position after rendering the character. `None`
     /// means use character width.
     pub x_advance: Option<f32>,
+
+    /// Kerning information for this character. This is a map of following
+    /// characters and the amount of kerning to apply between them.
+    pub kernings: HashMap<char, f32>,
 }
 
 /// Text rendered using an [`ImageFont`].

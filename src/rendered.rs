@@ -10,6 +10,8 @@
 //!   dynamically.
 //! - Integrates with the `image` crate for low-level image manipulation.
 
+use std::iter;
+
 use bevy::sprite::Anchor;
 use bevy::{
     prelude::*,
@@ -23,6 +25,7 @@ use image::{
     GenericImage as _, GenericImageView as _, ImageBuffer, ImageError, Rgba,
     imageops::{self, FilterType},
 };
+use itertools::Itertools as _;
 use thiserror::Error;
 
 use crate::render_context::{RenderConfig, RenderContext};
@@ -202,23 +205,8 @@ fn render_text_to_image(
     images: &Assets<Image>,
     layouts: &Assets<TextureAtlasLayout>,
 ) -> Result<Image, ImageFontRenderError> {
-    let image_font = image_fonts
-        .get(&image_font_text.font)
-        .ok_or(ImageFontRenderError::MissingImageFontAsset)?;
-    let textures = image_font.textures(images);
-
-    let render_config = RenderConfig {
-        text_anchor: Anchor::Center,
-        offset_characters: false,
-        apply_scaling: false,
-        letter_spacing: 0.0,
-        scaling_mode: ImageFontScalingMode::Truncated,
-        color: Color::WHITE, // Currently unused for rendering to an image
-    };
-
-    let mut render_context =
-        RenderContext::new(image_font, image_font_text, render_config, layouts)
-            .ok_or(ImageFontRenderError::MissingTextureAsset)?;
+    let (image_font, textures, mut render_context) =
+        prepare_context(image_font_text, image_fonts, images, layouts)?;
 
     if render_context.text().is_empty() {
         // Can't make a 0x0 image, so make a 1x1 transparent black pixel
@@ -237,7 +225,6 @@ fn render_text_to_image(
 
     let width = render_context.text_width() as u32;
     let height = render_context.max_height();
-
     let mut output_image = image::RgbaImage::new(width, height);
     let font_textures: Vec<ImageBuffer<Rgba<u8>, _>> = textures
         .iter()
@@ -248,35 +235,13 @@ fn render_text_to_image(
         .collect::<Option<_>>()
         .ok_or(ImageFontRenderError::UnknownError)?;
 
-    let mut x_pos = 0.0;
-    let mut texture_atlas = render_context.font_texture_atlas(' ');
-    let mut color = Color::default();
-    for character in render_context.text().filtered_chars() {
-        let image_font_character = &image_font.atlas_character_map[&character];
-        render_context.update_render_values(character, &mut texture_atlas, &mut color);
-
-        #[expect(
-            clippy::expect_used,
-            reason = "we're using `filtered_chars()` which has only valid characters"
-        )]
-        let rect = texture_atlas
-            .texture_rect(layouts)
-            .expect("`filtered_chars()` guarantees valid characters");
-
-        output_image.copy_from(
-            &*font_textures[image_font_character.page_index].view(
-                rect.min.x,
-                rect.min.y,
-                rect.width(),
-                rect.height(),
-            ),
-            x_pos as u32,
-            0,
-        )?;
-
-        // Let `transform()` handle x-position updates
-        render_context.transform(&mut x_pos, character);
-    }
+    render_glyphs_to_image(
+        layouts,
+        image_font,
+        &render_context,
+        &mut output_image,
+        font_textures,
+    )?;
 
     #[expect(
         clippy::cast_possible_truncation,
@@ -309,6 +274,134 @@ fn render_text_to_image(
     bevy_image.sampler = ImageSampler::nearest();
 
     Ok(bevy_image)
+}
+
+/// Renders each glyph of the filtered text into the output image buffer.
+///
+/// This function iterates over the filtered characters in the text, copying
+/// each glyph from the appropriate font texture into the output image at the
+/// correct position. It uses the render context to determine glyph placement,
+/// color, and texture atlas information. The function also handles updating the
+/// x-position for each glyph, including any kerning or advance adjustments, by
+/// delegating to the render context's transform logic.
+///
+/// # Parameters
+/// - `layouts`: The collection of texture atlas layouts for glyph positioning.
+/// - `image_font`: The font asset containing glyph metadata and character maps.
+/// - `render_context`: The context providing filtered text and rendering
+///   configuration.
+/// - `output_image`: The image buffer to which glyphs are rendered.
+/// - `font_textures`: The set of font texture images, one per atlas page.
+///
+/// # Errors
+/// Returns an error if copying a glyph from the font texture to the output
+/// image fails.
+#[expect(
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss,
+    reason = "numbers are always positive and small enough"
+)]
+fn render_glyphs_to_image(
+    layouts: &Assets<TextureAtlasLayout>,
+    image_font: &ImageFont,
+    render_context: &RenderContext<'_>,
+    output_image: &mut ImageBuffer<Rgba<u8>, Vec<u8>>,
+    font_textures: Vec<ImageBuffer<Rgba<u8>, &[u8]>>,
+) -> Result<(), ImageFontRenderError> {
+    let mut x_pos = 0.0;
+    let mut texture_atlas = render_context.font_texture_atlas(' ');
+    let mut color = Color::default();
+
+    for (character, next_character) in render_context
+        .text()
+        .filtered_chars()
+        .map(Some)
+        .chain(iter::once(None))
+        .tuple_windows()
+    {
+        #[expect(
+            clippy::expect_used,
+            reason = "tuple_windows() guarantees that only the last next_character is None"
+        )]
+        let character = character.expect("Only the last character can be None");
+
+        let image_font_character = &image_font.atlas_character_map[&character];
+        render_context.update_render_values(character, &mut texture_atlas, &mut color);
+
+        #[expect(
+            clippy::expect_used,
+            reason = "we're using `filtered_chars()` which has only valid characters"
+        )]
+        let rect = texture_atlas
+            .texture_rect(layouts)
+            .expect("`filtered_chars()` guarantees valid characters");
+
+        output_image.copy_from(
+            &*font_textures[image_font_character.page_index].view(
+                rect.min.x,
+                rect.min.y,
+                rect.width(),
+                rect.height(),
+            ),
+            x_pos as u32,
+            0,
+        )?;
+
+        // Let `transform()` handle x-position updates
+        render_context.transform(&mut x_pos, character, next_character);
+    }
+    Ok(())
+}
+
+/// Prepares the rendering context for image font text rendering.
+///
+/// This function retrieves the required font asset, associated textures, and
+/// constructs a `RenderContext` for the given `ImageFontText`. It returns all
+/// the necessary data to render the text as an image, including the font,
+/// textures, and context with rendering configuration.
+///
+/// # Parameters
+/// - `image_font_text`: The text and font information to render.
+/// - `image_fonts`: The collection of available font assets.
+/// - `images`: The collection of image assets used to retrieve font textures.
+/// - `layouts`: The texture atlas layouts defining character positioning.
+///
+/// # Returns
+/// A tuple containing:
+/// - A reference to the `ImageFont` asset.
+/// - A vector of references to the font's texture images.
+/// - The constructed `RenderContext` for rendering.
+///
+/// # Errors
+/// Returns an error if the font asset or required texture assets are missing.
+fn prepare_context<'assets, 'image>(
+    image_font_text: &'assets ImageFontText,
+    image_fonts: &'assets Assets<ImageFont>,
+    images: &'image Assets<Image>,
+    layouts: &'assets Assets<TextureAtlasLayout>,
+) -> Result<
+    (
+        &'assets ImageFont,
+        Vec<&'image Image>,
+        RenderContext<'assets>,
+    ),
+    ImageFontRenderError,
+> {
+    let image_font = image_fonts
+        .get(&image_font_text.font)
+        .ok_or(ImageFontRenderError::MissingImageFontAsset)?;
+    let textures = image_font.textures(images);
+    let render_config = RenderConfig {
+        text_anchor: Anchor::Center,
+        offset_characters: false,
+        apply_scaling: false,
+        letter_spacing: 0.0,
+        scaling_mode: ImageFontScalingMode::Truncated,
+        color: Color::WHITE, // Currently unused for rendering to an image
+    };
+    let render_context = RenderContext::new(image_font, image_font_text, render_config, layouts)
+        .ok_or(ImageFontRenderError::MissingTextureAsset)?;
+    Ok((image_font, textures, render_context))
 }
 
 /// Errors that can occur during the rendering of an `ImageFont`.

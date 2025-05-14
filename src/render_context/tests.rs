@@ -258,6 +258,7 @@ fn transform() {
         let transform = render_context.transform(
             &mut x_pos,
             render_context.text().filtered_chars().next().unwrap(),
+            Some(render_context.text().filtered_chars().next().unwrap()),
         );
 
         // Verify the transform is calculated correctly

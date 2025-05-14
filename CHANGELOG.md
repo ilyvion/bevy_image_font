@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **BMF kerning support:** Kerning pairs from BMF files are now parsed and applied during text rendering. This improves the visual appearance of text by adjusting spacing between specific character pairs according to the font's kerning data.
+- The `ImageFontCharacter` struct now includes a `kernings` field, and the rendering pipeline (including both `atlas_sprites` and `rendered` modes) applies kerning adjustments between character pairs.
+
+### Changed
+
+- The text rendering logic in both sprite-based and pre-rendered modes now takes BMF kerning into account when positioning characters.
+
 ### Fixed
 
 - Fixed a bug where text rendered with `bevy_image_font` would not update its size when `UiScale` changed, unless the text itself was also changed ([#17]). Now, all text is properly re-rendered when the UI scale changes.

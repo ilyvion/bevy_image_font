@@ -83,6 +83,7 @@ impl AssetLoader for BmFontLoader {
                 .await?;
 
         Ok(construct_image_font(
+            &bm_font,
             image_handles,
             atlas_character_map,
             atlas_layout_handles,
@@ -313,6 +314,7 @@ async fn load_images_and_textures(
 
 /// Constructs the final `ImageFont` asset.
 fn construct_image_font(
+    bm_font: &bmfont_rs::Font,
     image_handles: Vec<bevy::asset::Handle<Image>>,
     atlas_character_map: HashMap<char, (&bmfont_rs::Char, URect, Option<usize>)>,
     atlas_layout_handles: Vec<bevy::asset::Handle<TextureAtlasLayout>>,
@@ -323,6 +325,22 @@ fn construct_image_font(
         atlas_character_map: atlas_character_map
             .into_iter()
             .map(|(char, (font_char, _, atlas_index))| {
+                let kernings = bm_font.kernings.iter().filter_map(|kerning| {
+                    if kerning.first == font_char.id {
+                        if let Some(character) = char::from_u32(kerning.second) {
+                            Some((character, f32::from(kerning.amount)))
+                        } else {
+                            warn!(
+                                "Skipping invalid character id {} in kerning data.",
+                                kerning.second
+                            );
+                            None
+                        }
+                    } else {
+                        None
+                    }
+                });
+
                 (
                     char,
                     #[expect(
@@ -337,6 +355,7 @@ fn construct_image_font(
                             -f32::from(font_char.yoffset),
                         ),
                         x_advance: Some(f32::from(font_char.xadvance)),
+                        kernings: kernings.collect(),
                     },
                 )
             })

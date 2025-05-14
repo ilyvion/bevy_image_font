@@ -21,10 +21,12 @@
 pub mod gizmos;
 
 use std::fmt::Debug;
+use std::iter;
 
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
 use derive_setters::Setters;
+use itertools::Itertools as _;
 
 use crate::render_context::{RenderConfig, RenderContext};
 use crate::{
@@ -309,11 +311,13 @@ fn update_existing_sprites(
 
     let mut x_pos = 0.;
 
-    for (sprite_entity, character) in image_font_text_data
+    for ((sprite_entity, character), (next_sprite_entity, next_character)) in image_font_text_data
         .sprites
         .iter()
         .copied()
         .zip(render_context.text().filtered_chars())
+        .chain(iter::once((Entity::PLACEHOLDER, ' ')))
+        .tuple_windows()
     {
         let (mut sprite, mut transform) = match child_query.get_mut(sprite_entity) {
             Ok(result) => result,
@@ -336,7 +340,15 @@ fn update_existing_sprites(
 
         render_context.update_render_values(character, sprite_texture, &mut sprite.color);
 
-        *transform = render_context.transform(&mut x_pos, character);
+        *transform = render_context.transform(
+            &mut x_pos,
+            character,
+            if next_sprite_entity == Entity::PLACEHOLDER {
+                None
+            } else {
+                Some(next_character)
+            },
+        );
 
         #[cfg(feature = "gizmos")]
         gizmos::record_character_dimensions(
@@ -439,12 +451,21 @@ fn add_missing_sprites(
     let current_sprite_count = image_font_text_data.sprites.len();
 
     commands.entity(entity).with_children(|parent| {
-        for character in render_context
+        for (character, next_character) in render_context
             .text()
             .filtered_chars()
             .skip(current_sprite_count)
+            .map(Some)
+            .chain(iter::once(None))
+            .tuple_windows()
         {
-            let transform = render_context.transform(&mut x_pos, character);
+            #[expect(
+                clippy::expect_used,
+                reason = "tuple_windows() guarantees that only the last next_character is None"
+            )]
+            let character = character.expect("Only the last character can be None");
+
+            let transform = render_context.transform(&mut x_pos, character, next_character);
             let sprite = Sprite {
                 image: render_context.font_image(character),
                 texture_atlas: Some(render_context.font_texture_atlas(character)),
