@@ -267,7 +267,13 @@ macro_rules! gizmo_config_value {
     };
 }
 
-/// X
+/// Renders debug gizmos for a single `ImageFontText` entity and its glyph
+/// children.
+///
+/// This function draws rectangles and crosshairs to visualize the bounding
+/// boxes and anchor points of each glyph (child) and the text entity itself,
+/// according to the current gizmo configuration. Per-entity overrides are
+/// supported via `ShowAtlasSpritesGizmos`.
 fn render_gizmos(
     gizmos: &mut Gizmos<AtlasSpritesGizmoConfigGroup>,
     child_query: &Query<&GlobalTransform, Without<ImageFontText>>,
