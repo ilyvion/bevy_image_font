@@ -24,10 +24,6 @@
     reason = "if present as common.rs, cargo thinks it's an example binary"
 )]
 
-use bevy::log::LogPlugin;
-use bevy::log::tracing_subscriber::Layer as _;
-use bevy::log::tracing_subscriber::fmt::format::FmtSpan;
-use bevy::log::tracing_subscriber::fmt::layer;
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::AssetCollectionApp as _;
 use bevy_image_font::atlas_sprites::ImageFontSpriteText;
@@ -38,32 +34,20 @@ use crate::common::{DemoAssets, PANGRAMS};
 mod common;
 
 fn main() {
-    let log_plugin = LogPlugin {
-        custom_layer: |_| {
-            //let log_file = File::create("bmf.log").unwrap();
-            Some(
-                layer()
-                    .with_span_events(FmtSpan::ACTIVE)
-                    .with_file(true)
-                    .with_line_number(true)
-                    .with_ansi(false)
-                    .pretty()
-                    .boxed(),
-            )
-        },
-        ..default()
-    };
-    App::new()
-        .add_plugins((
-            DefaultPlugins
-                .set(ImagePlugin::default_nearest())
-                .set(log_plugin),
-            ImageFontPlugin,
-        ))
-        .init_collection::<DemoAssets>()
-        .add_systems(Startup, spawn_text)
-        .insert_resource(ClearColor(Color::srgb(0.2, 0.2, 0.2)))
-        .run();
+    let mut app = App::new();
+
+    app.add_plugins((
+        DefaultPlugins.set(ImagePlugin::default_nearest()),
+        ImageFontPlugin,
+    ))
+    .init_collection::<DemoAssets>()
+    .add_systems(Startup, setup)
+    .insert_resource(ClearColor(Color::srgb(0.2, 0.2, 0.2)));
+
+    #[cfg(feature = "gizmos")]
+    app.add_systems(Update, common::gizmos::toggle_gizmos);
+
+    app.run();
 }
 
 /// Spawns the text entities for the example.
@@ -71,7 +55,14 @@ fn main() {
 /// This system creates two text entities:
 /// 1. A text entity rendered at a scaled height with animated colors.
 /// 2. A text entity rendered at its native height with animated content.
-fn spawn_text(mut commands: Commands, assets: Res<DemoAssets>) {
+fn setup(
+    mut commands: Commands,
+    assets: Res<DemoAssets>,
+    #[cfg(feature = "gizmos")] store: ResMut<GizmoConfigStore>,
+) {
+    #[cfg(feature = "gizmos")]
+    common::gizmos::configure_gizmo_defaults(store);
+
     commands.spawn(Camera2d);
 
     for (i, &pangram) in PANGRAMS.iter().enumerate() {

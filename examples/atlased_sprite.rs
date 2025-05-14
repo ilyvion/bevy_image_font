@@ -36,7 +36,7 @@ fn main() {
                 animate_text,
                 animate_color,
                 #[cfg(feature = "gizmos")]
-                gizmos::toggle_gizmos,
+                common::gizmos::toggle_gizmos,
             ),
         )
         .insert_resource(ClearColor(Color::srgb(0.2, 0.2, 0.2)))
@@ -64,7 +64,7 @@ fn setup(
     #[cfg(feature = "gizmos")] store: ResMut<GizmoConfigStore>,
 ) {
     #[cfg(feature = "gizmos")]
-    gizmos::configure_gizmo_defaults(store);
+    common::gizmos::configure_gizmo_defaults(store);
 
     commands.spawn(Camera2d);
 
@@ -188,87 +188,6 @@ fn animate_color(mut query: Query<(&AnimateColor, &mut ImageFontSpriteText)>, ti
                 .sample(len - (animation_progress.fract() * len))
                 .expect("fract() is [0,1) and `len` will always be within bounds")
                 .into();
-        }
-    }
-}
-
-/// Gizmos related example code
-#[cfg(feature = "gizmos")]
-mod gizmos {
-
-    use bevy_image_font::atlas_sprites::gizmos::AtlasSpritesGizmoConfigGroup;
-
-    use super::{ButtonInput, GizmoConfigStore, KeyCode, Res, ResMut};
-
-    /// Configures default gizmo rendering settings.
-    ///
-    /// This function initializes the default visibility settings for
-    /// text-related gizmos, enabling anchor points and bounding box
-    /// rendering by default.
-    ///
-    /// # Default Behavior
-    /// - **Text anchor points**: Enabled (`render_text_anchor_point = true`).
-    /// - **Character anchor points**: Enabled (`render_character_anchor_point =
-    ///   true`).
-    /// - **Character bounding boxes**: Enabled (`render_character_box = true`).
-    ///
-    /// This function is called at startup to ensure gizmos are visible by
-    /// default.
-    pub(super) fn configure_gizmo_defaults(mut store: ResMut<'_, GizmoConfigStore>) {
-        let (_, atlas_sprites_config) = store.config_mut::<AtlasSpritesGizmoConfigGroup>();
-        atlas_sprites_config.render_text_anchor_point = true;
-        atlas_sprites_config.render_character_anchor_point = true;
-        atlas_sprites_config.render_character_box = true;
-    }
-
-    /// Handles keyboard input to toggle gizmo rendering settings.
-    ///
-    /// This function listens for key presses and updates the gizmo
-    /// configuration to enable or disable various debug visuals in real
-    /// time.
-    ///
-    /// # Parameters
-    /// - `input`: Reference to [`ButtonInput<KeyCode>`], used to detect key
-    ///   presses.
-    /// - `store`: Mutable reference to the [`GizmoConfigStore`] to update
-    ///   settings.
-    ///
-    /// # Keyboard Shortcuts
-    /// - **`G`**: Toggles all gizmo rendering on/off.
-    /// - **`A`**: Toggles character anchor point gizmos.
-    /// - **`B`**: Toggles character bounding box gizmos.
-    /// - **`T`**: Toggles text anchor point gizmos.
-    pub(super) fn toggle_gizmos(
-        input: Res<ButtonInput<KeyCode>>,
-        mut store: ResMut<GizmoConfigStore>,
-    ) {
-        let (config, atlas_sprites_config) = store.config_mut::<AtlasSpritesGizmoConfigGroup>();
-        if input.just_pressed(KeyCode::KeyG) {
-            config.enabled = !config.enabled;
-            println!("Gizmos enabled: {}", config.enabled);
-        }
-        if input.just_pressed(KeyCode::KeyA) {
-            atlas_sprites_config.render_character_anchor_point =
-                !atlas_sprites_config.render_character_anchor_point;
-            println!(
-                "Character anchor point gizmo enabled: {}",
-                atlas_sprites_config.render_character_anchor_point
-            );
-        }
-        if input.just_pressed(KeyCode::KeyB) {
-            atlas_sprites_config.render_character_box = !atlas_sprites_config.render_character_box;
-            println!(
-                "Character box gizmo enabled: {}",
-                atlas_sprites_config.render_character_box
-            );
-        }
-        if input.just_pressed(KeyCode::KeyT) {
-            atlas_sprites_config.render_text_anchor_point =
-                !atlas_sprites_config.render_text_anchor_point;
-            println!(
-                "Text anchor gizmo enabled: {}",
-                atlas_sprites_config.render_text_anchor_point
-            );
         }
     }
 }
