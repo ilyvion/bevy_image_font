@@ -15,7 +15,7 @@
 //!   behavior.
 //! - Default implementation (`Rounded`) balances precision and visual quality.
 
-use bevy::prelude::*;
+use bevy_reflect::Reflect;
 
 /// Determines how scaling is applied when calculating the dimensions of a
 /// character glyph. Scaling primarily affects width adjustments, while height

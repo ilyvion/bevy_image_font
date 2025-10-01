@@ -37,8 +37,16 @@ mod filtered_string;
 use std::cell::Cell;
 use std::fmt::Debug;
 
-use bevy::prelude::*;
-use bevy::sprite::Anchor;
+use bevy_asset::Assets;
+#[cfg(feature = "atlas_sprites")]
+use bevy_asset::Handle;
+use bevy_color::Color;
+#[cfg(feature = "atlas_sprites")]
+use bevy_image::Image;
+use bevy_image::{TextureAtlas, TextureAtlasLayout};
+use bevy_math::Vec2;
+use bevy_sprite::Anchor;
+use bevy_transform::components::Transform;
 
 use crate::ImageFontScalingMode;
 use crate::render_context::anchors::{AnchorExt as _, AnchorOffsets, ComputeTransformParams};
@@ -107,7 +115,7 @@ impl<'assets> RenderContext<'assets> {
         let atlas_layouts = match atlas_layouts {
             Ok(layout) => layout,
             Err(error) => {
-                error!("{error}");
+                bevy_log::error!("{error}");
                 return None;
             }
         };
@@ -121,7 +129,7 @@ impl<'assets> RenderContext<'assets> {
             render_config,
             filtered_text,
 
-            max_height: default(),
+            max_height: CacheCell::default(),
         })
     }
 
@@ -510,7 +518,7 @@ impl<T> Default for CacheCell<T> {
     /// The cache will initialize with no value and will compute the value on
     /// first access via `get_or_insert_with`.
     fn default() -> Self {
-        Self(default())
+        Self(Cell::default())
     }
 }
 

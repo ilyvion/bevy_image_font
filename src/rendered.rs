@@ -12,15 +12,24 @@
 
 use std::iter;
 
-use bevy::sprite::Anchor;
-use bevy::{
-    prelude::*,
-    render::{
-        render_asset::RenderAssetUsages,
-        render_resource::{Extent3d, TextureDimension, TextureFormat},
-    },
+use bevy_app::{App, Plugin, PostUpdate};
+use bevy_asset::{Assets, Handle};
+use bevy_color::Color;
+use bevy_ecs::{
+    component::Component,
+    query::Changed,
+    schedule::IntoScheduleConfigs as _,
+    system::{Query, Res, ResMut},
 };
-use bevy_image::{Image, ImageSampler};
+use bevy_image::{Image, ImageSampler, TextureAtlasLayout};
+use bevy_reflect::Reflect;
+use bevy_render::{
+    render_asset::RenderAssetUsages,
+    render_resource::{Extent3d, TextureDimension, TextureFormat},
+};
+use bevy_sprite::{Anchor, Sprite};
+#[cfg(feature = "ui")]
+use bevy_ui::widget::ImageNode;
 use image::{
     GenericImage as _, GenericImageView as _, ImageBuffer, ImageError, Rgba,
     imageops::{self, FilterType},
@@ -49,7 +58,7 @@ impl Plugin for RenderedPlugin {
 
         #[cfg(feature = "ui")]
         {
-            use bevy::ui::widget::update_image_content_size_system;
+            use bevy_ui::widget::update_image_content_size_system;
             app.add_systems(
                 PostUpdate,
                 render_text_to_image_node
@@ -157,15 +166,16 @@ fn render_text_to_image_holder<'borrow>(
     layouts: &Assets<TextureAtlasLayout>,
 ) {
     for (image_font_text, image_handle_holder) in font_text_to_image_iter {
-        debug!("Rendering [{}]", image_font_text.text);
+        bevy_log::debug!("Rendering [{}]", image_font_text.text);
         match render_text_to_image(image_font_text, image_fonts, images, layouts) {
             Ok(image) => {
                 image_handle_holder.set_image_handle(images.add(image));
             }
             Err(error) => {
-                error!(
+                bevy_log::error!(
                     "Error when rendering image font text {:?}: {}",
-                    image_font_text, error
+                    image_font_text,
+                    error
                 );
             }
         }

@@ -23,11 +23,24 @@ pub mod gizmos;
 use std::fmt::Debug;
 use std::iter;
 
-use bevy::prelude::*;
-use bevy::sprite::Anchor;
+use bevy_app::{App, Plugin, PostUpdate};
+use bevy_asset::Assets;
+use bevy_color::Color;
+use bevy_ecs::component::Component;
+use bevy_ecs::entity::Entity;
+use bevy_ecs::query::{Changed, Or};
+use bevy_ecs::schedule::IntoScheduleConfigs as _;
+use bevy_ecs::system::{Commands, Query, Res};
+use bevy_image::TextureAtlasLayout;
+use bevy_reflect::Reflect;
+use bevy_render::view::Visibility;
+use bevy_sprite::{Anchor, Sprite};
+use bevy_transform::components::Transform;
 use derive_setters::Setters;
 use itertools::Itertools as _;
 
+#[cfg(feature = "gizmos")]
+use crate::atlas_sprites::gizmos::ImageFontTextGizmoData;
 use crate::render_context::{RenderConfig, RenderContext};
 use crate::{
     ImageFont, ImageFontScalingMode, ImageFontSet, ImageFontText, LetterSpacing,
@@ -125,7 +138,7 @@ struct ImageFontTextData {
     /// tracks glyph dimensions and other relevant data used for rendering
     /// debug gizmos, such as bounding boxes and anchor points.
     #[cfg(feature = "gizmos")]
-    gizmo_data: gizmos::ImageFontTextGizmoData,
+    gizmo_data: ImageFontTextGizmoData,
 }
 impl ImageFontTextData {
     /// Creates a new `ImageFontTextData` instance for a given entity.
@@ -143,10 +156,10 @@ impl ImageFontTextData {
     fn new(entity: Entity) -> Self {
         Self {
             self_entity: entity,
-            sprites: default(),
-            has_reported_missing_font: default(),
+            sprites: Vec::default(),
+            has_reported_missing_font: false,
             #[cfg(feature = "gizmos")]
-            gizmo_data: default(),
+            gizmo_data: ImageFontTextGizmoData::default(),
         }
     }
 }
@@ -209,7 +222,7 @@ pub fn set_up_sprites(
                 } else {
                     &font_handle.id()
                 };
-                error!(
+                bevy_log::error!(
                     "ImageFont asset {font_handle_detail:?} is not loaded; can't render text for entity: {}",
                     image_font_text_data.self_entity
                 );
@@ -281,7 +294,7 @@ fn maybe_insert_new_image_font_text_data(
     maybe_new_image_font_text_data: Option<ImageFontTextData>,
 ) {
     if let Some(new_image_font_text_data) = maybe_new_image_font_text_data {
-        debug!("Inserted new ImageFontTextData for entity {:?}", entity);
+        bevy_log::debug!("Inserted new ImageFontTextData for entity {:?}", entity);
         commands.entity(entity).insert(new_image_font_text_data);
     }
 }
@@ -322,7 +335,7 @@ fn update_existing_sprites(
         let (mut sprite, mut transform) = match child_query.get_mut(sprite_entity) {
             Ok(result) => result,
             Err(error) => {
-                error!(
+                bevy_log::error!(
                     "An ImageFontSpriteText unexpectedly failed: {error}. This will likely cause rendering bugs."
                 );
                 continue;
@@ -331,7 +344,7 @@ fn update_existing_sprites(
 
         let sprite = &mut *sprite;
         let Some(sprite_texture) = sprite.texture_atlas.as_mut() else {
-            error!(
+            bevy_log::error!(
                 "An ImageFontSpriteText's child sprite was \
             unexpectedly missing a `texture_atlas`. This will likely cause rendering bugs."
             );

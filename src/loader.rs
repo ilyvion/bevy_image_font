@@ -4,12 +4,10 @@
 
 use std::io::Error as IoError;
 
-use bevy::{
-    asset::{AssetLoader, LoadContext, LoadDirectError, io::Reader},
-    platform::collections::HashMap,
-    prelude::*,
-};
-use bevy_image::{Image, ImageSampler, ImageSamplerDescriptor};
+use bevy_asset::{AssetLoader, LoadContext, LoadDirectError, io::Reader};
+use bevy_image::{Image, ImageSampler, ImageSamplerDescriptor, TextureAtlasLayout};
+use bevy_math::{URect, UVec2};
+use bevy_platform::collections::HashMap;
 use camino::{FromPathError, Utf8Path, Utf8PathBuf};
 use ron::de::SpannedError;
 use serde::{Deserialize, Serialize};

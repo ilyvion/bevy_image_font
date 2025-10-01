@@ -2,6 +2,11 @@ use std::marker::PhantomData;
 
 use bevy::asset::AssetIndex;
 use bevy::ecs::system::SystemState;
+use bevy_app::Update;
+use bevy_ecs::change_detection::DetectChanges as _;
+use bevy_ecs::world::Ref;
+#[cfg(feature = "ui")]
+use bevy_ui::UiScale;
 
 use super::*;
 
@@ -155,6 +160,8 @@ fn text_changed_when_ui_scale_changes() {
     // The bug: text is NOT marked as changed, even though UI scale changed
     // This should fail if the bug is present
     with_image_font_text(&mut app, &mut system_state, |image_font_text| {
+        use bevy_ecs::change_detection::DetectChanges as _;
+
         assert!(
             image_font_text.is_changed(),
             "ImageFontText should be marked as changed when UiScale changes"

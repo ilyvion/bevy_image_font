@@ -13,7 +13,8 @@
 //! - Default implementation (`Pixel(0)`), representing no spacing between
 //!   characters.
 
-use bevy::prelude::*;
+use bevy_reflect::Reflect;
+
 /// Specifies the spacing between characters in text rendering.
 ///
 /// This enum provides options for defining the kerning or spacing between

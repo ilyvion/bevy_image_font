@@ -1,4 +1,6 @@
+use bevy::asset::Handle;
 use bevy::color::palettes::css;
+use bevy_app::App;
 use float_eq::assert_float_eq;
 
 use super::*;
@@ -382,7 +384,7 @@ impl<'app> RenderContextTester<'app> {
             image_font_text,
             render_config: RenderConfig {
                 offset_characters: true,
-                ..default()
+                ..Default::default()
             },
             image_font_assets,
             atlas_layout_assets,
