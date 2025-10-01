@@ -26,7 +26,7 @@
 
 use std::fmt;
 
-use bevy::platform::collections::HashMap;
+use bevy_platform::collections::HashMap;
 
 use crate::{ImageFont, ImageFontCharacter};
 

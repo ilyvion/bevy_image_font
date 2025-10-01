@@ -15,8 +15,20 @@
 
 use std::fmt::Debug;
 
-use bevy::color::palettes::css;
-use bevy::prelude::*;
+use bevy_app::{App, Update};
+use bevy_color::Color;
+use bevy_color::palettes::css;
+use bevy_ecs::component::Component;
+use bevy_ecs::hierarchy::Children;
+use bevy_ecs::query::{With, Without};
+use bevy_ecs::resource::Resource;
+use bevy_ecs::system::Query;
+use bevy_gizmos::AppGizmoBuilder as _;
+use bevy_gizmos::config::GizmoConfigGroup;
+use bevy_gizmos::gizmos::Gizmos;
+use bevy_math::Vec2;
+use bevy_reflect::Reflect;
+use bevy_transform::components::GlobalTransform;
 
 use crate::ImageFontText;
 use crate::atlas_sprites::ImageFontTextData;
@@ -104,7 +116,11 @@ impl Default for AtlasSpritesGizmoConfigGroup {
 /// This module exists entirely to circumvent an annoying Clippy bug
 #[expect(clippy::min_ident_chars, reason = "clippy bug")]
 mod clippy_bug {
-    use bevy::prelude::*;
+
+    use bevy_color::Color;
+    use bevy_ecs::component::Component;
+    use bevy_ecs::reflect::ReflectComponent;
+    use bevy_reflect::{Reflect, prelude::ReflectDefault};
 
     #[expect(unused_imports, reason = "used in intra-doc comment")]
     use super::AtlasSpritesGizmoConfigGroup;
@@ -290,7 +306,9 @@ fn render_gizmos(
             if gizmo_config_value!(gizmos, sprite_gizmos, render_character_box) {
                 let color = gizmo_config_value!(gizmos, sprite_gizmos, character_box_color);
                 gizmos.rect_2d(
-                    Isometry2d::from_translation(child_global_transform.translation().truncate()),
+                    bevy_math::Isometry2d::from_translation(
+                        child_global_transform.translation().truncate(),
+                    ),
                     Vec2::new(width, height),
                     color,
                 );
@@ -300,7 +318,9 @@ fn render_gizmos(
                 let color =
                     gizmo_config_value!(gizmos, sprite_gizmos, character_anchor_point_color);
                 gizmos.cross_2d(
-                    Isometry2d::from_translation(child_global_transform.translation().truncate()),
+                    bevy_math::Isometry2d::from_translation(
+                        child_global_transform.translation().truncate(),
+                    ),
                     5.,
                     color,
                 );
@@ -311,7 +331,7 @@ fn render_gizmos(
     if gizmo_config_value!(gizmos, sprite_gizmos, render_text_anchor_point) {
         let color = gizmo_config_value!(gizmos, sprite_gizmos, text_anchor_point_color);
         gizmos.cross_2d(
-            Isometry2d::from_translation(global_transform.translation().truncate()),
+            bevy_math::Isometry2d::from_translation(global_transform.translation().truncate()),
             10.,
             color,
         );

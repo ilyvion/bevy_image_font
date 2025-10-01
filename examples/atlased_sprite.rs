@@ -15,6 +15,8 @@ use bevy::color::palettes::tailwind;
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
 use bevy_asset_loader::prelude::AssetCollectionApp as _;
+#[cfg(feature = "gizmos")]
+use bevy_gizmos::config::GizmoConfigStore;
 use bevy_image_font::atlas_sprites::ImageFontSpriteText;
 use bevy_image_font::{ImageFontPlugin, ImageFontText, LetterSpacing};
 

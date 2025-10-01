@@ -5,9 +5,12 @@
 
 use std::sync::LazyLock;
 
-use bevy::log::LogPlugin;
-use bevy::platform::collections::HashMap;
+use bevy_asset::{AssetPlugin, AssetServer};
 use bevy_image::{CompressedImageFormats, ImageLoader};
+use bevy_log::LogPlugin;
+use bevy_platform::collections::HashMap;
+#[cfg(feature = "ui")]
+use bevy_ui::UiScale;
 use camino::Utf8Path;
 
 use super::*;
@@ -51,7 +54,13 @@ pub(crate) fn wait_until_loaded<T: Asset>(app: &mut App, handle: &Handle<T>) {
 fn initialize_app_with_font(font_path: impl AsRef<Utf8Path>) -> (App, Handle<ImageFont>) {
     let mut app = App::new();
 
-    app.add_plugins((MinimalPlugins, AssetPlugin::default(), LogPlugin::default()));
+    app.add_plugins((
+        bevy_app::TaskPoolPlugin::default(),
+        bevy_time::TimePlugin,
+        bevy_app::ScheduleRunnerPlugin::default(),
+        AssetPlugin::default(),
+        LogPlugin::default(),
+    ));
     app.add_plugins(ImageFontPlugin);
 
     #[cfg(feature = "ui")]

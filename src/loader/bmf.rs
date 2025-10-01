@@ -10,15 +10,13 @@
 //! Code for parsing an [`ImageFont`] off of an on-disk representation in `fnt`
 //! format.
 
-use bevy::log::warn;
-use bevy::math::Vec2;
-use bevy::{
-    asset::{AssetLoader, LoadContext, io::Reader},
-    image::Image,
-    math::{URect, UVec2},
-    platform::collections::HashMap,
-};
+use bevy_asset::{AssetLoader, LoadContext, io::Reader};
+use bevy_image::Image;
 use bevy_image::TextureAtlasLayout;
+use bevy_log::warn;
+use bevy_math::Vec2;
+use bevy_math::{URect, UVec2};
+use bevy_platform::collections::HashMap;
 use camino::Utf8Path;
 use strum::{AsRefStr, EnumIter, IntoEnumIterator as _, VariantNames};
 use thiserror::Error;
@@ -264,8 +262,8 @@ async fn load_images_and_textures(
     load_context: &mut LoadContext<'_>,
 ) -> Result<
     (
-        Vec<bevy::asset::Handle<Image>>,
-        Vec<bevy::asset::Handle<TextureAtlasLayout>>,
+        Vec<bevy_asset::Handle<Image>>,
+        Vec<bevy_asset::Handle<TextureAtlasLayout>>,
     ),
     BmFontLoadError,
 > {
@@ -315,9 +313,9 @@ async fn load_images_and_textures(
 /// Constructs the final `ImageFont` asset.
 fn construct_image_font(
     bm_font: &bmfont_rs::Font,
-    image_handles: Vec<bevy::asset::Handle<Image>>,
+    image_handles: Vec<bevy_asset::Handle<Image>>,
     atlas_character_map: HashMap<char, (&bmfont_rs::Char, URect, Option<usize>)>,
-    atlas_layout_handles: Vec<bevy::asset::Handle<TextureAtlasLayout>>,
+    atlas_layout_handles: Vec<bevy_asset::Handle<TextureAtlasLayout>>,
     settings: &ImageFontLoaderSettings,
 ) -> ImageFont {
     ImageFont {

@@ -3,6 +3,10 @@
 
 use std::any::TypeId;
 
+use bevy_asset::AssetServer;
+use bevy_ecs::reflect::AppTypeRegistry;
+use bevy_math::{URect, UVec2};
+
 use super::*;
 use crate::tests::utils::{ExampleFont, initialize_app_with_example_font};
 
@@ -71,5 +75,10 @@ fn image_font_plugin_initialization() {
 // This is mostly here for the sake of coverage.
 #[test]
 fn creating_image_font_works() {
-    ImageFont::new(default(), default(), default(), default());
+    ImageFont::new(
+        Vec::default(),
+        HashMap::default(),
+        Vec::default(),
+        ImageSampler::default(),
+    );
 }

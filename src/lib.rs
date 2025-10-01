@@ -4,11 +4,26 @@
 // the `docsrs` configuration attribute is defined
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
-use bevy::{
-    platform::collections::{HashMap, HashSet},
-    prelude::*,
+use bevy_app::{App, Plugin, PostUpdate};
+#[cfg(feature = "rendered")]
+use bevy_asset::Assets;
+use bevy_asset::{Asset, AssetApp as _, AssetEvent, AssetId, Handle};
+use bevy_derive::{Deref, DerefMut};
+#[cfg(feature = "ui")]
+use bevy_ecs::system::Res;
+use bevy_ecs::{
+    change_detection::DetectChangesMut as _,
+    component::Component,
+    event::EventReader,
+    schedule::SystemSet,
+    system::{Local, Query},
 };
-use bevy_image::{Image, ImageSampler};
+use bevy_image::{Image, ImageSampler, TextureAtlasLayout};
+use bevy_math::{URect, UVec2, Vec2};
+use bevy_platform::collections::{HashMap, HashSet};
+use bevy_reflect::Reflect;
+#[cfg(feature = "ui")]
+use bevy_ui::UiScale;
 use derive_setters::Setters;
 
 mod letter_spacing;
@@ -145,7 +160,7 @@ impl ImageFont {
                 ImageFontCharacter {
                     page_index: page,
                     character_index: atlas_layout.add_texture(rect),
-                    ..default()
+                    ..Default::default()
                 },
             );
         }
@@ -291,8 +306,12 @@ pub fn sync_texts_with_font_changes(
     #[cfg(feature = "ui")]
     {
         // If the UI scale changed, mark all texts as changed
+
+        use bevy_ecs::change_detection::DetectChanges as _;
         if ui_scale.is_changed() && !ui_scale.is_added() {
             for mut image_font_text in &mut query {
+                use bevy_ecs::change_detection::DetectChangesMut as _;
+
                 image_font_text.set_changed();
             }
             changed_fonts.clear();
@@ -302,7 +321,7 @@ pub fn sync_texts_with_font_changes(
 
     // Extract relevant IDs from events
     for id in events.read().filter_map(extract_asset_id) {
-        info!("Image font {id} finished loading; marking as dirty");
+        bevy_log::info!("Image font {id} finished loading; marking as dirty");
         changed_fonts.insert(id);
     }
 

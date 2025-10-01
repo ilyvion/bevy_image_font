@@ -21,9 +21,9 @@
 //! The module includes comprehensive unit tests to ensure the correctness
 //! of offsets and transform calculations. See the `tests` module for details.
 
-use bevy::math::Vec2;
-use bevy::prelude::*;
-use bevy::sprite::Anchor;
+use bevy_math::Vec2;
+use bevy_sprite::Anchor;
+use bevy_transform::components::Transform;
 
 /// Extension trait to provide additional functionality for `Anchor`.
 pub(crate) trait AnchorExt {
@@ -214,6 +214,8 @@ fn finalize_transform(translation: Vec2, scale: f32) -> Transform {
 
 #[cfg(test)]
 mod tests {
+    use bevy_math::Vec3;
+
     use super::*;
 
     #[test]
