@@ -174,14 +174,14 @@ impl ImageFontLayout {
                     .expect("can't create character map from an empty string")
                     as u32;
 
-                if size.x % max_chars_per_line != 0 {
+                if !size.x.is_multiple_of(max_chars_per_line) {
                     return Err(ImageFontLayoutValidationError::InvalidImageWidth {
                         width: size.x,
                         per_line_character_count: max_chars_per_line,
                     });
                 }
                 let line_count = str.lines().count() as u32;
-                if size.y % line_count != 0 {
+                if !size.y.is_multiple_of(line_count) {
                     return Err(ImageFontLayoutValidationError::InvalidImageHeight {
                         height: size.y,
                         line_count,

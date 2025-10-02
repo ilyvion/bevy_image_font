@@ -176,7 +176,7 @@ fn animate_color(mut query: Query<(&AnimateColor, &mut ImageFontSpriteText)>, ti
     for (animate_color, mut image_sprite_font_text) in &mut query {
         let animation_progress = time.elapsed_secs() / RAINBOW.len() as f32;
         let len = (RAINBOW.len() - 1) as f32;
-        if animation_progress.trunc() as u32 % 2 == 0 {
+        if (animation_progress.trunc() as u32).is_multiple_of(2) {
             image_sprite_font_text.color = animate_color
                 .0
                 .sample(animation_progress.fract() * len)

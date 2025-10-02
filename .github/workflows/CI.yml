@@ -47,7 +47,7 @@ jobs:
             fail-fast: false
             matrix:
                 os: [ubuntu-latest]
-                toolchain: [stable, beta, nightly]
+                toolchain: [nightly] #[stable, beta, nightly]
                 include:
                     - os: windows-latest
                       toolchain: nightly
@@ -60,6 +60,7 @@ jobs:
             - name: Free disk space
               if: matrix.os == 'ubuntu-latest'
               run: |
+                  set -ex
                   df -h
                   sudo swapoff -a
                   sudo rm -f /swapfile
@@ -138,8 +139,8 @@ jobs:
               with:
                   submodules: true
 
-            - name: Install stable toolchain
-              uses: dtolnay/rust-toolchain@stable
+            - name: Install nightly toolchain
+              uses: dtolnay/rust-toolchain@nightly
               with:
                   components: clippy, rustfmt
 
@@ -204,6 +205,8 @@ jobs:
 
             - name: Install Rust
               uses: dtolnay/rust-toolchain@nightly
+              with:
+                  components: clippy, rustfmt
 
             - name: Cache the Cargo build files
               uses: Leafwing-Studios/cargo-cache@v2

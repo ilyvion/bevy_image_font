@@ -214,15 +214,15 @@ impl<'assets> RenderContext<'assets> {
         let height = rect.height() as f32;
         let max_height = self.max_height() as f32;
 
-        if let Some(font_height) = self.image_font_text.font_height {
-            if self.render_config.apply_scaling {
-                let scaling_mode = self.render_config.scaling_mode;
-                let scale_factor = font_height / max_height;
-                return (
-                    scaling_mode.apply_scale(width, scale_factor),
-                    scaling_mode.apply_scale(height, scale_factor),
-                );
-            }
+        if let Some(font_height) = self.image_font_text.font_height
+            && self.render_config.apply_scaling
+        {
+            let scaling_mode = self.render_config.scaling_mode;
+            let scale_factor = font_height / max_height;
+            return (
+                scaling_mode.apply_scale(width, scale_factor),
+                scaling_mode.apply_scale(height, scale_factor),
+            );
         }
 
         (width, height)
@@ -404,10 +404,10 @@ impl<'assets> RenderContext<'assets> {
             character_offsets: self.character_offsets(character),
             scale: self.scale(),
         };
-        if let Some(next_character) = next_character {
-            if let Some(kerning) = self.character_kerning(character, next_character) {
-                *x_pos += kerning;
-            }
+        if let Some(next_character) = next_character
+            && let Some(kerning) = self.character_kerning(character, next_character)
+        {
+            *x_pos += kerning;
         }
         self.anchor_offsets().compute_transform(params)
     }
