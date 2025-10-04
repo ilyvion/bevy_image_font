@@ -11,6 +11,7 @@ description = "Render pixel fonts from PNGs in Bevy."
 keywords = ["gamedev", "bevy"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/ilyvion/bevy_image_font"
+include = ["/src", "README.md", "LICENSE*", "CHANGELOG.md"]
 
 [package.metadata.docs.rs]
 # document all features
