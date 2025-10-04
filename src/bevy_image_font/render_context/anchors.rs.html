@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/render_context/anchors.rs`."><title>anchors.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e56847b5.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="bevy_image_font" data-themes="" data-resource-suffix="" data-rustdoc-version="1.92.0-nightly (4da69dfff 2025-10-01)" data-channel="nightly" data-search-js="search-e256b49e.js" data-stringdex-js="stringdex-828709d0.js" data-settings-js="settings-c38705f0.js" ><script src="../../../static.files/storage-e2aeef58.js"></script><script defer src="../../../static.files/src-script-813739b1.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-ce535bd0.js"></script><script defer src="../../../static.files/scrape-examples-2bbcccac.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-263c88ec.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">bevy_image_font/render_context/</div>anchors.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="doccomment">//! This module provides functionality for managing anchor-based positioning
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/render_context/anchors.rs`."><title>anchors.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e56847b5.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="bevy_image_font" data-themes="" data-resource-suffix="" data-rustdoc-version="1.92.0-nightly (595b9a498 2025-10-03)" data-channel="nightly" data-search-js="search-de4c8920.js" data-stringdex-js="stringdex-828709d0.js" data-settings-js="settings-c38705f0.js" ><script src="../../../static.files/storage-e2aeef58.js"></script><script defer src="../../../static.files/src-script-813739b1.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-ce535bd0.js"></script><script defer src="../../../static.files/scrape-examples-2bbcccac.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-263c88ec.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">bevy_image_font/render_context/</div>anchors.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="doccomment">//! This module provides functionality for managing anchor-based positioning
 <a href=#2 id=2 data-nosnippet>2</a>//! and alignment in text rendering.
 <a href=#3 id=3 data-nosnippet>3</a>//!
 <a href=#4 id=4 data-nosnippet>4</a>//! It extends Bevy's [`Anchor`] type with additional methods and structures
@@ -21,9 +21,9 @@
 <a href=#21 id=21 data-nosnippet>21</a>//! The module includes comprehensive unit tests to ensure the correctness
 <a href=#22 id=22 data-nosnippet>22</a>//! of offsets and transform calculations. See the `tests` module for details.
 <a href=#23 id=23 data-nosnippet>23</a>
-<a href=#24 id=24 data-nosnippet>24</a></span><span class="kw">use </span>bevy::math::Vec2;
-<a href=#25 id=25 data-nosnippet>25</a><span class="kw">use </span>bevy::prelude::<span class="kw-2">*</span>;
-<a href=#26 id=26 data-nosnippet>26</a><span class="kw">use </span>bevy::sprite::Anchor;
+<a href=#24 id=24 data-nosnippet>24</a></span><span class="kw">use </span>bevy_math::Vec2;
+<a href=#25 id=25 data-nosnippet>25</a><span class="kw">use </span>bevy_sprite::Anchor;
+<a href=#26 id=26 data-nosnippet>26</a><span class="kw">use </span>bevy_transform::components::Transform;
 <a href=#27 id=27 data-nosnippet>27</a>
 <a href=#28 id=28 data-nosnippet>28</a><span class="doccomment">/// Extension trait to provide additional functionality for `Anchor`.
 <a href=#29 id=29 data-nosnippet>29</a></span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">trait </span>AnchorExt {
@@ -214,144 +214,146 @@
 <a href=#214 id=214 data-nosnippet>214</a>
 <a href=#215 id=215 data-nosnippet>215</a><span class="attr">#[cfg(test)]
 <a href=#216 id=216 data-nosnippet>216</a></span><span class="kw">mod </span>tests {
-<a href=#217 id=217 data-nosnippet>217</a>    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+<a href=#217 id=217 data-nosnippet>217</a>    <span class="kw">use </span>bevy_math::Vec3;
 <a href=#218 id=218 data-nosnippet>218</a>
-<a href=#219 id=219 data-nosnippet>219</a>    <span class="attr">#[test]
-<a href=#220 id=220 data-nosnippet>220</a>    </span><span class="kw">fn </span>base_translation_sets_right_value() {
-<a href=#221 id=221 data-nosnippet>221</a>        <span class="macro">assert_eq!</span>(base_translation(<span class="number">10.0</span>), Vec2::new(<span class="number">10.0</span>, <span class="number">0.0</span>));
-<a href=#222 id=222 data-nosnippet>222</a>    }
-<a href=#223 id=223 data-nosnippet>223</a>
-<a href=#224 id=224 data-nosnippet>224</a>    <span class="attr">#[test]
-<a href=#225 id=225 data-nosnippet>225</a>    </span><span class="kw">fn </span>apply_whole_offset_applies_correct_offset() {
-<a href=#226 id=226 data-nosnippet>226</a>        <span class="comment">// Initial translation starts at (10.0, 0.0)
-<a href=#227 id=227 data-nosnippet>227</a>        </span><span class="kw">let </span><span class="kw-2">mut </span>translation = Vec2::new(<span class="number">10.0</span>, <span class="number">0.0</span>);
-<a href=#228 id=228 data-nosnippet>228</a>
-<a href=#229 id=229 data-nosnippet>229</a>        <span class="comment">// Apply a whole offset:
-<a href=#230 id=230 data-nosnippet>230</a>        // - `text_width` = 20.0 contributes 20.0 * 1.0 = 20.0 to the x-component.
-<a href=#231 id=231 data-nosnippet>231</a>        // - `max_height` = 30, `scale_height` = 0.5 contributes 30 * -1.0 * 0.5 = -15.0
-<a href=#232 id=232 data-nosnippet>232</a>        //   to the y-component.
-<a href=#233 id=233 data-nosnippet>233</a>        // - The whole offset vector (1.0, -1.0) determines these directions.
-<a href=#234 id=234 data-nosnippet>234</a>        </span>apply_whole_offset(<span class="kw-2">&amp;mut </span>translation, <span class="number">20.0</span>, <span class="number">30</span>, <span class="number">0.5</span>, Vec2::new(<span class="number">1.0</span>, -<span class="number">1.0</span>));
-<a href=#235 id=235 data-nosnippet>235</a>
-<a href=#236 id=236 data-nosnippet>236</a>        <span class="comment">// After the adjustment:
-<a href=#237 id=237 data-nosnippet>237</a>        // - x-component: 10.0 (initial) + 20.0 (whole.x contribution) = 30.0.
-<a href=#238 id=238 data-nosnippet>238</a>        // - y-component: 0.0 (initial) + (-15.0) (whole.y contribution) = -15.0.
-<a href=#239 id=239 data-nosnippet>239</a>        </span><span class="macro">assert_eq!</span>(translation, Vec2::new(<span class="number">30.0</span>, -<span class="number">15.0</span>));
-<a href=#240 id=240 data-nosnippet>240</a>    }
-<a href=#241 id=241 data-nosnippet>241</a>
-<a href=#242 id=242 data-nosnippet>242</a>    <span class="attr">#[test]
-<a href=#243 id=243 data-nosnippet>243</a>    </span><span class="kw">fn </span>apply_whole_offset_with_zero() {
-<a href=#244 id=244 data-nosnippet>244</a>        <span class="kw">let </span><span class="kw-2">mut </span>translation = Vec2::new(<span class="number">10.0</span>, <span class="number">5.0</span>);
-<a href=#245 id=245 data-nosnippet>245</a>        apply_whole_offset(<span class="kw-2">&amp;mut </span>translation, <span class="number">0.0</span>, <span class="number">0</span>, <span class="number">1.0</span>, Vec2::ZERO);
-<a href=#246 id=246 data-nosnippet>246</a>        <span class="macro">assert_eq!</span>(translation, Vec2::new(<span class="number">10.0</span>, <span class="number">5.0</span>)); <span class="comment">// No change
-<a href=#247 id=247 data-nosnippet>247</a>    </span>}
-<a href=#248 id=248 data-nosnippet>248</a>
-<a href=#249 id=249 data-nosnippet>249</a>    <span class="attr">#[test]
-<a href=#250 id=250 data-nosnippet>250</a>    </span><span class="kw">fn </span>test_apply_whole_offset_edge_cases() {
-<a href=#251 id=251 data-nosnippet>251</a>        <span class="kw">let </span><span class="kw-2">mut </span>translation = Vec2::new(<span class="number">0.0</span>, <span class="number">0.0</span>);
-<a href=#252 id=252 data-nosnippet>252</a>
-<a href=#253 id=253 data-nosnippet>253</a>        <span class="comment">// Zero scaling factor should result in no y adjustment
-<a href=#254 id=254 data-nosnippet>254</a>        </span>apply_whole_offset(<span class="kw-2">&amp;mut </span>translation, <span class="number">20.0</span>, <span class="number">30</span>, <span class="number">0.0</span>, Vec2::new(<span class="number">1.0</span>, -<span class="number">1.0</span>));
-<a href=#255 id=255 data-nosnippet>255</a>        <span class="macro">assert_eq!</span>(translation, Vec2::new(<span class="number">20.0</span>, <span class="number">0.0</span>)); <span class="comment">// Only x affected
-<a href=#256 id=256 data-nosnippet>256</a>
-<a href=#257 id=257 data-nosnippet>257</a>        // Negative offsets
-<a href=#258 id=258 data-nosnippet>258</a>        </span>apply_whole_offset(<span class="kw-2">&amp;mut </span>translation, <span class="number">50.0</span>, <span class="number">40</span>, <span class="number">1.0</span>, Vec2::new(-<span class="number">1.0</span>, <span class="number">1.0</span>));
-<a href=#259 id=259 data-nosnippet>259</a>        <span class="macro">assert_eq!</span>(translation, Vec2::new(-<span class="number">30.0</span>, <span class="number">40.0</span>)); <span class="comment">// Moves left and up
-<a href=#260 id=260 data-nosnippet>260</a>
-<a href=#261 id=261 data-nosnippet>261</a>        // Large dimensions
-<a href=#262 id=262 data-nosnippet>262</a>        </span>apply_whole_offset(<span class="kw-2">&amp;mut </span>translation, <span class="number">1e6</span>, <span class="number">100_000</span>, <span class="number">1.0</span>, Vec2::new(<span class="number">1.0</span>, -<span class="number">1.0</span>));
-<a href=#263 id=263 data-nosnippet>263</a>        <span class="macro">assert_eq!</span>(translation, Vec2::new(<span class="number">1e6 </span>- <span class="number">30.0</span>, -<span class="number">99_960.0</span>));
-<a href=#264 id=264 data-nosnippet>264</a>    }
-<a href=#265 id=265 data-nosnippet>265</a>
-<a href=#266 id=266 data-nosnippet>266</a>    <span class="attr">#[test]
-<a href=#267 id=267 data-nosnippet>267</a>    </span><span class="kw">fn </span>apply_individual_offset_applies_the_correct_offset() {
-<a href=#268 id=268 data-nosnippet>268</a>        <span class="comment">// Initial translation starts at (10.0, 0.0)
-<a href=#269 id=269 data-nosnippet>269</a>        </span><span class="kw">let </span><span class="kw-2">mut </span>translation = Vec2::new(<span class="number">10.0</span>, <span class="number">0.0</span>);
-<a href=#270 id=270 data-nosnippet>270</a>
-<a href=#271 id=271 data-nosnippet>271</a>        <span class="comment">// Apply an individual offset:
-<a href=#272 id=272 data-nosnippet>272</a>        // - `width` = 5.0 contributes 5.0 * 2.0 = 10.0 to the x-component.
-<a href=#273 id=273 data-nosnippet>273</a>        // - The individual offset vector (2.0, 0.0) determines these directions.
-<a href=#274 id=274 data-nosnippet>274</a>        </span>apply_individual_offset(<span class="kw-2">&amp;mut </span>translation, <span class="number">5.0</span>, Vec2::new(<span class="number">2.0</span>, <span class="number">0.0</span>));
-<a href=#275 id=275 data-nosnippet>275</a>
-<a href=#276 id=276 data-nosnippet>276</a>        <span class="comment">// After the adjustment:
-<a href=#277 id=277 data-nosnippet>277</a>        // - x-component: 10.0 (initial) + 10.0 (individual.x contribution) = 20.0.
-<a href=#278 id=278 data-nosnippet>278</a>        // - y-component: 0.0 remains unchanged since individual.y = 0.0.
-<a href=#279 id=279 data-nosnippet>279</a>        </span><span class="macro">assert_eq!</span>(translation, Vec2::new(<span class="number">20.0</span>, <span class="number">0.0</span>));
-<a href=#280 id=280 data-nosnippet>280</a>    }
-<a href=#281 id=281 data-nosnippet>281</a>
-<a href=#282 id=282 data-nosnippet>282</a>    <span class="attr">#[test]
-<a href=#283 id=283 data-nosnippet>283</a>    </span><span class="kw">fn </span>finalize_transform_produces_expected_transform() {
-<a href=#284 id=284 data-nosnippet>284</a>        <span class="comment">// Case 1: Normal translation and scale
-<a href=#285 id=285 data-nosnippet>285</a>        </span><span class="kw">let </span>translation = Vec2::new(<span class="number">10.0</span>, -<span class="number">5.0</span>);
-<a href=#286 id=286 data-nosnippet>286</a>        <span class="kw">let </span>scale = <span class="number">2.0</span>;
-<a href=#287 id=287 data-nosnippet>287</a>        <span class="kw">let </span>transform = finalize_transform(translation, scale);
-<a href=#288 id=288 data-nosnippet>288</a>
-<a href=#289 id=289 data-nosnippet>289</a>        <span class="macro">assert_eq!</span>(transform.translation, Vec3::new(<span class="number">10.0</span>, -<span class="number">5.0</span>, <span class="number">0.0</span>));
-<a href=#290 id=290 data-nosnippet>290</a>        <span class="macro">assert_eq!</span>(transform.scale, Vec3::new(<span class="number">2.0</span>, <span class="number">2.0</span>, <span class="number">0.0</span>));
-<a href=#291 id=291 data-nosnippet>291</a>
-<a href=#292 id=292 data-nosnippet>292</a>        <span class="comment">// Case 2: Zero scale
-<a href=#293 id=293 data-nosnippet>293</a>        </span><span class="kw">let </span>translation = Vec2::new(-<span class="number">3.0</span>, <span class="number">8.0</span>);
-<a href=#294 id=294 data-nosnippet>294</a>        <span class="kw">let </span>scale = <span class="number">0.0</span>;
-<a href=#295 id=295 data-nosnippet>295</a>        <span class="kw">let </span>transform = finalize_transform(translation, scale);
-<a href=#296 id=296 data-nosnippet>296</a>
-<a href=#297 id=297 data-nosnippet>297</a>        <span class="macro">assert_eq!</span>(transform.translation, Vec3::new(-<span class="number">3.0</span>, <span class="number">8.0</span>, <span class="number">0.0</span>));
-<a href=#298 id=298 data-nosnippet>298</a>        <span class="macro">assert_eq!</span>(transform.scale, Vec3::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>));
-<a href=#299 id=299 data-nosnippet>299</a>    }
-<a href=#300 id=300 data-nosnippet>300</a>
-<a href=#301 id=301 data-nosnippet>301</a>    <span class="attr">#[test]
-<a href=#302 id=302 data-nosnippet>302</a>    </span><span class="kw">fn </span>compute_transform_produces_expected_transform() {
-<a href=#303 id=303 data-nosnippet>303</a>        <span class="kw">let </span>offsets = AnchorOffsets {
-<a href=#304 id=304 data-nosnippet>304</a>            whole: Vec2::new(<span class="number">1.0</span>, -<span class="number">1.0</span>),
-<a href=#305 id=305 data-nosnippet>305</a>            individual: Vec2::new(<span class="number">0.5</span>, <span class="number">0.0</span>),
-<a href=#306 id=306 data-nosnippet>306</a>        };
-<a href=#307 id=307 data-nosnippet>307</a>
-<a href=#308 id=308 data-nosnippet>308</a>        <span class="comment">// Case 1: Normal parameters
-<a href=#309 id=309 data-nosnippet>309</a>        </span><span class="kw">let </span>params = ComputeTransformParams {
-<a href=#310 id=310 data-nosnippet>310</a>            x_pos: <span class="number">10.0</span>,
-<a href=#311 id=311 data-nosnippet>311</a>            scaled_text_width: <span class="number">20.0</span>,
-<a href=#312 id=312 data-nosnippet>312</a>            scaled_width: <span class="number">5.0</span>,
-<a href=#313 id=313 data-nosnippet>313</a>            scaled_height: <span class="number">20.</span>,
-<a href=#314 id=314 data-nosnippet>314</a>            max_height: <span class="number">30</span>,
-<a href=#315 id=315 data-nosnippet>315</a>            character_offsets: Vec2::ZERO,
-<a href=#316 id=316 data-nosnippet>316</a>            scale: <span class="number">1.5</span>,
-<a href=#317 id=317 data-nosnippet>317</a>        };
-<a href=#318 id=318 data-nosnippet>318</a>        <span class="kw">let </span>transform = offsets.compute_transform(params);
-<a href=#319 id=319 data-nosnippet>319</a>        <span class="macro">assert_eq!</span>(transform.translation, Vec3::new(<span class="number">32.5</span>, -<span class="number">32.5</span>, <span class="number">0.0</span>));
-<a href=#320 id=320 data-nosnippet>320</a>        <span class="macro">assert_eq!</span>(transform.scale, Vec3::new(<span class="number">1.5</span>, <span class="number">1.5</span>, <span class="number">0.0</span>));
-<a href=#321 id=321 data-nosnippet>321</a>
-<a href=#322 id=322 data-nosnippet>322</a>        <span class="comment">// Case 2: Zero scaling factor
-<a href=#323 id=323 data-nosnippet>323</a>        </span><span class="kw">let </span>params = ComputeTransformParams {
-<a href=#324 id=324 data-nosnippet>324</a>            x_pos: <span class="number">0.0</span>,
-<a href=#325 id=325 data-nosnippet>325</a>            scaled_text_width: <span class="number">10.0</span>,
-<a href=#326 id=326 data-nosnippet>326</a>            scaled_width: <span class="number">2.0</span>,
-<a href=#327 id=327 data-nosnippet>327</a>            scaled_height: <span class="number">5.0</span>,
-<a href=#328 id=328 data-nosnippet>328</a>            max_height: <span class="number">50</span>,
-<a href=#329 id=329 data-nosnippet>329</a>            character_offsets: Vec2::ZERO,
-<a href=#330 id=330 data-nosnippet>330</a>            scale: <span class="number">0.0</span>,
-<a href=#331 id=331 data-nosnippet>331</a>        };
-<a href=#332 id=332 data-nosnippet>332</a>        <span class="kw">let </span>transform = offsets.compute_transform(params);
-<a href=#333 id=333 data-nosnippet>333</a>        <span class="macro">assert_eq!</span>(transform.translation, Vec3::new(<span class="number">11.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>));
-<a href=#334 id=334 data-nosnippet>334</a>        <span class="macro">assert_eq!</span>(transform.scale, Vec3::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>));
-<a href=#335 id=335 data-nosnippet>335</a>    }
-<a href=#336 id=336 data-nosnippet>336</a>
-<a href=#337 id=337 data-nosnippet>337</a>    <span class="attr">#[test]
-<a href=#338 id=338 data-nosnippet>338</a>    </span><span class="kw">fn </span>to_anchor_offsets_are_as_expected() {
-<a href=#339 id=339 data-nosnippet>339</a>        <span class="comment">// Case 1: Center anchor
-<a href=#340 id=340 data-nosnippet>340</a>        </span><span class="kw">let </span>anchor = Anchor::Center;
-<a href=#341 id=341 data-nosnippet>341</a>        <span class="kw">let </span>offsets = anchor.to_anchor_offsets(<span class="bool-val">true</span>);
-<a href=#342 id=342 data-nosnippet>342</a>        <span class="macro">assert_eq!</span>(offsets.whole, Vec2::new(-<span class="number">0.5</span>, <span class="number">0.0</span>));
-<a href=#343 id=343 data-nosnippet>343</a>        <span class="macro">assert_eq!</span>(offsets.individual, Vec2::new(<span class="number">0.5</span>, <span class="number">0.0</span>));
-<a href=#344 id=344 data-nosnippet>344</a>
-<a href=#345 id=345 data-nosnippet>345</a>        <span class="comment">// Case 2: Top-left anchor
-<a href=#346 id=346 data-nosnippet>346</a>        </span><span class="kw">let </span>anchor = Anchor::TopLeft;
-<a href=#347 id=347 data-nosnippet>347</a>        <span class="kw">let </span>offsets = anchor.to_anchor_offsets(<span class="bool-val">true</span>);
-<a href=#348 id=348 data-nosnippet>348</a>        <span class="macro">assert_eq!</span>(offsets.whole, Vec2::new(<span class="number">0.0</span>, -<span class="number">0.5</span>));
-<a href=#349 id=349 data-nosnippet>349</a>        <span class="macro">assert_eq!</span>(offsets.individual, Vec2::new(<span class="number">0.5</span>, <span class="number">0.0</span>));
-<a href=#350 id=350 data-nosnippet>350</a>
-<a href=#351 id=351 data-nosnippet>351</a>        <span class="comment">// Case 3: Bottom-right anchor
-<a href=#352 id=352 data-nosnippet>352</a>        </span><span class="kw">let </span>anchor = Anchor::BottomRight;
-<a href=#353 id=353 data-nosnippet>353</a>        <span class="kw">let </span>offsets = anchor.to_anchor_offsets(<span class="bool-val">true</span>);
-<a href=#354 id=354 data-nosnippet>354</a>        <span class="macro">assert_eq!</span>(offsets.whole, Vec2::new(-<span class="number">1.0</span>, <span class="number">0.5</span>));
-<a href=#355 id=355 data-nosnippet>355</a>        <span class="macro">assert_eq!</span>(offsets.individual, Vec2::new(<span class="number">0.5</span>, <span class="number">0.0</span>));
-<a href=#356 id=356 data-nosnippet>356</a>    }
-<a href=#357 id=357 data-nosnippet>357</a>}</code></pre></div></section></main></body></html>
+<a href=#219 id=219 data-nosnippet>219</a>    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+<a href=#220 id=220 data-nosnippet>220</a>
+<a href=#221 id=221 data-nosnippet>221</a>    <span class="attr">#[test]
+<a href=#222 id=222 data-nosnippet>222</a>    </span><span class="kw">fn </span>base_translation_sets_right_value() {
+<a href=#223 id=223 data-nosnippet>223</a>        <span class="macro">assert_eq!</span>(base_translation(<span class="number">10.0</span>), Vec2::new(<span class="number">10.0</span>, <span class="number">0.0</span>));
+<a href=#224 id=224 data-nosnippet>224</a>    }
+<a href=#225 id=225 data-nosnippet>225</a>
+<a href=#226 id=226 data-nosnippet>226</a>    <span class="attr">#[test]
+<a href=#227 id=227 data-nosnippet>227</a>    </span><span class="kw">fn </span>apply_whole_offset_applies_correct_offset() {
+<a href=#228 id=228 data-nosnippet>228</a>        <span class="comment">// Initial translation starts at (10.0, 0.0)
+<a href=#229 id=229 data-nosnippet>229</a>        </span><span class="kw">let </span><span class="kw-2">mut </span>translation = Vec2::new(<span class="number">10.0</span>, <span class="number">0.0</span>);
+<a href=#230 id=230 data-nosnippet>230</a>
+<a href=#231 id=231 data-nosnippet>231</a>        <span class="comment">// Apply a whole offset:
+<a href=#232 id=232 data-nosnippet>232</a>        // - `text_width` = 20.0 contributes 20.0 * 1.0 = 20.0 to the x-component.
+<a href=#233 id=233 data-nosnippet>233</a>        // - `max_height` = 30, `scale_height` = 0.5 contributes 30 * -1.0 * 0.5 = -15.0
+<a href=#234 id=234 data-nosnippet>234</a>        //   to the y-component.
+<a href=#235 id=235 data-nosnippet>235</a>        // - The whole offset vector (1.0, -1.0) determines these directions.
+<a href=#236 id=236 data-nosnippet>236</a>        </span>apply_whole_offset(<span class="kw-2">&amp;mut </span>translation, <span class="number">20.0</span>, <span class="number">30</span>, <span class="number">0.5</span>, Vec2::new(<span class="number">1.0</span>, -<span class="number">1.0</span>));
+<a href=#237 id=237 data-nosnippet>237</a>
+<a href=#238 id=238 data-nosnippet>238</a>        <span class="comment">// After the adjustment:
+<a href=#239 id=239 data-nosnippet>239</a>        // - x-component: 10.0 (initial) + 20.0 (whole.x contribution) = 30.0.
+<a href=#240 id=240 data-nosnippet>240</a>        // - y-component: 0.0 (initial) + (-15.0) (whole.y contribution) = -15.0.
+<a href=#241 id=241 data-nosnippet>241</a>        </span><span class="macro">assert_eq!</span>(translation, Vec2::new(<span class="number">30.0</span>, -<span class="number">15.0</span>));
+<a href=#242 id=242 data-nosnippet>242</a>    }
+<a href=#243 id=243 data-nosnippet>243</a>
+<a href=#244 id=244 data-nosnippet>244</a>    <span class="attr">#[test]
+<a href=#245 id=245 data-nosnippet>245</a>    </span><span class="kw">fn </span>apply_whole_offset_with_zero() {
+<a href=#246 id=246 data-nosnippet>246</a>        <span class="kw">let </span><span class="kw-2">mut </span>translation = Vec2::new(<span class="number">10.0</span>, <span class="number">5.0</span>);
+<a href=#247 id=247 data-nosnippet>247</a>        apply_whole_offset(<span class="kw-2">&amp;mut </span>translation, <span class="number">0.0</span>, <span class="number">0</span>, <span class="number">1.0</span>, Vec2::ZERO);
+<a href=#248 id=248 data-nosnippet>248</a>        <span class="macro">assert_eq!</span>(translation, Vec2::new(<span class="number">10.0</span>, <span class="number">5.0</span>)); <span class="comment">// No change
+<a href=#249 id=249 data-nosnippet>249</a>    </span>}
+<a href=#250 id=250 data-nosnippet>250</a>
+<a href=#251 id=251 data-nosnippet>251</a>    <span class="attr">#[test]
+<a href=#252 id=252 data-nosnippet>252</a>    </span><span class="kw">fn </span>test_apply_whole_offset_edge_cases() {
+<a href=#253 id=253 data-nosnippet>253</a>        <span class="kw">let </span><span class="kw-2">mut </span>translation = Vec2::new(<span class="number">0.0</span>, <span class="number">0.0</span>);
+<a href=#254 id=254 data-nosnippet>254</a>
+<a href=#255 id=255 data-nosnippet>255</a>        <span class="comment">// Zero scaling factor should result in no y adjustment
+<a href=#256 id=256 data-nosnippet>256</a>        </span>apply_whole_offset(<span class="kw-2">&amp;mut </span>translation, <span class="number">20.0</span>, <span class="number">30</span>, <span class="number">0.0</span>, Vec2::new(<span class="number">1.0</span>, -<span class="number">1.0</span>));
+<a href=#257 id=257 data-nosnippet>257</a>        <span class="macro">assert_eq!</span>(translation, Vec2::new(<span class="number">20.0</span>, <span class="number">0.0</span>)); <span class="comment">// Only x affected
+<a href=#258 id=258 data-nosnippet>258</a>
+<a href=#259 id=259 data-nosnippet>259</a>        // Negative offsets
+<a href=#260 id=260 data-nosnippet>260</a>        </span>apply_whole_offset(<span class="kw-2">&amp;mut </span>translation, <span class="number">50.0</span>, <span class="number">40</span>, <span class="number">1.0</span>, Vec2::new(-<span class="number">1.0</span>, <span class="number">1.0</span>));
+<a href=#261 id=261 data-nosnippet>261</a>        <span class="macro">assert_eq!</span>(translation, Vec2::new(-<span class="number">30.0</span>, <span class="number">40.0</span>)); <span class="comment">// Moves left and up
+<a href=#262 id=262 data-nosnippet>262</a>
+<a href=#263 id=263 data-nosnippet>263</a>        // Large dimensions
+<a href=#264 id=264 data-nosnippet>264</a>        </span>apply_whole_offset(<span class="kw-2">&amp;mut </span>translation, <span class="number">1e6</span>, <span class="number">100_000</span>, <span class="number">1.0</span>, Vec2::new(<span class="number">1.0</span>, -<span class="number">1.0</span>));
+<a href=#265 id=265 data-nosnippet>265</a>        <span class="macro">assert_eq!</span>(translation, Vec2::new(<span class="number">1e6 </span>- <span class="number">30.0</span>, -<span class="number">99_960.0</span>));
+<a href=#266 id=266 data-nosnippet>266</a>    }
+<a href=#267 id=267 data-nosnippet>267</a>
+<a href=#268 id=268 data-nosnippet>268</a>    <span class="attr">#[test]
+<a href=#269 id=269 data-nosnippet>269</a>    </span><span class="kw">fn </span>apply_individual_offset_applies_the_correct_offset() {
+<a href=#270 id=270 data-nosnippet>270</a>        <span class="comment">// Initial translation starts at (10.0, 0.0)
+<a href=#271 id=271 data-nosnippet>271</a>        </span><span class="kw">let </span><span class="kw-2">mut </span>translation = Vec2::new(<span class="number">10.0</span>, <span class="number">0.0</span>);
+<a href=#272 id=272 data-nosnippet>272</a>
+<a href=#273 id=273 data-nosnippet>273</a>        <span class="comment">// Apply an individual offset:
+<a href=#274 id=274 data-nosnippet>274</a>        // - `width` = 5.0 contributes 5.0 * 2.0 = 10.0 to the x-component.
+<a href=#275 id=275 data-nosnippet>275</a>        // - The individual offset vector (2.0, 0.0) determines these directions.
+<a href=#276 id=276 data-nosnippet>276</a>        </span>apply_individual_offset(<span class="kw-2">&amp;mut </span>translation, <span class="number">5.0</span>, Vec2::new(<span class="number">2.0</span>, <span class="number">0.0</span>));
+<a href=#277 id=277 data-nosnippet>277</a>
+<a href=#278 id=278 data-nosnippet>278</a>        <span class="comment">// After the adjustment:
+<a href=#279 id=279 data-nosnippet>279</a>        // - x-component: 10.0 (initial) + 10.0 (individual.x contribution) = 20.0.
+<a href=#280 id=280 data-nosnippet>280</a>        // - y-component: 0.0 remains unchanged since individual.y = 0.0.
+<a href=#281 id=281 data-nosnippet>281</a>        </span><span class="macro">assert_eq!</span>(translation, Vec2::new(<span class="number">20.0</span>, <span class="number">0.0</span>));
+<a href=#282 id=282 data-nosnippet>282</a>    }
+<a href=#283 id=283 data-nosnippet>283</a>
+<a href=#284 id=284 data-nosnippet>284</a>    <span class="attr">#[test]
+<a href=#285 id=285 data-nosnippet>285</a>    </span><span class="kw">fn </span>finalize_transform_produces_expected_transform() {
+<a href=#286 id=286 data-nosnippet>286</a>        <span class="comment">// Case 1: Normal translation and scale
+<a href=#287 id=287 data-nosnippet>287</a>        </span><span class="kw">let </span>translation = Vec2::new(<span class="number">10.0</span>, -<span class="number">5.0</span>);
+<a href=#288 id=288 data-nosnippet>288</a>        <span class="kw">let </span>scale = <span class="number">2.0</span>;
+<a href=#289 id=289 data-nosnippet>289</a>        <span class="kw">let </span>transform = finalize_transform(translation, scale);
+<a href=#290 id=290 data-nosnippet>290</a>
+<a href=#291 id=291 data-nosnippet>291</a>        <span class="macro">assert_eq!</span>(transform.translation, Vec3::new(<span class="number">10.0</span>, -<span class="number">5.0</span>, <span class="number">0.0</span>));
+<a href=#292 id=292 data-nosnippet>292</a>        <span class="macro">assert_eq!</span>(transform.scale, Vec3::new(<span class="number">2.0</span>, <span class="number">2.0</span>, <span class="number">0.0</span>));
+<a href=#293 id=293 data-nosnippet>293</a>
+<a href=#294 id=294 data-nosnippet>294</a>        <span class="comment">// Case 2: Zero scale
+<a href=#295 id=295 data-nosnippet>295</a>        </span><span class="kw">let </span>translation = Vec2::new(-<span class="number">3.0</span>, <span class="number">8.0</span>);
+<a href=#296 id=296 data-nosnippet>296</a>        <span class="kw">let </span>scale = <span class="number">0.0</span>;
+<a href=#297 id=297 data-nosnippet>297</a>        <span class="kw">let </span>transform = finalize_transform(translation, scale);
+<a href=#298 id=298 data-nosnippet>298</a>
+<a href=#299 id=299 data-nosnippet>299</a>        <span class="macro">assert_eq!</span>(transform.translation, Vec3::new(-<span class="number">3.0</span>, <span class="number">8.0</span>, <span class="number">0.0</span>));
+<a href=#300 id=300 data-nosnippet>300</a>        <span class="macro">assert_eq!</span>(transform.scale, Vec3::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>));
+<a href=#301 id=301 data-nosnippet>301</a>    }
+<a href=#302 id=302 data-nosnippet>302</a>
+<a href=#303 id=303 data-nosnippet>303</a>    <span class="attr">#[test]
+<a href=#304 id=304 data-nosnippet>304</a>    </span><span class="kw">fn </span>compute_transform_produces_expected_transform() {
+<a href=#305 id=305 data-nosnippet>305</a>        <span class="kw">let </span>offsets = AnchorOffsets {
+<a href=#306 id=306 data-nosnippet>306</a>            whole: Vec2::new(<span class="number">1.0</span>, -<span class="number">1.0</span>),
+<a href=#307 id=307 data-nosnippet>307</a>            individual: Vec2::new(<span class="number">0.5</span>, <span class="number">0.0</span>),
+<a href=#308 id=308 data-nosnippet>308</a>        };
+<a href=#309 id=309 data-nosnippet>309</a>
+<a href=#310 id=310 data-nosnippet>310</a>        <span class="comment">// Case 1: Normal parameters
+<a href=#311 id=311 data-nosnippet>311</a>        </span><span class="kw">let </span>params = ComputeTransformParams {
+<a href=#312 id=312 data-nosnippet>312</a>            x_pos: <span class="number">10.0</span>,
+<a href=#313 id=313 data-nosnippet>313</a>            scaled_text_width: <span class="number">20.0</span>,
+<a href=#314 id=314 data-nosnippet>314</a>            scaled_width: <span class="number">5.0</span>,
+<a href=#315 id=315 data-nosnippet>315</a>            scaled_height: <span class="number">20.</span>,
+<a href=#316 id=316 data-nosnippet>316</a>            max_height: <span class="number">30</span>,
+<a href=#317 id=317 data-nosnippet>317</a>            character_offsets: Vec2::ZERO,
+<a href=#318 id=318 data-nosnippet>318</a>            scale: <span class="number">1.5</span>,
+<a href=#319 id=319 data-nosnippet>319</a>        };
+<a href=#320 id=320 data-nosnippet>320</a>        <span class="kw">let </span>transform = offsets.compute_transform(params);
+<a href=#321 id=321 data-nosnippet>321</a>        <span class="macro">assert_eq!</span>(transform.translation, Vec3::new(<span class="number">32.5</span>, -<span class="number">32.5</span>, <span class="number">0.0</span>));
+<a href=#322 id=322 data-nosnippet>322</a>        <span class="macro">assert_eq!</span>(transform.scale, Vec3::new(<span class="number">1.5</span>, <span class="number">1.5</span>, <span class="number">0.0</span>));
+<a href=#323 id=323 data-nosnippet>323</a>
+<a href=#324 id=324 data-nosnippet>324</a>        <span class="comment">// Case 2: Zero scaling factor
+<a href=#325 id=325 data-nosnippet>325</a>        </span><span class="kw">let </span>params = ComputeTransformParams {
+<a href=#326 id=326 data-nosnippet>326</a>            x_pos: <span class="number">0.0</span>,
+<a href=#327 id=327 data-nosnippet>327</a>            scaled_text_width: <span class="number">10.0</span>,
+<a href=#328 id=328 data-nosnippet>328</a>            scaled_width: <span class="number">2.0</span>,
+<a href=#329 id=329 data-nosnippet>329</a>            scaled_height: <span class="number">5.0</span>,
+<a href=#330 id=330 data-nosnippet>330</a>            max_height: <span class="number">50</span>,
+<a href=#331 id=331 data-nosnippet>331</a>            character_offsets: Vec2::ZERO,
+<a href=#332 id=332 data-nosnippet>332</a>            scale: <span class="number">0.0</span>,
+<a href=#333 id=333 data-nosnippet>333</a>        };
+<a href=#334 id=334 data-nosnippet>334</a>        <span class="kw">let </span>transform = offsets.compute_transform(params);
+<a href=#335 id=335 data-nosnippet>335</a>        <span class="macro">assert_eq!</span>(transform.translation, Vec3::new(<span class="number">11.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>));
+<a href=#336 id=336 data-nosnippet>336</a>        <span class="macro">assert_eq!</span>(transform.scale, Vec3::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>));
+<a href=#337 id=337 data-nosnippet>337</a>    }
+<a href=#338 id=338 data-nosnippet>338</a>
+<a href=#339 id=339 data-nosnippet>339</a>    <span class="attr">#[test]
+<a href=#340 id=340 data-nosnippet>340</a>    </span><span class="kw">fn </span>to_anchor_offsets_are_as_expected() {
+<a href=#341 id=341 data-nosnippet>341</a>        <span class="comment">// Case 1: Center anchor
+<a href=#342 id=342 data-nosnippet>342</a>        </span><span class="kw">let </span>anchor = Anchor::Center;
+<a href=#343 id=343 data-nosnippet>343</a>        <span class="kw">let </span>offsets = anchor.to_anchor_offsets(<span class="bool-val">true</span>);
+<a href=#344 id=344 data-nosnippet>344</a>        <span class="macro">assert_eq!</span>(offsets.whole, Vec2::new(-<span class="number">0.5</span>, <span class="number">0.0</span>));
+<a href=#345 id=345 data-nosnippet>345</a>        <span class="macro">assert_eq!</span>(offsets.individual, Vec2::new(<span class="number">0.5</span>, <span class="number">0.0</span>));
+<a href=#346 id=346 data-nosnippet>346</a>
+<a href=#347 id=347 data-nosnippet>347</a>        <span class="comment">// Case 2: Top-left anchor
+<a href=#348 id=348 data-nosnippet>348</a>        </span><span class="kw">let </span>anchor = Anchor::TopLeft;
+<a href=#349 id=349 data-nosnippet>349</a>        <span class="kw">let </span>offsets = anchor.to_anchor_offsets(<span class="bool-val">true</span>);
+<a href=#350 id=350 data-nosnippet>350</a>        <span class="macro">assert_eq!</span>(offsets.whole, Vec2::new(<span class="number">0.0</span>, -<span class="number">0.5</span>));
+<a href=#351 id=351 data-nosnippet>351</a>        <span class="macro">assert_eq!</span>(offsets.individual, Vec2::new(<span class="number">0.5</span>, <span class="number">0.0</span>));
+<a href=#352 id=352 data-nosnippet>352</a>
+<a href=#353 id=353 data-nosnippet>353</a>        <span class="comment">// Case 3: Bottom-right anchor
+<a href=#354 id=354 data-nosnippet>354</a>        </span><span class="kw">let </span>anchor = Anchor::BottomRight;
+<a href=#355 id=355 data-nosnippet>355</a>        <span class="kw">let </span>offsets = anchor.to_anchor_offsets(<span class="bool-val">true</span>);
+<a href=#356 id=356 data-nosnippet>356</a>        <span class="macro">assert_eq!</span>(offsets.whole, Vec2::new(-<span class="number">1.0</span>, <span class="number">0.5</span>));
+<a href=#357 id=357 data-nosnippet>357</a>        <span class="macro">assert_eq!</span>(offsets.individual, Vec2::new(<span class="number">0.5</span>, <span class="number">0.0</span>));
+<a href=#358 id=358 data-nosnippet>358</a>    }
+<a href=#359 id=359 data-nosnippet>359</a>}</code></pre></div></section></main></body></html>
