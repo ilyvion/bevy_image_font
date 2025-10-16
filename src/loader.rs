@@ -436,7 +436,7 @@ impl AssetLoader for ImageFontLoader {
             .loader()
             .immediate()
             .with_unknown_type()
-            .load(image_path.as_path())
+            .load(image_path.clone())
             .await?
             .take::<Image>()
         else {

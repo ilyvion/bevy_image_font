@@ -73,7 +73,8 @@ fn initialize_app_with_font(font_path: impl AsRef<Utf8Path>) -> (App, Handle<Ima
     // Verify that `ImageFont` is registered as an asset by attempting to load one
     let asset_server = app.world().resource::<AssetServer>();
 
-    let handle: Handle<ImageFont> = asset_server.load(font_path.as_ref().as_std_path());
+    let handle: Handle<ImageFont> =
+        asset_server.load(font_path.as_ref().to_owned().into_std_path_buf());
 
     (app, handle)
 }

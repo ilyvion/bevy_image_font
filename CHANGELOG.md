@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Crate updated to target Bevy 0.17.
 - The text rendering logic in both sprite-based and pre-rendered modes now takes BMF kerning into account when positioning characters.
 
 ### Fixed

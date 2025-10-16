@@ -339,19 +339,19 @@ mod tests {
     #[test]
     fn to_anchor_offsets_are_as_expected() {
         // Case 1: Center anchor
-        let anchor = Anchor::Center;
+        let anchor = Anchor::CENTER;
         let offsets = anchor.to_anchor_offsets(true);
         assert_eq!(offsets.whole, Vec2::new(-0.5, 0.0));
         assert_eq!(offsets.individual, Vec2::new(0.5, 0.0));
 
         // Case 2: Top-left anchor
-        let anchor = Anchor::TopLeft;
+        let anchor = Anchor::TOP_LEFT;
         let offsets = anchor.to_anchor_offsets(true);
         assert_eq!(offsets.whole, Vec2::new(0.0, -0.5));
         assert_eq!(offsets.individual, Vec2::new(0.5, 0.0));
 
         // Case 3: Bottom-right anchor
-        let anchor = Anchor::BottomRight;
+        let anchor = Anchor::BOTTOM_RIGHT;
         let offsets = anchor.to_anchor_offsets(true);
         assert_eq!(offsets.whole, Vec2::new(-1.0, 0.5));
         assert_eq!(offsets.individual, Vec2::new(0.5, 0.0));

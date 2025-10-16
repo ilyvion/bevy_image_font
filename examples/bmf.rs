@@ -69,9 +69,9 @@ fn setup(
 
     for (i, &pangram) in PANGRAMS.iter().enumerate() {
         let font = match i % 3 {
-            0 => assets.bmf_txt.clone_weak(),
-            1 => assets.bmf_xml.clone_weak(),
-            2 => assets.bmf_bin.clone_weak(),
+            0 => assets.bmf_txt.clone(),
+            1 => assets.bmf_xml.clone(),
+            2 => assets.bmf_bin.clone(),
             _ => unreachable!(),
         };
 

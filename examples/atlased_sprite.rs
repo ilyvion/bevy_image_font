@@ -89,7 +89,7 @@ fn setup(
         // To still center it horizontally with the text above, we shift it left by half its width.
         ImageFontSpriteText::default()
             .color(tailwind::AMBER_500)
-            .anchor(Anchor::CenterLeft),
+            .anchor(Anchor::CENTER_LEFT),
         ImageFontText::default().font(assets.example.clone()),
         #[expect(
             clippy::cast_precision_loss,
