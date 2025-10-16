@@ -58,10 +58,8 @@ fn spawn_text(mut commands: Commands, assets: Res<DemoAssets>) {
         // Instead of shifting the character by 0.5 pixels when the text lands in the middle of
         // a pixel, we can anchor the sprite to an edge and move it by a whole number of pixels.
         // To center it with the text above, we shift it left by half its width.
-        Sprite {
-            anchor: Anchor::CenterLeft,
-            ..default()
-        },
+        Anchor::CENTER_LEFT,
+        Sprite::default(),
         #[expect(
             clippy::cast_precision_loss,
             reason = "the magnitude of the numbers we're working on here are too small to lose \

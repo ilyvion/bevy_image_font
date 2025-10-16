@@ -372,7 +372,7 @@ impl<'app> RenderContextTester<'app> {
     fn new(app: &'app App, handle: Handle<ImageFont>) -> Self {
         let image_font_text = ImageFontText {
             text: String::from("Test"),
-            font: handle.clone_weak(),
+            font: handle.clone(),
             font_height: None,
         };
 

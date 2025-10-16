@@ -46,7 +46,7 @@ fn changed_after_modified_event() {
 
     app.update();
 
-    app.world_mut().send_event(AssetEvent::Modified {
+    app.world_mut().write_message(AssetEvent::Modified {
         id: font_handle.id(),
     });
 
@@ -69,7 +69,7 @@ fn changed_after_loaded_with_dependencies_event() {
     app.update();
 
     app.world_mut()
-        .send_event(AssetEvent::LoadedWithDependencies {
+        .write_message(AssetEvent::LoadedWithDependencies {
             id: font_handle.id(),
         });
 
@@ -95,7 +95,7 @@ fn not_changed_after_events_on_other_fonts() {
         index: AssetIndex::from_bits(42),
         marker: PhantomData,
     };
-    app.world_mut().send_event(AssetEvent::Modified {
+    app.world_mut().write_message(AssetEvent::Modified {
         id: unrelated_font_id,
     });
 
@@ -117,15 +117,15 @@ fn not_changed_on_irrelevant_events() {
 
     app.update();
 
-    app.world_mut().send_event(AssetEvent::Added {
+    app.world_mut().write_message(AssetEvent::Added {
         id: font_handle.id(),
     });
 
-    app.world_mut().send_event(AssetEvent::Removed {
+    app.world_mut().write_message(AssetEvent::Removed {
         id: font_handle.id(),
     });
 
-    app.world_mut().send_event(AssetEvent::Unused {
+    app.world_mut().write_message(AssetEvent::Unused {
         id: font_handle.id(),
     });
 
@@ -177,7 +177,7 @@ fn setup_app_system_state_and_entity() -> (
     Handle<ImageFont>,
 ) {
     let mut app = App::new();
-    app.add_event::<AssetEvent<ImageFont>>();
+    app.add_message::<AssetEvent<ImageFont>>();
     app.add_systems(Update, sync_texts_with_font_changes);
     #[cfg(feature = "ui")]
     app.init_resource::<UiScale>();

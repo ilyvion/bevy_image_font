@@ -29,27 +29,28 @@ rendered = ["dep:image", "bevy_ui"]
 ui = ["rendered", "bevy_ui", "bevy/bevy_ui"]
 
 [dependencies]
-bevy_image = "0.16"
-bevy_asset = "0.16"
-bevy_render = "0.16"
-bevy_platform = "0.16"
-bevy_ecs = "0.16"
-bevy_app = "0.16"
-bevy_sprite = "0.16"
-bevy_log = "0.16"
-bevy_reflect = "0.16"
-bevy_math = "0.16"
-bevy_ui = { version = "0.16", optional = true }
-bevy_gizmos = { version = "0.16", optional = true }
-bevy_derive = "0.16"
-bevy_color = "0.16"
-bevy_transform = "0.16"
-bevy_time = "0.16"
+bevy_app = "0.17"
+bevy_asset = "0.17"
+bevy_camera = "0.17"
+bevy_color = "0.17"
+bevy_derive = "0.17"
+bevy_ecs = "0.17"
+bevy_gizmos = { version = "0.17", optional = true }
+bevy_image = "0.17"
+bevy_log = "0.17"
+bevy_math = "0.17"
+bevy_platform = "0.17"
+bevy_reflect = "0.17"
+bevy_render = "0.17"
+bevy_sprite = "0.17"
+bevy_time = "0.17"
+bevy_transform = "0.17"
+bevy_ui = { version = "0.17", optional = true }
 bmfont_rs = { version = "0.3", features = ["xml"] }
-camino = { version = "1.1.9", features = ["serde1"] }
+camino = { version = "1.2.1", features = ["serde1"] }
 derive_setters = "0.1"
 itertools = "0.14"
-ron = "0.10"
+ron = "0.11"
 serde = { version = "1", features = ["derive"] }
 strum = { version = "0.27", features = ["derive"] }
 thiserror = "2"
@@ -61,10 +62,12 @@ features = ["png"]
 optional = true
 
 [dev-dependencies]
-bevy = { version = "0.16", default-features = false, features = [
+bevy = { version = "0.17", default-features = false, features = [
     "bevy_asset",
+    "bevy_log",
     "bevy_render",
     "bevy_sprite",
+    "bevy_state",
     "bevy_core_pipeline",
     "bevy_window",
     "multi_threaded",
@@ -72,7 +75,7 @@ bevy = { version = "0.16", default-features = false, features = [
     "png",
     "x11",
 ] }
-bevy_asset_loader = { version = "0.23.0-rc.4", features = ["2d"] }
+bevy_asset_loader = { version = "0.24.0-rc.1", features = ["2d"] }
 crossbeam-channel = "0.5.14"
 float_eq = "1.0.1"
 itertools = "0.14"

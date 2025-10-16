@@ -302,7 +302,7 @@ impl<'assets> RenderContext<'assets> {
     pub(crate) fn font_image(&self, character: char) -> Handle<Image> {
         let image_font_character = &self.image_font.atlas_character_map[&character];
 
-        self.image_font.textures[image_font_character.page_index].clone_weak()
+        self.image_font.textures[image_font_character.page_index].clone()
     }
 
     /// Constructs the texture atlas entry for a specific character.
@@ -319,7 +319,7 @@ impl<'assets> RenderContext<'assets> {
     pub(crate) fn font_texture_atlas(&self, character: char) -> TextureAtlas {
         let image_font_character = &self.image_font.atlas_character_map[&character];
         TextureAtlas {
-            layout: self.image_font.atlas_layouts[image_font_character.page_index].clone_weak(),
+            layout: self.image_font.atlas_layouts[image_font_character.page_index].clone(),
             index: image_font_character.character_index,
         }
     }

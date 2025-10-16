@@ -5,13 +5,13 @@
 //! 2. Copy from gpu image to buffer using `ImageCopyDriver` node in
 //!    `RenderGraph`
 //! 3. Copy from buffer to channel using `receive_image_from_buffer` after
-//!    `RenderSet::Render`
+//!    `RenderSystems::Render`
 //! 4. Save from channel to random named file using `scene::update` at
 //!    `PostUpdate` in `MainWorld`
 //! 5. Exit if `single_image` setting is set
 
+use bevy::prelude::*;
 use bevy::sprite::Anchor;
-use bevy::{prelude::*, reflect::Enum as _};
 use bevy_asset_loader::asset_collection::AssetCollection;
 use bevy_image_font::atlas_sprites::ImageFontSpriteText;
 use bevy_image_font::rendered::ImageFontPreRenderedText;
@@ -79,10 +79,8 @@ fn setup_rendered_base_alignment(commands: Commands, assets: Res<TestAssets>) {
     setup_base_alignment(commands, assets, |anchor| {
         (
             ImageFontPreRenderedText::default(),
-            Sprite {
-                anchor,
-                ..default()
-            },
+            anchor,
+            Sprite::default(),
         )
     });
 }
@@ -98,17 +96,16 @@ fn setup_base_alignment<B: Bundle>(
     assets: Res<TestAssets>,
     mut setup_component: impl FnMut(Anchor) -> B,
 ) {
-    use Anchor::*;
     for anchor in [
-        Center,
-        BottomLeft,
-        BottomCenter,
-        BottomRight,
-        CenterLeft,
-        CenterRight,
-        TopLeft,
-        TopCenter,
-        TopRight,
+        Anchor::CENTER,
+        Anchor::BOTTOM_LEFT,
+        Anchor::BOTTOM_CENTER,
+        Anchor::BOTTOM_RIGHT,
+        Anchor::CENTER_LEFT,
+        Anchor::CENTER_RIGHT,
+        Anchor::TOP_LEFT,
+        Anchor::TOP_CENTER,
+        Anchor::TOP_RIGHT,
     ] {
         setup_anchored_text(&mut commands, &assets, anchor, setup_component(anchor));
     }
@@ -118,10 +115,8 @@ fn setup_rendered_custom_alignment(steps: In<i8>, commands: Commands, assets: Re
     setup_custom_alignment(steps.0, commands, assets, |anchor| {
         (
             ImageFontPreRenderedText::default(),
-            Sprite {
-                anchor,
-                ..default()
-            },
+            anchor,
+            Sprite::default(),
         )
     });
 }
@@ -145,7 +140,7 @@ fn setup_custom_alignment<B: Bundle>(
 
 fn custom(steps: i8) -> impl Iterator<Item = Anchor> {
     itertools::iproduct!(-steps..=steps, -steps..=steps).map(move |(x, y)| {
-        Anchor::Custom(Vec2::new(
+        Anchor(Vec2::new(
             f32::from(x) / f32::from(steps) / 2.,
             f32::from(y) / f32::from(steps) / 2.,
         ))
@@ -160,16 +155,16 @@ fn setup_anchored_text(
 ) {
     let anchor_vec = anchor.as_vec();
     let text = match anchor {
-        Anchor::Custom(vec) => format!("({:.2}, {:.2})", vec.x, vec.y),
-        Anchor::Center
-        | Anchor::BottomLeft
-        | Anchor::BottomCenter
-        | Anchor::BottomRight
-        | Anchor::CenterLeft
-        | Anchor::CenterRight
-        | Anchor::TopLeft
-        | Anchor::TopCenter
-        | Anchor::TopRight => anchor.variant_name().to_owned(),
+        Anchor::CENTER => "Center".to_owned(),
+        Anchor::BOTTOM_LEFT => "BottomLeft".to_owned(),
+        Anchor::BOTTOM_CENTER => "BottomCenter".to_owned(),
+        Anchor::BOTTOM_RIGHT => "BottomRight".to_owned(),
+        Anchor::CENTER_LEFT => "CenterLeft".to_owned(),
+        Anchor::CENTER_RIGHT => "CenterRight".to_owned(),
+        Anchor::TOP_LEFT => "TopLeft".to_owned(),
+        Anchor::TOP_CENTER => "TopCenter".to_owned(),
+        Anchor::TOP_RIGHT => "TopRight".to_owned(),
+        Anchor(vec) => format!("({:.2}, {:.2})", vec.x, vec.y),
     };
 
     commands.spawn((
@@ -221,10 +216,8 @@ fn setup_rendered_manual_positioning(mut commands: Commands, assets: Res<TestAss
         let text_width = text.len() as f32 * CHARACTER_WIDTH as f32;
         commands.spawn((
             ImageFontPreRenderedText::default(),
-            Sprite {
-                anchor: Anchor::TopLeft,
-                ..default()
-            },
+            Anchor::TOP_LEFT,
+            Sprite::default(),
             ImageFontText::default()
                 .text(text)
                 .font(assets.image_font.clone()),
@@ -250,7 +243,7 @@ fn setup_sprites_manual_positioning(mut commands: Commands, assets: Res<TestAsse
         let text = format!("{x:02}.{y:02}");
         let text_width = text.len() as f32 * CHARACTER_WIDTH as f32;
         commands.spawn((
-            ImageFontSpriteText::default().anchor(Anchor::TopLeft),
+            ImageFontSpriteText::default().anchor(Anchor::TOP_LEFT),
             ImageFontText::default()
                 .text(text)
                 .font(assets.image_font.clone()),
@@ -283,10 +276,8 @@ fn setup_rendered_sizes(mut commands: Commands, assets: Res<TestAssets>) {
                 .text(text)
                 .font(assets.image_font.clone())
                 .font_height(size as f32),
-            Sprite {
-                anchor: Anchor::TopLeft,
-                ..default()
-            },
+            Anchor::TOP_LEFT,
+            Sprite::default(),
             Transform::from_translation((TOP_LEFT_ORIGIN + Vec2::new(0., -y)).extend(0.)),
         ));
 
@@ -306,7 +297,7 @@ fn setup_sprites_sizes(mut commands: Commands, assets: Res<TestAssets>) {
         let text = format!("This text is size {size}");
 
         commands.spawn((
-            ImageFontSpriteText::default().anchor(Anchor::TopLeft),
+            ImageFontSpriteText::default().anchor(Anchor::TOP_LEFT),
             ImageFontText::default()
                 .text(text)
                 .font(assets.image_font.clone())
@@ -331,7 +322,7 @@ fn setup_sprites_spacing(mut commands: Commands, assets: Res<TestAssets>) {
 
         commands.spawn((
             ImageFontSpriteText::default()
-                .anchor(Anchor::TopLeft)
+                .anchor(Anchor::TOP_LEFT)
                 .letter_spacing(LetterSpacing::Pixel(spacing)),
             ImageFontText::default()
                 .text(text)

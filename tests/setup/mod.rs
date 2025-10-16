@@ -13,32 +13,30 @@ use std::{
     time::Duration,
 };
 
+use bevy::app::ScheduleRunnerPlugin;
+use bevy::camera::RenderTarget;
+use bevy::core_pipeline::tonemapping::Tonemapping;
 use bevy::ecs::system::ScheduleSystem;
+use bevy::image::TextureFormatPixelInfo as _;
 use bevy::log::LogPlugin;
+use bevy::prelude::*;
 use bevy::render::graph::CameraDriverLabel;
-use bevy::render::texture::GpuImage;
-use bevy::winit::WinitPlugin;
-use bevy::{
-    app::{AppExit, ScheduleRunnerPlugin},
-    core_pipeline::tonemapping::Tonemapping,
-    prelude::*,
-    render::{
-        Extract, Render, RenderApp, RenderSet,
-        camera::RenderTarget,
-        render_asset::{RenderAssetUsages, RenderAssets},
-        render_graph::{self, NodeRunError, RenderGraph, RenderGraphContext, RenderLabel},
-        render_resource::{
-            Buffer, BufferDescriptor, BufferUsages, CommandEncoderDescriptor, Extent3d, Maintain,
-            MapMode, TexelCopyBufferInfo, TexelCopyBufferLayout, TextureDimension, TextureFormat,
-            TextureUsages,
-        },
-        renderer::{RenderContext, RenderDevice, RenderQueue},
-    },
+use bevy::render::render_asset::RenderAssets;
+use bevy::render::render_graph::{
+    self, NodeRunError, RenderGraph, RenderGraphContext, RenderLabel,
 };
+use bevy::render::render_resource::{
+    Buffer, BufferDescriptor, BufferUsages, CommandEncoderDescriptor, Extent3d, MapMode, PollType,
+    TexelCopyBufferInfo, TexelCopyBufferLayout, TextureFormat, TextureUsages,
+};
+use bevy::render::renderer::{RenderContext, RenderDevice, RenderQueue};
+use bevy::render::texture::GpuImage;
+use bevy::render::{Extract, Render, RenderApp, RenderSystems};
+use bevy::window::ExitCondition;
+use bevy::winit::WinitPlugin;
 use bevy_asset_loader::asset_collection::AssetCollectionApp as _;
 use bevy_asset_loader::loading_state::config::ConfigureLoadingState as _;
 use bevy_asset_loader::loading_state::{LoadingState, LoadingStateAppExt as _};
-use bevy_image::TextureFormatPixelInfo as _;
 use bevy_image_font::ImageFontPlugin;
 use crossbeam_channel::{Receiver, Sender};
 use image::ImageFormat;
@@ -99,6 +97,7 @@ fn setup_plugins(app: &mut App) {
             .set(ImagePlugin::default_nearest())
             .set(WindowPlugin {
                 primary_window: None,
+                exit_condition: ExitCondition::DontExit,
                 ..default()
             })
             .disable::<WinitPlugin>()
@@ -222,7 +221,10 @@ impl Plugin for ImageCopyPlugin {
             .add_systems(ExtractSchedule, image_copy_extract)
             // Receives image data from buffer to channel
             // so we need to run it after the render graph is done
-            .add_systems(Render, receive_image_from_buffer.after(RenderSet::Render));
+            .add_systems(
+                Render,
+                receive_image_from_buffer.after(RenderSystems::Render),
+            );
     }
 }
 
@@ -257,26 +259,15 @@ fn setup_render_target(
 }
 
 fn create_render_target_image(images: &mut ResMut<Assets<Image>>, size: Extent3d) -> Handle<Image> {
-    let mut render_target_image = Image::new_fill(
-        size,
-        TextureDimension::D2,
-        &[0; 4],
-        TextureFormat::bevy_default(),
-        RenderAssetUsages::default(),
-    );
-    render_target_image.texture_descriptor.usage |=
-        TextureUsages::COPY_SRC | TextureUsages::RENDER_ATTACHMENT | TextureUsages::TEXTURE_BINDING;
+    let mut render_target_image =
+        Image::new_target_texture(size.width, size.height, TextureFormat::bevy_default());
+    render_target_image.texture_descriptor.usage |= TextureUsages::COPY_SRC;
     images.add(render_target_image)
 }
 
 fn create_cpu_image(images: &mut ResMut<Assets<Image>>, size: Extent3d) -> Handle<Image> {
-    let cpu_image = Image::new_fill(
-        size,
-        TextureDimension::D2,
-        &[0; 4],
-        TextureFormat::bevy_default(),
-        RenderAssetUsages::default(),
-    );
+    let cpu_image =
+        Image::new_target_texture(size.width, size.height, TextureFormat::bevy_default());
     images.add(cpu_image)
 }
 
@@ -476,7 +467,9 @@ fn receive_image_from_buffer(
         // wait on native but not on WebGpu.
 
         // This blocks until the gpu is done executing everything
-        render_device.poll(Maintain::wait()).panic_on_timeout();
+        render_device
+            .poll(PollType::Wait)
+            .expect("Failed to poll device for map async");
 
         // This blocks until the buffer is mapped
         buffer_receiver
@@ -503,7 +496,7 @@ fn update(
     receiver: Res<MainWorldReceiver>,
     images: ResMut<Assets<Image>>,
     mut scene_controller: ResMut<SceneController>,
-    app_exit_writer: EventWriter<AppExit>,
+    app_exit_writer: MessageWriter<AppExit>,
 ) {
     match scene_controller.state {
         SceneState::BuildScene => {}
@@ -540,7 +533,7 @@ fn render_scene(
     receiver: Res<MainWorldReceiver>,
     mut images: ResMut<Assets<Image>>,
     scene_controller: ResMut<SceneController>,
-    app_exit_writer: EventWriter<AppExit>,
+    app_exit_writer: MessageWriter<AppExit>,
 ) {
     let image_data = fetch_latest_image_data(&receiver);
     if image_data.is_empty() {
@@ -581,7 +574,7 @@ fn render_scene(
     clippy::expect_used,
     reason = "we want to panic if any of these go wrong"
 )]
-fn compare_images(paths: ImagePaths, mut app_exit_writer: EventWriter<'_, AppExit>) {
+fn compare_images(paths: ImagePaths, mut app_exit_writer: MessageWriter<AppExit>) {
     let ImagePaths {
         new: new_image_path,
         accepted: accepted_image_path,
@@ -646,7 +639,8 @@ fn prepare_image_buffer(
     // If the image became wider when copying from the texture to the buffer,
     // then the data is reduced to its original size when copying from the buffer to
     // the image.
-    let row_bytes = img_bytes.width() as usize * img_bytes.texture_descriptor.format.pixel_size();
+    let row_bytes =
+        img_bytes.width() as usize * img_bytes.texture_descriptor.format.pixel_size().unwrap();
     let aligned_row_bytes = RenderDevice::align_copy_bytes_per_row(row_bytes);
 
     // If row_bytes == aligned_row_bytes, we can copy directly. Otherwise, we must

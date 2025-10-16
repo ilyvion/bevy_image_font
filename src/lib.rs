@@ -14,7 +14,7 @@ use bevy_ecs::system::Res;
 use bevy_ecs::{
     change_detection::DetectChangesMut as _,
     component::Component,
-    event::EventReader,
+    message::MessageReader,
     schedule::SystemSet,
     system::{Local, Query},
 };
@@ -298,7 +298,7 @@ pub struct ImageFontText {
     reason = "Systems are only `pub` for the sake of allowing dependent crates to use them for ordering"
 )]
 pub fn sync_texts_with_font_changes(
-    mut events: EventReader<AssetEvent<ImageFont>>,
+    mut events: MessageReader<AssetEvent<ImageFont>>,
     mut query: Query<&mut ImageFontText>,
     mut changed_fonts: Local<CachedHashSet>,
     #[cfg(feature = "ui")] ui_scale: Res<UiScale>,

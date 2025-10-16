@@ -13,7 +13,7 @@
 use std::iter;
 
 use bevy_app::{App, Plugin, PostUpdate};
-use bevy_asset::{Assets, Handle};
+use bevy_asset::{Assets, Handle, RenderAssetUsages};
 use bevy_color::Color;
 use bevy_ecs::{
     component::Component,
@@ -23,10 +23,7 @@ use bevy_ecs::{
 };
 use bevy_image::{Image, ImageSampler, TextureAtlasLayout};
 use bevy_reflect::Reflect;
-use bevy_render::{
-    render_asset::RenderAssetUsages,
-    render_resource::{Extent3d, TextureDimension, TextureFormat},
-};
+use bevy_render::render_resource::{Extent3d, TextureDimension, TextureFormat};
 use bevy_sprite::{Anchor, Sprite};
 #[cfg(feature = "ui")]
 use bevy_ui::widget::ImageNode;
@@ -402,7 +399,7 @@ fn prepare_context<'assets, 'image>(
         .ok_or(ImageFontRenderError::MissingImageFontAsset)?;
     let textures = image_font.textures(images);
     let render_config = RenderConfig {
-        text_anchor: Anchor::Center,
+        text_anchor: Anchor::CENTER,
         offset_characters: false,
         apply_scaling: false,
         letter_spacing: 0.0,

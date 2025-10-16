@@ -25,6 +25,7 @@ use std::iter;
 
 use bevy_app::{App, Plugin, PostUpdate};
 use bevy_asset::Assets;
+use bevy_camera::visibility::Visibility;
 use bevy_color::Color;
 use bevy_ecs::component::Component;
 use bevy_ecs::entity::Entity;
@@ -33,7 +34,6 @@ use bevy_ecs::schedule::IntoScheduleConfigs as _;
 use bevy_ecs::system::{Commands, Query, Res};
 use bevy_image::TextureAtlasLayout;
 use bevy_reflect::Reflect;
-use bevy_render::view::Visibility;
 use bevy_sprite::{Anchor, Sprite};
 use bevy_transform::components::Transform;
 use derive_setters::Setters;
