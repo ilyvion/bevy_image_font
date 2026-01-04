@@ -75,6 +75,20 @@ test_cases!(sprites => {
     fifths_alignment  :custom_alignment:5,
 });
 
+enum AnchorWithFormat {
+    Custom(Anchor),
+    Named(Anchor),
+}
+
+impl AnchorWithFormat {
+    fn as_vec(&self) -> Vec2 {
+        match *self {
+            AnchorWithFormat::Custom(anchor) => anchor.as_vec(),
+            AnchorWithFormat::Named(anchor) => anchor.as_vec(),
+        }
+    }
+}
+
 fn setup_rendered_base_alignment(commands: Commands, assets: Res<TestAssets>) {
     setup_base_alignment(commands, assets, |anchor| {
         (
@@ -107,7 +121,12 @@ fn setup_base_alignment<B: Bundle>(
         Anchor::TOP_CENTER,
         Anchor::TOP_RIGHT,
     ] {
-        setup_anchored_text(&mut commands, &assets, anchor, setup_component(anchor));
+        setup_anchored_text(
+            &mut commands,
+            &assets,
+            AnchorWithFormat::Named(anchor),
+            setup_component(anchor),
+        );
     }
 }
 
@@ -134,7 +153,12 @@ fn setup_custom_alignment<B: Bundle>(
     setup_component: impl Fn(Anchor) -> B,
 ) {
     for anchor in custom(steps) {
-        setup_anchored_text(&mut commands, &assets, anchor, setup_component(anchor));
+        setup_anchored_text(
+            &mut commands,
+            &assets,
+            AnchorWithFormat::Custom(anchor),
+            setup_component(anchor),
+        );
     }
 }
 
@@ -150,21 +174,24 @@ fn custom(steps: i8) -> impl Iterator<Item = Anchor> {
 fn setup_anchored_text(
     commands: &mut Commands,
     assets: &TestAssets,
-    anchor: Anchor,
+    anchor: AnchorWithFormat,
     text_render_components: impl Bundle,
 ) {
     let anchor_vec = anchor.as_vec();
     let text = match anchor {
-        Anchor::CENTER => "Center".to_owned(),
-        Anchor::BOTTOM_LEFT => "BottomLeft".to_owned(),
-        Anchor::BOTTOM_CENTER => "BottomCenter".to_owned(),
-        Anchor::BOTTOM_RIGHT => "BottomRight".to_owned(),
-        Anchor::CENTER_LEFT => "CenterLeft".to_owned(),
-        Anchor::CENTER_RIGHT => "CenterRight".to_owned(),
-        Anchor::TOP_LEFT => "TopLeft".to_owned(),
-        Anchor::TOP_CENTER => "TopCenter".to_owned(),
-        Anchor::TOP_RIGHT => "TopRight".to_owned(),
-        Anchor(vec) => format!("({:.2}, {:.2})", vec.x, vec.y),
+        AnchorWithFormat::Named(anchor) => match anchor {
+            Anchor::CENTER => "Center".to_owned(),
+            Anchor::BOTTOM_LEFT => "BottomLeft".to_owned(),
+            Anchor::BOTTOM_CENTER => "BottomCenter".to_owned(),
+            Anchor::BOTTOM_RIGHT => "BottomRight".to_owned(),
+            Anchor::CENTER_LEFT => "CenterLeft".to_owned(),
+            Anchor::CENTER_RIGHT => "CenterRight".to_owned(),
+            Anchor::TOP_LEFT => "TopLeft".to_owned(),
+            Anchor::TOP_CENTER => "TopCenter".to_owned(),
+            Anchor::TOP_RIGHT => "TopRight".to_owned(),
+            Anchor(anchor) => panic!("Non-named anchor passed as named: {:?}", anchor),
+        },
+        AnchorWithFormat::Custom(_anchor) => format!("({:.2}, {:.2})", anchor_vec.x, anchor_vec.y),
     };
 
     commands.spawn((
