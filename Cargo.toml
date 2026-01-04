@@ -25,8 +25,8 @@ default = ["ui", "rendered", "atlas_sprites", "bmf"]
 atlas_sprites = []
 bmf = []
 gizmos = ["dep:bevy_gizmos", "bevy/bevy_gizmos"]
-rendered = ["dep:image", "bevy_ui"]
-ui = ["rendered", "bevy_ui", "bevy/bevy_ui"]
+rendered = ["dep:image", "bevy_ui", "bevy_ui_render"]
+ui = ["rendered", "bevy_ui", "bevy_ui_render", "bevy/bevy_ui"]
 
 [dependencies]
 bevy_app = "0.17"
@@ -43,9 +43,11 @@ bevy_platform = "0.17"
 bevy_reflect = "0.17"
 bevy_render = "0.17"
 bevy_sprite = "0.17"
+bevy_sprite_render = "0.17"
 bevy_time = "0.17"
 bevy_transform = "0.17"
 bevy_ui = { version = "0.17", optional = true }
+bevy_ui_render = { version = "0.17", optional = true }
 bmfont_rs = { version = "0.3", features = ["xml"] }
 camino = { version = "1.2.1", features = ["serde1"] }
 derive_setters = "0.1"
@@ -67,11 +69,13 @@ bevy = { version = "0.17", default-features = false, features = [
     "bevy_log",
     "bevy_render",
     "bevy_sprite",
+    "bevy_sprite_render",
     "bevy_state",
     "bevy_core_pipeline",
     "bevy_window",
     "multi_threaded",
     "bevy_ui",
+    "bevy_ui_render",
     "png",
     "x11",
 ] }
