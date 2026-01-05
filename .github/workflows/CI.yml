@@ -102,11 +102,11 @@ jobs:
             - name: Install cargo-hack
               uses: taiki-e/install-action@v2
               with:
-                  tool: cargo-hack
+                  tool: cargo-hack,cargo-nextest
 
             - name: Cargo test
               id: tests
-              run: cargo hack --feature-powerset --keep-going test --no-fail-fast --workspace --exclude-features default
+              run: cargo hack --feature-powerset --keep-going nextest run --no-fail-fast --workspace --exclude-features default
 
             # - name: Cargo test
             #   id: tests

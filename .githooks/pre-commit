@@ -10,5 +10,4 @@ fi
 
 cargo fmt --all --check
 cargo hack --feature-powerset clippy --all-targets --exclude-features default -- -D warnings
-# XXX: Temporarily skip some tests that are currently broken.
-cargo test --all-features -- --skip rendered_ --skip sprites_
+cargo nextest run --all-features

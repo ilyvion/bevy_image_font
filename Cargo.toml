@@ -108,8 +108,56 @@ required-features = ["atlas_sprites"]
 doc-scrape-examples = true
 
 [[test]]
-name = "visual-acceptance-testing"
-required-features = ["ui", "rendered", "atlas_sprites", "bmf"]
+name = "rendered_base_alignment"
+required-features = ["rendered"]
+
+[[test]]
+name = "rendered_fifths_alignment"
+required-features = ["rendered"]
+
+[[test]]
+name = "rendered_manual_positioning"
+required-features = ["rendered"]
+
+[[test]]
+name = "rendered_quarters_alignment"
+required-features = ["rendered"]
+
+[[test]]
+name = "rendered_sizes"
+required-features = ["rendered"]
+
+[[test]]
+name = "rendered_thirds_alignment"
+required-features = ["rendered"]
+
+[[test]]
+name = "sprites_base_alignment"
+required-features = ["rendered", "atlas_sprites"]
+
+[[test]]
+name = "sprites_fifths_alignment"
+required-features = ["rendered", "atlas_sprites"]
+
+[[test]]
+name = "sprites_manual_positioning"
+required-features = ["rendered", "atlas_sprites"]
+
+[[test]]
+name = "sprites_quarters_alignment"
+required-features = ["rendered", "atlas_sprites"]
+
+[[test]]
+name = "sprites_sizes"
+required-features = ["rendered", "atlas_sprites"]
+
+[[test]]
+name = "sprites_spacing"
+required-features = ["rendered", "atlas_sprites"]
+
+[[test]]
+name = "sprites_thirds_alignment"
+required-features = ["rendered", "atlas_sprites"]
 
 [lints.rust]
 absolute_paths_not_starting_with_crate = "warn"

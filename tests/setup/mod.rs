@@ -1,3 +1,5 @@
+//#![allow(unused)]
+
 use std::fs::{self, create_dir_all, remove_file};
 use std::io::Cursor;
 use std::iter;
@@ -42,8 +44,7 @@ use crossbeam_channel::{Receiver, Sender};
 use image::ImageFormat;
 use oxipng::Options;
 
-use super::TestAssets;
-use crate::{SCREENSHOT_HEIGHT, SCREENSHOT_WIDTH};
+use crate::visual_acceptance_testing::{SCREENSHOT_HEIGHT, SCREENSHOT_WIDTH, TestAssets};
 
 // To communicate between the main world and the render world we need a channel.
 // Since the main world and render world run in parallel, there will always be a

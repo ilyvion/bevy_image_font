@@ -1,3 +1,5 @@
+#![allow(unused, reason = "not all items are used in every test case")]
+//
 // Based on
 // <https://github.com/bevyengine/bevy/blob/main/examples/app/headless_renderer.rs>
 
@@ -13,67 +15,41 @@
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
 use bevy_asset_loader::asset_collection::AssetCollection;
+#[cfg(feature = "atlas_sprites")]
 use bevy_image_font::atlas_sprites::ImageFontSpriteText;
 use bevy_image_font::rendered::ImageFontPreRenderedText;
 use bevy_image_font::{ImageFont, ImageFontText, LetterSpacing};
 use itertools::Itertools as _;
 
-use crate::setup::prepare_app;
-
-mod setup;
-
-macro_rules! test_cases {
-    ($category:ident => {$($name:ident,)+ }) => {
+#[expect(unused_macro_rules, reason = "only one rule is used per test file")]
+macro_rules! test_case {
+    ($category:ident, $name:ident) => {
         paste::paste! {
-            $(
-                #[test]
-                #[cfg_attr(ci, ignore = "Does not work when headless")]
-                fn [< $category _ $name >]() {
-                    prepare_app(stringify!($category), stringify!($name), [< setup _ $category _ $name >]);
-                }
-            )+
+            #[test]
+            #[cfg_attr(ci, ignore = "Does not work when headless")]
+            fn [< $category _ $name >]() {
+                $crate::setup::prepare_app(
+                    stringify!($category),
+                    stringify!($name),
+                    $crate::visual_acceptance_testing::[< setup _ $category _ $name >],
+                );
+            }
         }
     };
-    ($category:ident => {$($name:ident:$custom_name:ident:$val:expr_2021,)+ }) => {
+    ($category:ident, $name:ident:$custom_name:ident:$val:expr_2021) => {
         paste::paste! {
-            $(
-                #[test]
-                #[cfg_attr(ci, ignore = "Does not work when headless")]
-                fn [< $category _ $name >]() {
-                    prepare_app(
-                        stringify!($category),
-                        stringify!($name),
-                        (|| $val).pipe([< setup _ $category _ $custom_name >]));
-                }
-            )+
+            #[test]
+            #[cfg_attr(ci, ignore = "Does not work when headless")]
+            fn [< $category _ $name >]() {
+                use bevy_ecs::system::IntoSystem;
+                $crate::setup::prepare_app(
+                    stringify!($category),
+                    stringify!($name),
+                    (|| $val).pipe($crate::visual_acceptance_testing::[< setup _ $category _ $custom_name >]));
+            }
         }
     };
 }
-
-test_cases!(rendered => {
-    base_alignment,
-    manual_positioning,
-    sizes,
-});
-
-test_cases!(rendered => {
-    thirds_alignment  :custom_alignment:3,
-    quarters_alignment:custom_alignment:4,
-    fifths_alignment  :custom_alignment:5,
-});
-
-test_cases!(sprites => {
-    base_alignment,
-    manual_positioning,
-    sizes,
-    spacing,
-});
-
-test_cases!(sprites => {
-    thirds_alignment  :custom_alignment:3,
-    quarters_alignment:custom_alignment:4,
-    fifths_alignment  :custom_alignment:5,
-});
 
 enum AnchorWithFormat {
     Custom(Anchor),
@@ -82,6 +58,10 @@ enum AnchorWithFormat {
 
 impl AnchorWithFormat {
     fn as_vec(&self) -> Vec2 {
+        #[expect(
+            clippy::match_same_arms,
+            reason = "the arms represent different types of anchors"
+        )]
         match *self {
             AnchorWithFormat::Custom(anchor) => anchor.as_vec(),
             AnchorWithFormat::Named(anchor) => anchor.as_vec(),
@@ -89,7 +69,7 @@ impl AnchorWithFormat {
     }
 }
 
-fn setup_rendered_base_alignment(commands: Commands, assets: Res<TestAssets>) {
+pub(crate) fn setup_rendered_base_alignment(commands: Commands, assets: Res<TestAssets>) {
     setup_base_alignment(commands, assets, |anchor| {
         (
             ImageFontPreRenderedText::default(),
@@ -99,7 +79,8 @@ fn setup_rendered_base_alignment(commands: Commands, assets: Res<TestAssets>) {
     });
 }
 
-fn setup_sprites_base_alignment(commands: Commands, assets: Res<TestAssets>) {
+#[cfg(feature = "atlas_sprites")]
+pub(crate) fn setup_sprites_base_alignment(commands: Commands, assets: Res<TestAssets>) {
     setup_base_alignment(commands, assets, |anchor| {
         ImageFontSpriteText::default().anchor(anchor)
     });
@@ -130,7 +111,11 @@ fn setup_base_alignment<B: Bundle>(
     }
 }
 
-fn setup_rendered_custom_alignment(steps: In<i8>, commands: Commands, assets: Res<TestAssets>) {
+pub(crate) fn setup_rendered_custom_alignment(
+    steps: In<i8>,
+    commands: Commands,
+    assets: Res<TestAssets>,
+) {
     setup_custom_alignment(steps.0, commands, assets, |anchor| {
         (
             ImageFontPreRenderedText::default(),
@@ -140,7 +125,12 @@ fn setup_rendered_custom_alignment(steps: In<i8>, commands: Commands, assets: Re
     });
 }
 
-fn setup_sprites_custom_alignment(steps: In<i8>, commands: Commands, assets: Res<TestAssets>) {
+#[cfg(feature = "atlas_sprites")]
+pub(crate) fn setup_sprites_custom_alignment(
+    steps: In<i8>,
+    commands: Commands,
+    assets: Res<TestAssets>,
+) {
     setup_custom_alignment(steps.0, commands, assets, |anchor| {
         ImageFontSpriteText::default().anchor(anchor)
     });
@@ -189,7 +179,7 @@ fn setup_anchored_text(
             Anchor::TOP_LEFT => "TopLeft".to_owned(),
             Anchor::TOP_CENTER => "TopCenter".to_owned(),
             Anchor::TOP_RIGHT => "TopRight".to_owned(),
-            Anchor(anchor) => panic!("Non-named anchor passed as named: {:?}", anchor),
+            Anchor(anchor) => panic!("Non-named anchor passed as named: {anchor:?}"),
         },
         AnchorWithFormat::Custom(_anchor) => format!("({:.2}, {:.2})", anchor_vec.x, anchor_vec.y),
     };
@@ -212,8 +202,8 @@ fn setup_anchored_text(
     ));
 }
 
-const SCREENSHOT_WIDTH: u32 = 1920;
-const SCREENSHOT_HEIGHT: u32 = 1080;
+pub(crate) const SCREENSHOT_WIDTH: u32 = 1920;
+pub(crate) const SCREENSHOT_HEIGHT: u32 = 1080;
 
 const CHARACTER_WIDTH: u32 = 5;
 const CHARACTER_HEIGHT: u32 = 12;
@@ -237,7 +227,7 @@ const PADDING: f32 = 2.0;
     reason = "the magnitude of the numbers we're working on here are too small to lose \
         anything"
 )]
-fn setup_rendered_manual_positioning(mut commands: Commands, assets: Res<TestAssets>) {
+pub(crate) fn setup_rendered_manual_positioning(mut commands: Commands, assets: Res<TestAssets>) {
     for (x, y) in (0..GRID_WIDTH).cartesian_product(0..GRID_HEIGHT) {
         let text = format!("{x:02}.{y:02}");
         let text_width = text.len() as f32 * CHARACTER_WIDTH as f32;
@@ -265,7 +255,8 @@ fn setup_rendered_manual_positioning(mut commands: Commands, assets: Res<TestAss
     reason = "the magnitude of the numbers we're working on here are too small to lose \
         anything"
 )]
-fn setup_sprites_manual_positioning(mut commands: Commands, assets: Res<TestAssets>) {
+#[cfg(feature = "atlas_sprites")]
+pub(crate) fn setup_sprites_manual_positioning(mut commands: Commands, assets: Res<TestAssets>) {
     for (x, y) in (0..GRID_WIDTH).cartesian_product(0..GRID_HEIGHT) {
         let text = format!("{x:02}.{y:02}");
         let text_width = text.len() as f32 * CHARACTER_WIDTH as f32;
@@ -291,7 +282,7 @@ fn setup_sprites_manual_positioning(mut commands: Commands, assets: Res<TestAsse
     reason = "the magnitude of the numbers we're working on here are too small to lose \
         anything"
 )]
-fn setup_rendered_sizes(mut commands: Commands, assets: Res<TestAssets>) {
+pub(crate) fn setup_rendered_sizes(mut commands: Commands, assets: Res<TestAssets>) {
     let mut y = 0.;
     for size_multiplier in 1..14 {
         let size = CHARACTER_HEIGHT * size_multiplier;
@@ -317,7 +308,8 @@ fn setup_rendered_sizes(mut commands: Commands, assets: Res<TestAssets>) {
     reason = "the magnitude of the numbers we're working on here are too small to lose \
         anything"
 )]
-fn setup_sprites_sizes(mut commands: Commands, assets: Res<TestAssets>) {
+#[cfg(feature = "atlas_sprites")]
+pub(crate) fn setup_sprites_sizes(mut commands: Commands, assets: Res<TestAssets>) {
     let mut y = 0.;
     for size_multiplier in 1..14 {
         let size = CHARACTER_HEIGHT * size_multiplier;
@@ -341,7 +333,8 @@ fn setup_sprites_sizes(mut commands: Commands, assets: Res<TestAssets>) {
     reason = "the magnitude of the numbers we're working on here are too small to lose \
         anything"
 )]
-fn setup_sprites_spacing(mut commands: Commands, assets: Res<TestAssets>) {
+#[cfg(feature = "atlas_sprites")]
+pub(crate) fn setup_sprites_spacing(mut commands: Commands, assets: Res<TestAssets>) {
     let mut y = 0.;
     for spacing in 0..16 {
         let size = CHARACTER_HEIGHT * 4;
@@ -363,7 +356,7 @@ fn setup_sprites_spacing(mut commands: Commands, assets: Res<TestAssets>) {
 }
 
 #[derive(AssetCollection, Resource)]
-struct TestAssets {
+pub(crate) struct TestAssets {
     #[asset(path = "example_font.image_font.ron")]
     image_font: Handle<ImageFont>,
 }

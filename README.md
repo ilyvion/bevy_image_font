@@ -123,6 +123,7 @@ For detailed changes across versions, see the [Changelog](CHANGELOG.md). Each Gi
 2. Install required tools:
    ```bash
    cargo install cargo-hack --locked
+   cargo install cargo-nextest --locked
    ```
 
 PRs to support the latest Bevy releases are welcome!
