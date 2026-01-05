@@ -181,6 +181,10 @@ pub struct ImageFontTextGizmoData {
     height: f32,
 }
 
+/// Records the width and height of a character for gizmo visualization.
+///
+/// This function queries the `RenderContext` for the dimensions of the given
+/// character and stores them in the provided `ImageFontTextGizmoData`.
 pub(crate) fn record_character_dimensions(
     render_context: &RenderContext,
     character: char,
