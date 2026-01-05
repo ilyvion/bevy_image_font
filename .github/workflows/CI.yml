@@ -56,31 +56,35 @@ jobs:
         permissions:
             checks: write
         steps:
-            # The fact that we even have to do this is absurd.
-            - name: Free disk space
-              if: matrix.os == 'ubuntu-latest'
-              run: |
-                  set -ex
-                  df -h
-                  sudo swapoff -a
-                  sudo rm -f /swapfile
-                  sudo apt clean
-                  docker rmi $(docker image ls -aq) || true
-                  sudo rm -rf \
-                    "$AGENT_TOOLSDIRECTORY" \
-                    /opt/google/chrome \
-                    /opt/microsoft/msedge \
-                    /opt/microsoft/powershell \
-                    /opt/pipx \
-                    /usr/lib/mono \
-                    /usr/local/julia* \
-                    /usr/local/lib/android \
-                    /usr/local/lib/node_modules \
-                    /usr/local/share/chromium \
-                    /usr/local/share/powershell \
-                    /usr/share/dotnet \
-                    /usr/share/swift
-                  df -h
+            # # The fact that we even have to do this is absurd.
+            # - name: Free disk space
+            #   if: matrix.os == 'ubuntu-latest'
+            #   run: |
+            #       sudo mkdir /mnt/target
+            #       sudo chown -R $(whoami) /mnt/target
+            #       sudo chmod -R u+rwx /mnt/target
+            #       echo "CARGO_TARGET_DIR=/mnt/target" >> $GITHUB_ENV
+            # set -ex
+            # df -h
+            # sudo swapoff -a
+            # sudo rm -f /swapfile
+            # sudo apt clean
+            # docker rmi $(docker image ls -aq) || true
+            # sudo rm -rf \
+            #   "$AGENT_TOOLSDIRECTORY" \
+            #   /opt/google/chrome \
+            #   /opt/microsoft/msedge \
+            #   /opt/microsoft/powershell \
+            #   /opt/pipx \
+            #   /usr/lib/mono \
+            #   /usr/local/julia* \
+            #   /usr/local/lib/android \
+            #   /usr/local/lib/node_modules \
+            #   /usr/local/share/chromium \
+            #   /usr/local/share/powershell \
+            #   /usr/share/dotnet \
+            #   /usr/share/swift
+            # df -h
 
             - name: Checkout source code
               uses: actions/checkout@v4
@@ -106,7 +110,9 @@ jobs:
 
             - name: Cargo test
               id: tests
-              run: cargo hack --feature-powerset --keep-going nextest run --no-fail-fast --workspace --exclude-features default
+              run: cargo nextest run --all-features --workspace
+              # XXX: Broken due to running out of disk space on GitHub CI
+              #run: cargo hack --feature-powerset --keep-going nextest run --no-fail-fast --workspace --exclude-features default
 
             # - name: Cargo test
             #   id: tests
