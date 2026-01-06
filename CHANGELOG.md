@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-01-06
+
 ### Added
 
 - **BMF kerning support:** Kerning pairs from BMF files are now parsed and applied during text rendering. This improves the visual appearance of text by adjusting spacing between specific character pairs according to the font's kerning data.
@@ -69,25 +71,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Scaling Customization**:
-
   - Introduced the `ScalingMode` enum with options (`Truncated`, `Rounded`, `Smooth`) for controlling glyph scaling behavior in text rendering.
   - Enabled support for floating-point glyph dimensions to allow sub-pixel rendering.
 
 ### Changed
 
 - **Rendering Precision**:
-
   - Replaced integer-based scaling (`u32`) with floating-point calculations (`f32`) to improve rendering precision.
   - Refactored text rendering logic to integrate the `ScalingMode` enum.
 
 - **Code Cleanup**:
-
   - Removed all deprecated annotations and legacy comments associated with `ImageFontDescriptor`.
 
 ### Removed
 
 - **Deprecated Fields and Types**:
-
   - Removed deprecated public fields `image` and `layout` from `ImageFontDescriptor`. Use accessor methods (`image`, `layout`) to retrieve their values.
   - Removed the deprecated type alias `ImageFontSettings`.
   - Removed unused error variants `EmptyImagePath` and `EmptyLayoutString`.
@@ -97,32 +95,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Validation and Accessors**:
-
   - Introduced `ImageFontDescriptor::new` for creating validated instances.
   - Added accessor methods (`image`, `layout`) for retrieving the values of deprecated public fields.
   - Added `ValidationError` to `ImageFontLoadError` for encapsulating validation issues.
 
 - **Core System Tests**:
-
   - Added tests for the `sync_texts_with_font_changes` system to validate:
     - Correct handling of `AssetEvent` variants.
     - Accurate change detection for `ImageFontText` components when their respective `ImageFont` is changed.
 
 - **Component and Layout Tests**:
-
   - Introduced test modules for `ImageFontDescriptor` and `ImageFontLayout`:
     - Verified `ImageFontDescriptor::new` creation and validation logic.
     - Tested `ImageFontLayout`'s character map generation for all layout types (`Automatic`, `Manual`, `ManualMonospace`).
     - Added tests for edge cases like repeated characters and invalid image dimensions.
 
 - **Loader Tests**:
-
   - Comprehensive coverage for `ImageFontLoader` functionality:
     - Validated `read_and_validate_font_descriptor` for proper descriptor parsing and validation.
     - Ensured `descriptor_to_character_map_and_layout` handles both valid and invalid inputs.
 
 - **Integration Tests**:
-
   - Verified the behavior of `ImageFontPlugin` integration with the Bevy framework:
     - Tested asset loading setup.
     - Confirmed correct registration of `ImageFont` and `ImageFontText` types with the reflection system.
@@ -131,12 +124,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **Field Deprecation**:
-
   - Marked `ImageFontDescriptor` fields (`image` and `layout`) as deprecated, with a plan to make them private in version 8.0.
   - Updated documentation to guide users toward using `new`, `image`, and `layout` methods.
 
 - **Gizmo Debugging**:
-
   - Added green cross markers to `render_sprite_gizmos` for enhanced visual debugging of sprite positions.
 
 ### Fixed
@@ -260,7 +251,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First public release; prior versions are not on Cargo.
 
-[unreleased]: https://github.com/ilyvion/bevy_image_font/compare/0.9.0...HEAD
+[unreleased]: https://github.com/ilyvion/bevy_image_font/compare/0.10.0...HEAD
+[0.10.0]: https://github.com/ilyvion/bevy_image_font/compare/0.9.0...0.10.0
 [0.9.0]: https://github.com/ilyvion/bevy_image_font/compare/0.8.0...0.9.0
 [0.8.0]: https://github.com/ilyvion/bevy_image_font/compare/0.7.1...0.8.0
 [0.7.1]: https://github.com/ilyvion/bevy_image_font/compare/0.7.0...0.7.1
