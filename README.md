@@ -41,7 +41,7 @@ Add the following to your `Cargo.toml`:
 ```toml
 [dependencies]
 bevy = "0.17"
-bevy_image_font = "0.9"
+bevy_image_font = "0.10"
 ```
 
 ### Usage
