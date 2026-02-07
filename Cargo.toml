@@ -29,25 +29,25 @@ rendered = ["dep:image", "bevy_ui", "bevy_ui_render"]
 ui = ["rendered", "bevy_ui", "bevy_ui_render", "bevy/bevy_ui"]
 
 [dependencies]
-bevy_app = "0.17"
-bevy_asset = "0.17"
-bevy_camera = "0.17"
-bevy_color = "0.17"
-bevy_derive = "0.17"
-bevy_ecs = "0.17"
-bevy_gizmos = { version = "0.17", optional = true }
-bevy_image = "0.17"
-bevy_log = "0.17"
-bevy_math = "0.17"
-bevy_platform = "0.17"
-bevy_reflect = "0.17"
-bevy_render = "0.17"
-bevy_sprite = "0.17"
-bevy_sprite_render = "0.17"
-bevy_time = "0.17"
-bevy_transform = "0.17"
-bevy_ui = { version = "0.17", optional = true }
-bevy_ui_render = { version = "0.17", optional = true }
+bevy_app = "0.18"
+bevy_asset = "0.18"
+bevy_camera = "0.18"
+bevy_color = "0.18"
+bevy_derive = "0.18"
+bevy_ecs = "0.18"
+bevy_gizmos = { version = "0.18", optional = true }
+bevy_image = "0.18"
+bevy_log = "0.18"
+bevy_math = "0.18"
+bevy_platform = "0.18"
+bevy_reflect = "0.18"
+bevy_render = "0.18"
+bevy_sprite = "0.18"
+bevy_sprite_render = "0.18"
+bevy_time = "0.18"
+bevy_transform = "0.18"
+bevy_ui = { version = "0.18", optional = true }
+bevy_ui_render = { version = "0.18", optional = true }
 bmfont_rs = { version = "0.3", features = ["xml"] }
 camino = { version = "1.2.1", features = ["serde1"] }
 derive_setters = "0.1"
@@ -64,7 +64,7 @@ features = ["png"]
 optional = true
 
 [dev-dependencies]
-bevy = { version = "0.17", default-features = false, features = [
+bevy = { version = "0.18", default-features = false, features = [
     "bevy_asset",
     "bevy_log",
     "bevy_render",
@@ -79,7 +79,7 @@ bevy = { version = "0.17", default-features = false, features = [
     "png",
     "x11",
 ] }
-bevy_asset_loader = { version = "0.24.0-rc.1", features = ["2d"] }
+bevy_asset_loader = { version = "0.25", features = ["2d"] }
 crossbeam-channel = "0.5.14"
 float_eq = "1.0.1"
 itertools = "0.14"

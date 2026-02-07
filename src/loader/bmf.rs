@@ -10,6 +10,7 @@
 //! Code for parsing an [`ImageFont`] off of an on-disk representation in `fnt`
 //! format.
 
+use bevy_asset::AssetPath;
 use bevy_asset::{AssetLoader, LoadContext, io::Reader};
 use bevy_image::Image;
 use bevy_image::TextureAtlasLayout;
@@ -17,7 +18,7 @@ use bevy_log::warn;
 use bevy_math::Vec2;
 use bevy_math::{URect, UVec2};
 use bevy_platform::collections::HashMap;
-use camino::Utf8Path;
+use bevy_reflect::TypePath;
 use strum::{AsRefStr, EnumIter, IntoEnumIterator as _, VariantNames};
 use thiserror::Error;
 
@@ -28,7 +29,7 @@ use crate::{
 };
 
 /// Loader for [`ImageFont`]s.
-#[derive(Debug, Default)]
+#[derive(Debug, Default, TypePath)]
 pub struct BmFontLoader;
 
 /// An error type representing issues that may arise during the loading of BMF
@@ -136,22 +137,23 @@ impl BmFontExtension {
         Self::iter().find(|&self_extension| extension == self_extension.as_tuple())
     }
 
-    /// Extracts the `BmFontExtension` from a file path, if possible.
+    /// Extracts the `BmFontExtension` from a `AssetPath`, if possible.
     ///
     /// This function looks at the file name, extracts its two-dot extension,
     /// and attempts to match it against known BMF font extensions.
     ///
     /// # Parameters
-    /// - `path`: A reference to a `Utf8Path` representing the file path.
+    /// - `path`: A reference to a `AssetPath` representing the file path.
     ///
     /// # Returns
     /// - `Some(BmFontExtension)` if the file has a recognized extension.
     /// - `None` if the file's extension is not recognized or the path has no
     ///   valid file name.
-    fn from_path(path: &Utf8Path) -> Option<Self> {
-        let file_name = path.file_name()?;
-        let tuple = file_name_to_extension_tuple(file_name)?;
-        Self::from_tuple(tuple)
+    fn from_asset_path(path: &AssetPath) -> Option<Self> {
+        let file_name = path.get_full_extension()?;
+        let (base, ext2) = file_name.rsplit_once('.')?;
+        let ext1 = base.rsplit_once('.').map_or(base, |(_, ext)| ext);
+        Self::from_tuple((ext1, ext2))
     }
 
     /// Converts a `BmFontExtension` into its corresponding two-dot extension
@@ -168,25 +170,6 @@ impl BmFontExtension {
     }
 }
 
-/// Extracts a two-dot file extension from a file name.
-///
-/// This function assumes the file name follows the convention of having a
-/// two-part extension, such as `"txt.fnt"`. It will return `None` if the file
-/// name does not match this pattern.
-///
-/// # Parameters
-/// - `file_name`: A string slice representing the file name.
-///
-/// # Returns
-/// - `Some((&str, &str))` if a valid two-dot extension is found.
-/// - `None` if the file name does not contain at least two dot-separated parts.
-fn file_name_to_extension_tuple(file_name: &str) -> Option<(&str, &str)> {
-    let (base, ext2) = file_name.rsplit_once('.')?;
-    let (_, ext1) = base.rsplit_once('.')?;
-    let tuple = (ext1, ext2);
-    Some(tuple)
-}
-
 /// Reads the BMF font data from the reader.
 async fn read_bmf_data(reader: &mut dyn Reader) -> Result<Vec<u8>, ImageFontLoadError> {
     let mut data = Vec::new();
@@ -200,12 +183,8 @@ fn parse_bmf_data(
     load_context: &mut LoadContext<'_>,
 ) -> Result<bmfont_rs::Font, BmFontLoadError> {
     let path = load_context.path();
-    let path = match <&Utf8Path>::try_from(path) {
-        Ok(path) => path,
-        Err(error) => return Err(ImageFontLoadError::InvalidPath(error).into()),
-    };
 
-    let from_bytes = match BmFontExtension::from_path(path) {
+    let from_bytes = match BmFontExtension::from_asset_path(path) {
         Some(BmFontExtension::Text) => bmfont_rs::text::from_bytes,
         Some(BmFontExtension::Xml) => bmfont_rs::xml::from_bytes,
         Some(BmFontExtension::Binary) => bmfont_rs::binary::from_bytes,
@@ -272,21 +251,16 @@ async fn load_images_and_textures(
     for (page_no, page) in bm_font.pages.iter().enumerate() {
         let image_path = load_context
             .path()
-            .parent()
-            .ok_or(ImageFontLoadError::MissingParentPath)?
-            .join(page);
+            .resolve_embed(page)
+            .map_err(ImageFontLoadError::from)?;
 
-        let Some(mut image) = load_context
+        let mut image: Image = load_context
             .loader()
             .immediate()
-            .with_unknown_type()
             .load(image_path.clone())
             .await
             .map_err(ImageFontLoadError::from)?
-            .take::<Image>()
-        else {
-            return Err(ImageFontLoadError::NotAnImage(page.into()).into());
-        };
+            .take();
 
         image.sampler = settings.image_sampler.clone();
 

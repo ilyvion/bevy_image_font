@@ -4,11 +4,12 @@
 
 use std::io::Error as IoError;
 
-use bevy_asset::{AssetLoader, LoadContext, LoadDirectError, io::Reader};
+use bevy_asset::{AssetLoader, LoadContext, LoadDirectError, ParseAssetPathError, io::Reader};
 use bevy_image::{Image, ImageSampler, ImageSamplerDescriptor, TextureAtlasLayout};
 use bevy_math::{URect, UVec2};
 use bevy_platform::collections::HashMap;
-use camino::{FromPathError, Utf8Path, Utf8PathBuf};
+use bevy_reflect::TypePath;
+use camino::{Utf8Path, Utf8PathBuf};
 use ron::de::SpannedError;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -331,7 +332,7 @@ impl ImageFontDescriptor {
 }
 
 /// Loader for [`ImageFont`]s.
-#[derive(Debug, Default)]
+#[derive(Debug, Default, TypePath)]
 pub struct ImageFontLoader;
 
 /// Errors that can show up during font loading.
@@ -363,21 +364,10 @@ pub enum ImageFontLoadError {
     #[error("failed to load asset: {0}")]
     LoadDirect(Box<LoadDirectError>),
 
-    /// The path provided for the font's image was not loaded as an image. This
-    /// may occur if the file is in an unsupported format or if the path is
-    /// incorrect.
-    #[error("Path does not point to a valid image file: {0}")]
-    NotAnImage(Utf8PathBuf),
-
-    /// The path provided for the font's image was not loaded as an image. This
-    /// may occur if the file is in an unsupported format or if the path is
-    /// incorrect.
-    #[error("Path is not valid UTF-8: {0:?}")]
-    InvalidPath(FromPathError),
-
-    /// The asset path has no parent directory.
-    #[error("Asset path has no parent directory")]
-    MissingParentPath,
+    /// The path provided for the font's image was not parsed properly by bevy.
+    /// See `ParseAssetPathError` for details
+    #[error("failed to parse path for font's image: {0}")]
+    ParseAssetPathError(#[from] ParseAssetPathError),
 }
 
 impl From<LoadDirectError> for ImageFontLoadError {
@@ -429,23 +419,13 @@ impl AssetLoader for ImageFontLoader {
         // need the image loaded immediately because we need its size
         let image_path = load_context
             .path()
-            .parent()
-            .ok_or(ImageFontLoadError::MissingParentPath)?
-            .join(font_descriptor.image());
-        let Some(mut image) = load_context
+            .resolve_embed(font_descriptor.image().as_str())?;
+        let mut image: Image = load_context
             .loader()
             .immediate()
-            .with_unknown_type()
             .load(image_path.clone())
             .await?
-            .take::<Image>()
-        else {
-            let path = match Utf8PathBuf::try_from(image_path) {
-                Ok(path) => path,
-                Err(error) => return Err(ImageFontLoadError::InvalidPath(error.from_path_error())),
-            };
-            return Err(ImageFontLoadError::NotAnImage(path));
-        };
+            .take();
 
         image.sampler = settings.image_sampler.clone();
         let size = image.size();

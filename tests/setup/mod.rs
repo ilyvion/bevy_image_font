@@ -190,15 +190,7 @@ fn setup(
         "main_scene".into(),
     );
 
-    commands.spawn((
-        Camera2d,
-        Camera {
-            // render to image
-            target: render_target,
-            ..default()
-        },
-        Tonemapping::None,
-    ));
+    commands.spawn((Camera2d, render_target, Tonemapping::None));
 }
 
 /// Plugin for Render world part of work
@@ -261,14 +253,14 @@ fn setup_render_target(
 
 fn create_render_target_image(images: &mut ResMut<Assets<Image>>, size: Extent3d) -> Handle<Image> {
     let mut render_target_image =
-        Image::new_target_texture(size.width, size.height, TextureFormat::bevy_default());
+        Image::new_target_texture(size.width, size.height, TextureFormat::bevy_default(), None);
     render_target_image.texture_descriptor.usage |= TextureUsages::COPY_SRC;
     images.add(render_target_image)
 }
 
 fn create_cpu_image(images: &mut ResMut<Assets<Image>>, size: Extent3d) -> Handle<Image> {
     let cpu_image =
-        Image::new_target_texture(size.width, size.height, TextureFormat::bevy_default());
+        Image::new_target_texture(size.width, size.height, TextureFormat::bevy_default(), None);
     images.add(cpu_image)
 }
 
@@ -469,7 +461,7 @@ fn receive_image_from_buffer(
 
         // This blocks until the gpu is done executing everything
         render_device
-            .poll(PollType::Wait)
+            .poll(PollType::wait_indefinitely())
             .expect("Failed to poll device for map async");
 
         // This blocks until the buffer is mapped
