@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-02-20
+
+### Fixed
+
+- Adjusted asset loaders to support non-default asset sources (e.g., `source://...` paths). ([#22]) (PR [#27], thank you [GiantBlargg](https://github.com/GiantBlargg)!)
+
+### Changed
+
+- Crate updated to target Bevy 0.18. ([#26]) (PR [#27], thank you [GiantBlargg](https://github.com/GiantBlargg)!)
+
+[#22]: https://github.com/ilyvion/bevy_image_font/issues/22
+[#26]: https://github.com/ilyvion/bevy_image_font/issues/26
+[#27]: https://github.com/ilyvion/bevy_image_font/pull/27
+
 ## [0.10.0] - 2026-01-06
 
 ### Added
@@ -251,7 +265,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First public release; prior versions are not on Cargo.
 
-[unreleased]: https://github.com/ilyvion/bevy_image_font/compare/0.10.0...HEAD
+[unreleased]: https://github.com/ilyvion/bevy_image_font/compare/0.11.0...HEAD
+[0.11.0]: https://github.com/ilyvion/bevy_image_font/compare/0.10.0...0.11.0
 [0.10.0]: https://github.com/ilyvion/bevy_image_font/compare/0.9.0...0.10.0
 [0.9.0]: https://github.com/ilyvion/bevy_image_font/compare/0.8.0...0.9.0
 [0.8.0]: https://github.com/ilyvion/bevy_image_font/compare/0.7.1...0.8.0
