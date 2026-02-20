@@ -143,7 +143,7 @@ impl BmFontExtension {
     /// and attempts to match it against known BMF font extensions.
     ///
     /// # Parameters
-    /// - `path`: A reference to a `AssetPath` representing the file path.
+    /// - `path`: A reference to an `AssetPath` representing the file path.
     ///
     /// # Returns
     /// - `Some(BmFontExtension)` if the file has a recognized extension.

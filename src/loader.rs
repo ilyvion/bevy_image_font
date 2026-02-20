@@ -364,8 +364,8 @@ pub enum ImageFontLoadError {
     #[error("failed to load asset: {0}")]
     LoadDirect(Box<LoadDirectError>),
 
-    /// The path provided for the font's image was not parsed properly by bevy.
-    /// See `ParseAssetPathError` for details
+    /// The path provided for the font's image was not parsed properly by Bevy.
+    /// See `ParseAssetPathError` for details.
     #[error("failed to parse path for font's image: {0}")]
     ParseAssetPathError(#[from] ParseAssetPathError),
 }
