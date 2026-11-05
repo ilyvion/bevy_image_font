@@ -545,7 +545,7 @@ fn render_scene(
     } = image_paths;
 
     // write_optimized_png(img, &new_image_path);
-    if let Err(error) = img.save(&new_image_path) {
+    if let Err(error) = img.save(new_image_path) {
         panic!("Failed to save image: {error}");
     }
 
