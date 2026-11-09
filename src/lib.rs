@@ -42,6 +42,9 @@ pub mod rendered;
 #[cfg(feature = "atlas_sprites")]
 pub mod atlas_sprites;
 
+#[cfg(all(feature = "gizmos", not(feature = "atlas_sprites")))]
+compile_error!("Invalid feature combination. 'gizmos' currently requires 'atlas_sprites'.");
+
 /// A Bevy plugin for rendering image-based fonts.
 ///
 /// This plugin enables support for fonts stored as single images (e.g., PNG),
