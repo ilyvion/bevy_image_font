@@ -117,9 +117,9 @@ pub(crate) struct DemoAssets {
 pub(crate) mod gizmos {
     use bevy::{
         ecs::system::{Res, ResMut},
-        gizmos::config::GizmoConfigStore,
         input::{ButtonInput, keyboard::KeyCode},
     };
+    use bevy::gizmos::config::GizmoConfigStore;
     use bevy_image_font::atlas_sprites::gizmos::AtlasSpritesGizmoConfigGroup;
 
     //use super::{ButtonInput, GizmoConfigStore, KeyCode, Res, ResMut};
