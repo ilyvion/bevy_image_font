@@ -21,17 +21,41 @@ rustdoc-args = ["--cfg", "docsrs"]
 cargo-args = ["-Zunstable-options", "-Zrustdoc-scrape-examples"]
 
 [features]
-default = ["ui", "rendered", "atlas_sprites", "bmf"]
-atlas_sprites = []
-bmf = []
-gizmos = ["dep:bevy_gizmos", "bevy/bevy_gizmos"]
-rendered = ["dep:image", "bevy_ui", "bevy_ui_render"]
-ui = ["rendered", "bevy_ui", "bevy_ui_render", "bevy/bevy_ui"]
+default = [
+    "atlas_sprites",
+    "bmf",
+    "rendered",
+    "ui",
+]
+atlas_sprites = [
+    "dep:bevy_camera",
+    "dep:bevy_sprite",
+    "dep:bevy_transform",
+]
+bmf = [
+    "dep:bmfont_rs",
+    "dep:strum",
+]
+gizmos = [
+    "dep:bevy_gizmos",
+    "bevy/bevy_gizmos",
+]
+rendered = [
+    "dep:bevy_render",
+    "dep:bevy_sprite",
+    "dep:bevy_transform",
+    "dep:image",
+]
+ui = [
+    "rendered",
+    "dep:bevy_ui",
+    "bevy/bevy_ui",
+]
 
 [dependencies]
 bevy_app = "0.18"
 bevy_asset = "0.18"
-bevy_camera = "0.18"
+bevy_camera = { version = "0.18", optional = true }
 bevy_color = "0.18"
 bevy_derive = "0.18"
 bevy_ecs = "0.18"
@@ -41,20 +65,18 @@ bevy_log = "0.18"
 bevy_math = "0.18"
 bevy_platform = "0.18"
 bevy_reflect = "0.18"
-bevy_render = "0.18"
-bevy_sprite = "0.18"
-bevy_sprite_render = "0.18"
+bevy_render = { version = "0.18", optional = true }
+bevy_sprite = { version = "0.18", optional = true }
 bevy_time = "0.18"
-bevy_transform = "0.18"
+bevy_transform = { version = "0.18", optional = true }
 bevy_ui = { version = "0.18", optional = true }
-bevy_ui_render = { version = "0.18", optional = true }
-bmfont_rs = { version = "0.4", features = ["xml"] }
+bmfont_rs = { version = "0.4", features = ["xml"], optional = true }
 camino = { version = "1.2.1", features = ["serde1"] }
 derive_setters = "0.1"
 itertools = "0.14"
 ron = "0.12"
 serde = { version = "1", features = ["derive"] }
-strum = { version = "0.27", features = ["derive"] }
+strum = { version = "0.27", features = ["derive"], optional = true }
 thiserror = "2"
 
 [dependencies.image]
