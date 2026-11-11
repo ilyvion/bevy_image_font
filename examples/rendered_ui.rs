@@ -6,8 +6,8 @@
 )]
 #![expect(clippy::expect_used, reason = "only used when panics can't happen")]
 
-use bevy::prelude::*;
 use bevy::input::common_conditions::input_just_pressed;
+use bevy::prelude::*;
 use bevy_asset_loader::prelude::AssetCollectionApp as _;
 use bevy_image_font::rendered::ImageFontPreRenderedUiText;
 use bevy_image_font::{ImageFontPlugin, ImageFontText};
