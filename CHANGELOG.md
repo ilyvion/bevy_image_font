@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `ImageFontSpriteText::outline_color` draws the outline in its own color, with the inside of the glyphs in `color`. Outlines are drawn behind all glyphs, so they don't cover neighboring characters.
   - `ImageFontPreRenderedText` and `ImageFontPreRenderedUiText` have new `color` and `outline_color` fields that do the same for pre-rendered text. `color` defaults to white, which leaves the text as before.
   - `ImageFont::outline_layers` holds the extra outline and glyph textures these fonts are split into when loaded.
+- Non-Unicode BMFont fonts can be loaded with the new, non-default `bmf_charsets` feature. Character ids are read in the code page of the font's `charset`, so text is written in normal Unicode. See the `bmf_charsets` example. ([#16])
+  - `ANSI`/`DEFAULT` fonts are read as code page 1252 and `OEM` fonts as code page 437 unless `ImageFontLoaderSettings::bmf_ansi_code_page` or `bmf_oem_code_page` says otherwise.
+  - `SYMBOL` fonts put their glyphs at `U+F000` plus the character code, as Windows does, so the symbol at code `0x41` is drawn with `'\u{F041}'`.
+  - `JOHAB` fonts are not supported. Fonts that can't be loaded fail with the new `BmFontLoadError::UnknownCharset` or `BmFontLoadError::CodePageUnsupported` errors.
 
 ### Fixed
 

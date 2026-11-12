@@ -93,6 +93,7 @@ See examples for more details:
 - [Rendered UI example](https://github.com/ilyvion/bevy_image_font/blob/main/examples/rendered_ui.rs): Using `bevy_asset_loader` for texture and font handling.
 - [Atlased Sprite Example](https://github.com/ilyvion/bevy_image_font/blob/main/examples/atlased_sprite.rs): Demonstrates rendering text with a texture atlas, including animations for dynamic text display and changing colors.
 - [Packed BMFont example](https://github.com/ilyvion/bevy_image_font/blob/main/examples/bmf_packed.rs): Loads `BMFont` fonts whose glyphs are packed into the texture's four color channels, including one with a baked outline, drawn both in the font's black and in an outline color of your choice.
+- [Non-Unicode BMFont example](https://github.com/ilyvion/bevy_image_font/blob/main/examples/bmf_charsets.rs): Loads a code page 437 `BMFont` font with the `bmf_charsets` feature and draws box-drawing, shading and Greek characters with it from ordinary Unicode text.
 
 #### Note on Pixel Accuracy
 
@@ -103,6 +104,7 @@ Bevy anchors sprites at the center by default, which may cause odd-dimensioned s
 - You can disable the default `atlas_sprites` feature if you don't use `ImageFontSpriteText`.
 - You can disable the default `rendered` feature if you don't use `ImageFontPreRenderedText` or `ImageFontPreRenderedUiText`. This removes the dependency on the `image` crate.
 - You can disable the default `ui` feature if you don't use `ImageFontPreRenderedUiText` to remove a dependency on the `bevy/bevy_ui` feature.
+- Enable the `bmf_charsets` feature to load non-Unicode `BMFont` fonts, whose character ids are in a Windows code page such as Shift JIS or Windows-1251. The `ANSI` and `OEM` charsets depend on the system the font was exported on; set `bmf_ansi_code_page` and `bmf_oem_code_page` in the loader settings if yours weren't 1252 and 437.
 - If your project depends on this crate and you need support for non-PNG formats, add your own dependency on the same version of `image` and enable the relevant features.
 
 ## Bevy Version Compatibility

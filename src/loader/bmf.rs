@@ -14,6 +14,7 @@ use strum::{AsRefStr, EnumIter, IntoEnumIterator as _, VariantNames};
 use thiserror::Error;
 
 use self::channels::{ChannelSettings, PageDecoding, outline_layers};
+use self::charset::CharIds;
 use crate::{
     ImageFont,
     loader::{ImageFontLoadError, ImageFontLoaderSettings},
@@ -21,6 +22,7 @@ use crate::{
 use crate::{ImageFontCharacter, ImageFontOutlineLayers};
 
 mod channels;
+mod charset;
 
 /// Loader for [`ImageFont`]s.
 #[derive(Debug, Default, TypePath)]
@@ -44,10 +46,26 @@ pub enum BmFontLoadError {
     #[error(transparent)]
     BmFontError(#[from] bmfont_rs::Error),
 
-    /// [`BmFontLoader`] only supports Unicode fonts, but the loaded font is
-    /// not.
-    #[error("BmFontLoader only supports unicode fonts")]
+    /// The loaded font is not a Unicode font, and the `bmf_charsets` feature,
+    /// which [`BmFontLoader`] needs to load such fonts, is not enabled.
+    #[error("BmFontLoader only supports unicode fonts without the `bmf_charsets` feature")]
     CharsetUnsupported,
+
+    /// The loaded font is not a Unicode font, and its `info.charset` is not a
+    /// charset `BMFont` defines.
+    #[cfg(feature = "bmf_charsets")]
+    #[error("unknown BMFont charset {0:?}")]
+    UnknownCharset(String),
+
+    /// The loaded font is not a Unicode font, and the code page its charset
+    /// stands for can't be decoded. The `JOHAB` charset (code page 1361) is
+    /// not supported, and neither are code pages in
+    /// [`ImageFontLoaderSettings::bmf_ansi_code_page`] or
+    /// [`ImageFontLoaderSettings::bmf_oem_code_page`] that neither
+    /// `encoding_rs` nor `oem_cp` can decode.
+    #[cfg(feature = "bmf_charsets")]
+    #[error("BMFont code page {0} is not supported")]
+    CodePageUnsupported(u16),
 }
 
 impl AssetLoader for BmFontLoader {
@@ -65,14 +83,16 @@ impl AssetLoader for BmFontLoader {
     ) -> Result<Self::Asset, Self::Error> {
         let data = read_bmf_data(reader).await?;
         let bm_font = parse_bmf_data(&data, load_context)?;
+        let char_ids = CharIds::new(&bm_font.info, settings)?;
 
-        let mut atlas_character_map = process_bmf_characters(&bm_font);
+        let mut atlas_character_map = process_bmf_characters(&bm_font, char_ids);
         let textures =
             load_images_and_textures(&bm_font, &mut atlas_character_map, settings, load_context)
                 .await?;
 
         Ok(construct_image_font(
             &bm_font,
+            char_ids,
             textures,
             atlas_character_map,
             settings,
@@ -166,7 +186,7 @@ async fn read_bmf_data(reader: &mut dyn Reader) -> Result<Vec<u8>, ImageFontLoad
     Ok(data)
 }
 
-/// Parses the BMF font data and validates it.
+/// Parses the BMF font data.
 fn parse_bmf_data(
     data: &[u8],
     load_context: &mut LoadContext<'_>,
@@ -180,13 +200,7 @@ fn parse_bmf_data(
         extension => unreachable!("{extension:?}"),
     };
 
-    let bm_font = from_bytes(data)?;
-
-    if !bm_font.info.unicode {
-        return Err(BmFontLoadError::CharsetUnsupported);
-    }
-
-    Ok(bm_font)
+    Ok(from_bytes(data)?)
 }
 
 /// A BMF character and where its glyph is in the font's textures.
@@ -202,7 +216,10 @@ struct AtlasCharacter<'font> {
 }
 
 /// Processes BMF characters into an atlas character map.
-fn process_bmf_characters(bm_font: &bmfont_rs::Font) -> HashMap<char, AtlasCharacter<'_>> {
+fn process_bmf_characters(
+    bm_font: &bmfont_rs::Font,
+    char_ids: CharIds,
+) -> HashMap<char, AtlasCharacter<'_>> {
     let mut atlas_character_map = HashMap::new();
     for char in &bm_font.chars {
         let x = u32::from(char.x);
@@ -216,7 +233,7 @@ fn process_bmf_characters(bm_font: &bmfont_rs::Font) -> HashMap<char, AtlasChara
             },
         };
 
-        if let Some(character) = char::from_u32(char.id) {
+        if let Some(character) = char_ids.to_char(char.id) {
             atlas_character_map.insert(
                 character,
                 AtlasCharacter {
@@ -342,6 +359,7 @@ async fn load_images_and_textures(
 /// Constructs the final `ImageFont` asset.
 fn construct_image_font(
     bm_font: &bmfont_rs::Font,
+    char_ids: CharIds,
     textures: FontTextures,
     atlas_character_map: HashMap<char, AtlasCharacter<'_>>,
     settings: &ImageFontLoaderSettings,
@@ -354,7 +372,7 @@ fn construct_image_font(
                 let font_char = character.font_char;
                 let kernings = bm_font.kernings.iter().filter_map(|kerning| {
                     if kerning.first == font_char.id {
-                        if let Some(character) = char::from_u32(kerning.second) {
+                        if let Some(character) = char_ids.to_char(kerning.second) {
                             Some((character, f32::from(kerning.amount)))
                         } else {
                             warn!(

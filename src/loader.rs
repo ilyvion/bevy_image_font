@@ -388,12 +388,46 @@ pub struct ImageFontLoaderSettings {
     /// preserving a crisp, pixelated appearance. This is usually ideal for
     /// pixel-art fonts.
     pub image_sampler: ImageSampler,
+
+    /// The Windows code page that the character ids of non-Unicode `BMFont`
+    /// fonts with the `ANSI` or `DEFAULT` charset are in. These charsets
+    /// stand for the ANSI code page of the system the font was exported on.
+    ///
+    /// The default is 1252 (Western European).
+    #[cfg(feature = "bmf_charsets")]
+    #[serde(default = "default_bmf_ansi_code_page")]
+    pub bmf_ansi_code_page: u16,
+
+    /// The Windows code page that the character ids of non-Unicode `BMFont`
+    /// fonts with the `OEM` charset are in. This charset stands for the OEM
+    /// code page of the system the font was exported on.
+    ///
+    /// The default is 437 (US).
+    #[cfg(feature = "bmf_charsets")]
+    #[serde(default = "default_bmf_oem_code_page")]
+    pub bmf_oem_code_page: u16,
+}
+
+/// The default of [`ImageFontLoaderSettings::bmf_ansi_code_page`].
+#[cfg(feature = "bmf_charsets")]
+fn default_bmf_ansi_code_page() -> u16 {
+    1252
+}
+
+/// The default of [`ImageFontLoaderSettings::bmf_oem_code_page`].
+#[cfg(feature = "bmf_charsets")]
+fn default_bmf_oem_code_page() -> u16 {
+    437
 }
 
 impl Default for ImageFontLoaderSettings {
     fn default() -> Self {
         Self {
             image_sampler: ImageSampler::Descriptor(ImageSamplerDescriptor::nearest()),
+            #[cfg(feature = "bmf_charsets")]
+            bmf_ansi_code_page: default_bmf_ansi_code_page(),
+            #[cfg(feature = "bmf_charsets")]
+            bmf_oem_code_page: default_bmf_oem_code_page(),
         }
     }
 }

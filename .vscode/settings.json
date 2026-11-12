@@ -1,5 +1,6 @@
 {
     "rust-analyzer.cargo.features": [
-        "gizmos"
+        "gizmos",
+        "bmf_charsets"
     ]
 }
