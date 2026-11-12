@@ -353,7 +353,7 @@ fn update_existing_sprites(
 
         render_context.update_render_values(character, sprite_texture, &mut sprite.color);
 
-        *transform = render_context.transform(
+        *transform = render_context.sprite_transform(
             &mut x_pos,
             character,
             if next_sprite_entity == Entity::PLACEHOLDER {
@@ -478,7 +478,7 @@ fn add_missing_sprites(
             )]
             let character = character.expect("Only the last character can be None");
 
-            let transform = render_context.transform(&mut x_pos, character, next_character);
+            let transform = render_context.sprite_transform(&mut x_pos, character, next_character);
             let sprite = Sprite {
                 image: render_context.font_image(character),
                 texture_atlas: Some(render_context.font_texture_atlas(character)),

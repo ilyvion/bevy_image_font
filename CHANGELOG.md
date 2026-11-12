@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Crate updated to target Bevy 0.20.
+  - On Bevy 0.20, scenes with thousands of `ImageFontPreRenderedText` entities render much more slowly than on Bevy 0.19, because each text has its own image. See "Known Limitations" in the README for workarounds.
+- `ImageFontSpriteText` glyphs are now snapped to whole pixels. Text whose anchor would otherwise put glyph edges between pixels may be positioned up to one pixel differently than before.
+
+### Fixed
+
+- `ImageFontSpriteText` text placed on half-pixel positions (e.g. odd-width text with a centered anchor) no longer renders with gaps, stretched columns, or stray lines from neighboring glyphs.
+
 ## [0.12.0] - 2026-11-12
 
 ### Changed

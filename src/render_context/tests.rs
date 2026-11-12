@@ -277,6 +277,44 @@ fn transform() {
 }
 
 #[test]
+#[cfg(feature = "atlas_sprites")]
+#[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
+fn sprite_transform_snaps_glyph_edges_to_whole_units() {
+    let (app, handle) = initialize_app_with_loaded_example_font(ExampleFont::Monospace);
+    let render_context_tester = RenderContextTester::new(&app, handle);
+
+    render_context_tester.modify_and_then_test_with(
+        |tester| {
+            // An odd number of glyphs centered on the origin puts glyph edges on half
+            // units.
+            tester.image_font_text.text = String::from("Tes");
+        },
+        |render_context| {
+            let render_context = render_context.unwrap();
+            let first_char = render_context.text().filtered_chars().next().unwrap();
+
+            let unsnapped = render_context.transform(&mut 0.0, first_char, None);
+            assert_float_eq!(unsnapped.translation.x, -5.0, abs <= COMPARISON_TOLERANCE);
+
+            let mut x_pos = 0.0;
+            let snapped = render_context.sprite_transform(&mut x_pos, first_char, None);
+
+            // Left edge -7.5 snaps to -8.
+            assert_float_eq!(snapped.translation.x, -5.5, abs <= COMPARISON_TOLERANCE);
+            assert_float_eq!(snapped.translation.y, 0.0, abs <= COMPARISON_TOLERANCE);
+            // Snapping only moves the glyph; the next glyph's position is unaffected.
+            #[expect(
+                clippy::cast_precision_loss,
+                reason = "the magnitude of the numbers we're working on here are too small to \
+                    lose anything"
+            )]
+            let expected_x_pos = MONOSPACE_FONT_WIDTH as f32;
+            assert_float_eq!(x_pos, expected_x_pos, abs <= COMPARISON_TOLERANCE);
+        },
+    );
+}
+
+#[test]
 #[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
 fn update_sprite_values() {
     let (app, handle) = initialize_app_with_loaded_example_font(ExampleFont::Monospace);

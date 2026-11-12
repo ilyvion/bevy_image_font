@@ -419,6 +419,42 @@ impl<'assets> RenderContext<'assets> {
         }
         self.anchor_offsets().compute_transform(params)
     }
+
+    /// Computes the transform for a glyph sprite, like [`Self::transform`],
+    /// with the glyph's edges snapped to whole units.
+    ///
+    /// A glyph edge on a half unit makes each pixel sample exactly between two
+    /// texels, where the renderer may pick either one per pixel, producing gaps,
+    /// stretching, and bleeding from neighboring atlas glyphs.
+    ///
+    /// # Parameters
+    /// - `x_pos`: A mutable reference to the current x-position of the sprite.
+    ///   This value is updated to reflect the position of the next sprite.
+    /// - `character`: The character associated with the sprite.
+    /// - `next_character`: The character following this one, used for
+    ///   kerning.
+    ///
+    /// # Returns
+    /// A [`Transform`] representing the snapped position and scale of the
+    /// sprite.
+    #[inline]
+    #[cfg(feature = "atlas_sprites")]
+    pub(crate) fn sprite_transform(
+        &self,
+        x_pos: &mut f32,
+        character: char,
+        next_character: Option<char>,
+    ) -> Transform {
+        let transform = self.transform(x_pos, character, next_character);
+
+        let image_font_character = &self.image_font.atlas_character_map[&character];
+        let glyph_size = self.atlas_layouts[image_font_character.page_index].textures
+            [image_font_character.character_index]
+            .size()
+            .as_vec2();
+
+        anchors::snap_to_whole_units(transform, glyph_size * transform.scale.truncate())
+    }
 }
 
 /// Configuration settings for rendering text using an `ImageFont`.

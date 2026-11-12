@@ -36,8 +36,9 @@ use bevy::render::render_resource::{
     TexelCopyBufferInfo, TexelCopyBufferLayout, TextureFormat, TextureUsages,
 };
 use bevy::render::renderer::{RenderContext, RenderDevice, RenderGraph, RenderQueue};
+use bevy::render::settings::{RenderCreation, WgpuFeatures, WgpuSettings};
 use bevy::render::texture::GpuImage;
-use bevy::render::{Extract, Render, RenderApp, RenderSystems};
+use bevy::render::{Extract, Render, RenderApp, RenderPlugin, RenderSystems};
 use bevy::window::ExitCondition;
 use bevy::winit::WinitPlugin;
 use bevy_asset_loader::asset_collection::AssetCollectionApp as _;
@@ -77,9 +78,11 @@ pub(crate) fn prepare_app<M>(
     setup_system: impl IntoScheduleConfigs<ScheduleSystem, M>,
 ) {
     let mut app = App::new();
+    let category = category.into();
+    let bindless = category != "rendered";
 
-    setup_scene_controller(&mut app, category.into(), image_name.into());
-    setup_plugins(&mut app);
+    setup_scene_controller(&mut app, category, image_name.into());
+    setup_plugins(&mut app, bindless);
     setup_asset_loading(&mut app);
     setup_rendering(&mut app);
 
@@ -96,10 +99,26 @@ fn setup_scene_controller(app: &mut App, category: String, image_name: String) {
     .insert_resource(ClearColor(Color::srgb(0.2, 0.2, 0.2)));
 }
 
-fn setup_plugins(app: &mut App) {
+/// Sets up the plugins, with bindless materials only enabled if `bindless` is
+/// set.
+///
+/// Bindless materials make wgpu revalidate every texture in a shared bind group
+/// on each draw. This makes scenes with thousands of distinct sprite images,
+/// like the pre-rendered text tests, take seconds per frame, while scenes that
+/// share a few atlas images render faster with them.
+fn setup_plugins(app: &mut App, bindless: bool) {
+    let disabled_features = (!bindless).then_some(WgpuFeatures::TEXTURE_BINDING_ARRAY);
+
     app.add_plugins(
         DefaultPlugins
             .set(ImagePlugin::default_nearest())
+            .set(RenderPlugin {
+                render_creation: RenderCreation::Automatic(Box::new(WgpuSettings {
+                    disabled_features,
+                    ..default()
+                })),
+                ..default()
+            })
             .set(WindowPlugin {
                 primary_window: None,
                 exit_condition: ExitCondition::DontExit,
@@ -458,7 +477,11 @@ fn receive_image_from_buffer(
 
         // This could fail on app exit, if Main world clears resources (including
         // receiver) while Render world still renders
-        drop(sender.send(buffer_slice.get_mapped_range().to_vec()));
+        let mapped_range = buffer_slice
+            .get_mapped_range()
+            .expect("Failed to get the mapped buffer range");
+        drop(sender.send(mapped_range.to_vec()));
+        drop(mapped_range);
 
         // We need to make sure all `BufferView`'s are dropped before we do what we're
         // about to do.

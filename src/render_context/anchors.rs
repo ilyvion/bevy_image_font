@@ -212,6 +212,26 @@ fn finalize_transform(translation: Vec2, scale: f32) -> Transform {
     Transform::from_translation(translation.extend(0.0)).with_scale(Vec2::splat(scale).extend(0.0))
 }
 
+/// Moves a centered quad so that its edges lie on whole units.
+///
+/// Each edge is rounded to the nearest whole unit, with halves rounded toward
+/// the bottom-left.
+///
+/// # Parameters
+/// - `transform`: The transform positioning the quad's center.
+/// - `quad_size`: The quad's size after scaling.
+///
+/// # Returns
+/// The transform with its translation adjusted.
+#[cfg(feature = "atlas_sprites")]
+pub(crate) fn snap_to_whole_units(mut transform: Transform, quad_size: Vec2) -> Transform {
+    let half_size = quad_size / 2.;
+    let bottom_left = transform.translation.truncate() - half_size;
+    let snapped_bottom_left = (bottom_left - 0.5).ceil();
+    transform.translation = (snapped_bottom_left + half_size).extend(transform.translation.z);
+    transform
+}
+
 #[cfg(test)]
 mod tests {
     use bevy_math::Vec3;
@@ -334,6 +354,49 @@ mod tests {
         let transform = offsets.compute_transform(params);
         assert_eq!(transform.translation, Vec3::new(11.0, 0.0, 0.0));
         assert_eq!(transform.scale, Vec3::new(0.0, 0.0, 0.0));
+    }
+
+    #[test]
+    #[cfg(feature = "atlas_sprites")]
+    fn snap_to_whole_units_moves_half_unit_edges_toward_bottom_left() {
+        // An odd-sized quad centered on whole units has its edges on half units.
+        let transform = Transform::from_translation(Vec3::new(10.0, -20.0, 3.0))
+            .with_scale(Vec3::new(1.0, 1.0, 0.0));
+        let snapped = snap_to_whole_units(transform, Vec2::new(5.0, 7.0));
+
+        // Left edge 7.5 -> 7, bottom edge -23.5 -> -24.
+        assert_eq!(snapped.translation, Vec3::new(9.5, -20.5, 3.0));
+        assert_eq!(snapped.scale, transform.scale);
+    }
+
+    #[test]
+    #[cfg(feature = "atlas_sprites")]
+    fn snap_to_whole_units_rounds_to_nearest_whole_unit() {
+        let transform = Transform::from_translation(Vec3::new(10.3, 4.8, 0.0));
+        let snapped = snap_to_whole_units(transform, Vec2::new(4.0, 6.0));
+
+        // Left edge 8.3 -> 8, bottom edge 1.8 -> 2.
+        assert_eq!(snapped.translation, Vec3::new(10.0, 5.0, 0.0));
+    }
+
+    #[test]
+    #[cfg(feature = "atlas_sprites")]
+    fn snap_to_whole_units_keeps_aligned_quads_in_place() {
+        let transform = Transform::from_translation(Vec3::new(2.5, -3.0, 0.0));
+        let snapped = snap_to_whole_units(transform, Vec2::new(5.0, 12.0));
+
+        assert_eq!(snapped.translation, transform.translation);
+    }
+
+    #[test]
+    #[cfg(feature = "atlas_sprites")]
+    fn snap_to_whole_units_uses_scaled_size() {
+        // A 5x5 glyph scaled by 1.5 is 7.5 wide; centered at 0, its left edge
+        // is at -3.75 and snaps to -4.
+        let transform = Transform::from_translation(Vec3::ZERO).with_scale(Vec3::splat(1.5));
+        let snapped = snap_to_whole_units(transform, Vec2::new(5.0, 5.0) * 1.5);
+
+        assert_eq!(snapped.translation, Vec3::new(-0.25, -0.25, 0.0));
     }
 
     #[test]
