@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The `gizmos` feature now enables the `atlas_sprites` feature.
+
 ## [0.11.0] - 2026-02-20
 
 ### Fixed

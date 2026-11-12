@@ -31,12 +31,14 @@ atlas_sprites = [
     "dep:bevy_camera",
     "dep:bevy_sprite",
     "dep:bevy_transform",
+    "dep:itertools",
 ]
 bmf = [
     "dep:bmfont_rs",
     "dep:strum",
 ]
 gizmos = [
+    "atlas_sprites",
     "dep:bevy_gizmos",
     "bevy/bevy_gizmos",
 ]
@@ -45,6 +47,7 @@ rendered = [
     "dep:bevy_sprite",
     "dep:bevy_transform",
     "dep:image",
+    "dep:itertools",
 ]
 ui = [
     "rendered",
@@ -73,7 +76,7 @@ bevy_ui = { version = "0.18", optional = true }
 bmfont_rs = { version = "0.4", features = ["xml"], optional = true }
 camino = { version = "1.2.6", features = ["serde1"] }
 derive_setters = "0.1"
-itertools = "0.15"
+itertools = { version = "0.15", optional = true }
 ron = "0.12"
 serde = { version = "1", features = ["derive"] }
 strum = { version = "0.28", features = ["derive"], optional = true }

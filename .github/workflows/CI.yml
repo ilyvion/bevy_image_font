@@ -164,11 +164,8 @@ jobs:
             - name: Run cargo fmt
               run: cargo fmt --all -- --check
 
-            - name: Run cargo clippy without gizmos
-              run: cargo hack --feature-powerset clippy --all-targets --exclude-features "default,gizmos" -- -D warnings
-
-            - name: Run cargo clippy with gizmos
-              run: cargo hack --feature-powerset clippy --all-targets --exclude-features "default" --group-features "gizmos,atlas_sprites" -- -D warnings
+            - name: Run cargo clippy
+              run: cargo hack --feature-powerset clippy --all-targets --exclude-features default -- -D warnings
 
     # XXX: Disabled due to issues with GitHub CI disk space
     # coverage:

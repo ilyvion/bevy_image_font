@@ -113,7 +113,7 @@ pub(crate) struct DemoAssets {
 }
 
 /// Gizmos related example code
-#[cfg(all(feature = "gizmos", feature = "atlas_sprites"))]
+#[cfg(feature = "gizmos")]
 pub(crate) mod gizmos {
     use bevy::gizmos::config::GizmoConfigStore;
     use bevy::{
