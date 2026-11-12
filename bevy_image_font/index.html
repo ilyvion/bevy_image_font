@@ -28,6 +28,12 @@
 <ul>
 <li>Space characters require a blank texture region.</li>
 <li>Newlines are currently unsupported.</li>
+<li>On Bevy 0.20, thousands of <code>ImageFontPreRenderedText</code> entities on screen at once can take seconds per frame, because each text is a sprite with its own image and Bevy’s bindless sprite materials scale poorly with many distinct images. Workarounds:
+<ul>
+<li>Use <code>ImageFontSpriteText</code>, whose glyphs share the font’s atlas images.</li>
+<li>Disable bindless materials by setting <code>disabled_features: Some(WgpuFeatures::TEXTURE_BINDING_ARRAY)</code> in the <code>WgpuSettings</code> of Bevy’s <code>RenderPlugin</code>. This can make scenes with many sprites sharing a few images slower.</li>
+</ul>
+</li>
 </ul>
 <h3 id="getting-started"><a class="doc-anchor" href="#getting-started">§</a>Getting Started</h3>
 <p>Add the following to your <code>Cargo.toml</code>:</p>

@@ -353,7 +353,7 @@
 <a href=#353 id=353 data-nosnippet>353</a>
 <a href=#354 id=354 data-nosnippet>354</a>        render_context.update_render_values(character, sprite_texture, <span class="kw-2">&amp;mut </span>sprite.color);
 <a href=#355 id=355 data-nosnippet>355</a>
-<a href=#356 id=356 data-nosnippet>356</a>        <span class="kw-2">*</span>transform = render_context.transform(
+<a href=#356 id=356 data-nosnippet>356</a>        <span class="kw-2">*</span>transform = render_context.sprite_transform(
 <a href=#357 id=357 data-nosnippet>357</a>            <span class="kw-2">&amp;mut </span>x_pos,
 <a href=#358 id=358 data-nosnippet>358</a>            character,
 <a href=#359 id=359 data-nosnippet>359</a>            <span class="kw">if </span>next_sprite_entity == Entity::PLACEHOLDER {
@@ -478,7 +478,7 @@
 <a href=#478 id=478 data-nosnippet>478</a>            </span>)]
 <a href=#479 id=479 data-nosnippet>479</a>            </span><span class="kw">let </span>character = character.expect(<span class="string">"Only the last character can be None"</span>);
 <a href=#480 id=480 data-nosnippet>480</a>
-<a href=#481 id=481 data-nosnippet>481</a>            <span class="kw">let </span>transform = render_context.transform(<span class="kw-2">&amp;mut </span>x_pos, character, next_character);
+<a href=#481 id=481 data-nosnippet>481</a>            <span class="kw">let </span>transform = render_context.sprite_transform(<span class="kw-2">&amp;mut </span>x_pos, character, next_character);
 <a href=#482 id=482 data-nosnippet>482</a>            <span class="kw">let </span>sprite = Sprite {
 <a href=#483 id=483 data-nosnippet>483</a>                image: render_context.font_image(character),
 <a href=#484 id=484 data-nosnippet>484</a>                texture_atlas: <span class="prelude-val">Some</span>(render_context.font_texture_atlas(character)),
