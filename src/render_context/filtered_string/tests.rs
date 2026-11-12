@@ -126,6 +126,7 @@ fn test_image_font_filter_string() {
         atlas_character_map: atlas_character_map.clone(),
         image_sampler: ImageSampler::nearest(),
         line_height: None,
+        outline_layers: Vec::new(),
     };
 
     let input = "ABC";

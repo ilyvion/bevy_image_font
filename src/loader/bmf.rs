@@ -2,7 +2,7 @@
 //! format.
 
 use bevy_asset::AssetPath;
-use bevy_asset::{AssetLoader, LoadContext, io::Reader};
+use bevy_asset::{AssetLoader, Handle, LoadContext, io::Reader};
 use bevy_image::Image;
 use bevy_image::TextureAtlasLayout;
 use bevy_log::warn;
@@ -13,12 +13,12 @@ use bevy_reflect::TypePath;
 use strum::{AsRefStr, EnumIter, IntoEnumIterator as _, VariantNames};
 use thiserror::Error;
 
-use self::channels::{ChannelSettings, PageDecoding};
-use crate::ImageFontCharacter;
+use self::channels::{ChannelSettings, PageDecoding, outline_layers};
 use crate::{
     ImageFont,
     loader::{ImageFontLoadError, ImageFontLoaderSettings},
 };
+use crate::{ImageFontCharacter, ImageFontOutlineLayers};
 
 mod channels;
 
@@ -67,15 +67,14 @@ impl AssetLoader for BmFontLoader {
         let bm_font = parse_bmf_data(&data, load_context)?;
 
         let mut atlas_character_map = process_bmf_characters(&bm_font);
-        let (image_handles, atlas_layout_handles) =
+        let textures =
             load_images_and_textures(&bm_font, &mut atlas_character_map, settings, load_context)
                 .await?;
 
         Ok(construct_image_font(
             &bm_font,
-            image_handles,
+            textures,
             atlas_character_map,
-            atlas_layout_handles,
             settings,
         ))
     }
@@ -237,25 +236,31 @@ fn process_bmf_characters(bm_font: &bmfont_rs::Font) -> HashMap<char, AtlasChara
     atlas_character_map
 }
 
+/// The textures of a loaded font, with their atlas layouts and outline layers
+/// at the same indices.
+#[derive(Debug, Default)]
+struct FontTextures {
+    /// The font's textures.
+    images: Vec<Handle<Image>>,
+    /// The atlas layout of each texture.
+    atlas_layouts: Vec<Handle<TextureAtlasLayout>>,
+    /// The outline and glyph layers of each texture that holds an outline.
+    outline_layers: Vec<Option<ImageFontOutlineLayers>>,
+}
+
 /// Loads font images and creates texture atlases.
 ///
 /// Each page is decoded according to the font's channel settings. A packed
-/// page becomes one texture per channel its glyphs are in.
+/// page becomes one texture per channel its glyphs are in. Textures that hold
+/// an outline are also split into outline and glyph layers.
 async fn load_images_and_textures(
     bm_font: &bmfont_rs::Font,
     atlas_character_map: &mut HashMap<char, AtlasCharacter<'_>>,
     settings: &ImageFontLoaderSettings,
     load_context: &mut LoadContext<'_>,
-) -> Result<
-    (
-        Vec<bevy_asset::Handle<Image>>,
-        Vec<bevy_asset::Handle<TextureAtlasLayout>>,
-    ),
-    BmFontLoadError,
-> {
+) -> Result<FontTextures, BmFontLoadError> {
     let channel_settings = ChannelSettings::new(&bm_font.common);
-    let mut image_handles = Vec::new();
-    let mut atlas_layout_handles = Vec::new();
+    let mut textures = FontTextures::default();
     for (page_no, page) in bm_font.pages.iter().enumerate() {
         let image_path = load_context
             .path()
@@ -304,35 +309,45 @@ async fn load_images_and_textures(
             } else {
                 ""
             };
-            let texture_index = image_handles.len();
-            image_handles.push(
-                load_context.add_labeled_asset(format!("texture_{page_no}{suffix}"), view_image),
-            );
+            let label = format!("texture_{page_no}{suffix}");
+            let layers = decoding
+                .has_outline()
+                .then(|| outline_layers(&view_image))
+                .flatten()
+                .map(|(outline, glyph)| ImageFontOutlineLayers {
+                    outline: load_context.add_labeled_asset(format!("{label}_outline"), outline),
+                    glyph: load_context.add_labeled_asset(format!("{label}_glyph"), glyph),
+                });
+            textures.outline_layers.push(layers);
+
+            let texture_index = textures.images.len();
+            textures
+                .images
+                .push(load_context.add_labeled_asset(label, view_image));
 
             let mut atlas_layout = TextureAtlasLayout::new_empty(size);
             for character in characters {
                 character.placement =
                     Some((texture_index, atlas_layout.add_texture(character.rect)));
             }
-            atlas_layout_handles.push(
+            textures.atlas_layouts.push(
                 load_context.add_labeled_asset(format!("layout_{page_no}{suffix}"), atlas_layout),
             );
         }
     }
 
-    Ok((image_handles, atlas_layout_handles))
+    Ok(textures)
 }
 
 /// Constructs the final `ImageFont` asset.
 fn construct_image_font(
     bm_font: &bmfont_rs::Font,
-    image_handles: Vec<bevy_asset::Handle<Image>>,
+    textures: FontTextures,
     atlas_character_map: HashMap<char, AtlasCharacter<'_>>,
-    atlas_layout_handles: Vec<bevy_asset::Handle<TextureAtlasLayout>>,
     settings: &ImageFontLoaderSettings,
 ) -> ImageFont {
     ImageFont {
-        textures: image_handles,
+        textures: textures.images,
         atlas_character_map: atlas_character_map
             .into_iter()
             .map(|(char, character)| {
@@ -372,8 +387,9 @@ fn construct_image_font(
                 )
             })
             .collect(),
-        atlas_layouts: atlas_layout_handles,
+        atlas_layouts: textures.atlas_layouts,
         image_sampler: settings.image_sampler.clone(),
         line_height: Some(u32::from(bm_font.common.line_height)),
+        outline_layers: textures.outline_layers,
     }
 }

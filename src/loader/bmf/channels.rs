@@ -95,6 +95,19 @@ impl PageDecoding {
         }
     }
 
+    /// Whether a page decoded this way holds an outline around its glyphs,
+    /// with the glyph in the color channels and the outline in alpha.
+    pub(super) fn has_outline(self) -> bool {
+        matches!(
+            self,
+            Self::OutlineAndGlyph { .. }
+                | Self::Channel {
+                    content: ChannelContent::GlyphOutline,
+                    ..
+                }
+        )
+    }
+
     /// Decodes a single RGBA pixel in place.
     fn decode_pixel(self, pixel: &mut [u8; 4]) {
         match self {
@@ -134,6 +147,40 @@ impl PageDecoding {
             self.decode_pixel(pixel);
         }
     }
+}
+
+/// Splits a decoded page that holds an outline (see
+/// [`PageDecoding::has_outline`]) into its outline layer and its glyph layer.
+/// Both are white, with alpha holding the coverage of the outline and of the
+/// glyph, respectively.
+///
+/// Returns `None` for images that are not 8-bit RGBA or have no data.
+pub(super) fn outline_layers(image: &Image) -> Option<(Image, Image)> {
+    if !matches!(
+        image.texture_descriptor.format,
+        TextureFormat::Rgba8Unorm | TextureFormat::Rgba8UnormSrgb
+    ) {
+        return None;
+    }
+    let data = image.data.as_ref()?;
+
+    let mut outline = image.clone();
+    let mut glyph = image.clone();
+    for (layer, coverage_channel) in [(&mut outline, ALPHA), (&mut glyph, RED)] {
+        let layer_data = layer
+            .data
+            .as_mut()
+            .unwrap_or_else(|| unreachable!("a clone of an image with data has data"));
+        for (layer_pixel, pixel) in layer_data
+            .as_chunks_mut::<4>()
+            .0
+            .iter_mut()
+            .zip(data.as_chunks::<4>().0)
+        {
+            *layer_pixel = [u8::MAX, u8::MAX, u8::MAX, pixel[coverage_channel]];
+        }
+    }
+    Some((outline, glyph))
 }
 
 /// A font's channel settings, deciding how each glyph's page is decoded.
@@ -190,17 +237,6 @@ impl ChannelSettings {
 
 /// How the pages of a font that is not packed are decoded.
 fn not_packed_decoding(common: &Common) -> PageDecoding {
-    match ChannelContent::from_packing(common.alpha_chnl) {
-        Some(ChannelContent::Glyph | ChannelContent::Outline) => return PageDecoding::AsIs,
-        Some(ChannelContent::GlyphOutline) => {
-            return PageDecoding::Channel {
-                channel: ALPHA,
-                content: ChannelContent::GlyphOutline,
-            };
-        }
-        None => {}
-    }
-
     let color_channels = [
         (RED, common.red_chnl),
         (GREEN, common.green_chnl),
@@ -212,6 +248,25 @@ fn not_packed_decoding(common: &Common) -> PageDecoding {
             .find(|&&(_, packing)| ChannelContent::from_packing(packing) == Some(content))
             .map(|&(channel, _)| channel)
     };
+
+    match ChannelContent::from_packing(common.alpha_chnl) {
+        Some(ChannelContent::Glyph) => return PageDecoding::AsIs,
+        Some(ChannelContent::Outline) => {
+            return find(ChannelContent::Glyph).map_or(PageDecoding::AsIs, |glyph| {
+                PageDecoding::OutlineAndGlyph {
+                    outline: ALPHA,
+                    glyph,
+                }
+            });
+        }
+        Some(ChannelContent::GlyphOutline) => {
+            return PageDecoding::Channel {
+                channel: ALPHA,
+                content: ChannelContent::GlyphOutline,
+            };
+        }
+        None => {}
+    }
 
     if let Some(channel) = find(ChannelContent::GlyphOutline) {
         return PageDecoding::Channel {

@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, reason = "test code panics to indicate errors")]
+
 use super::*;
 
 /// A `Common` block with the given channel settings.
@@ -24,13 +26,93 @@ fn alpha_holding_shape_is_used_as_is() {
     }
     assert_eq!(
         not_packed(
-            Packing::Outline,
+            Packing::Glyph,
             Packing::Glyph,
             Packing::Glyph,
             Packing::Glyph
         ),
         PageDecoding::AsIs
     );
+}
+
+#[test]
+fn outline_in_alpha_with_glyph_in_color_channels_is_read_as_outline_and_glyph() {
+    assert_eq!(
+        not_packed(
+            Packing::Outline,
+            Packing::Glyph,
+            Packing::Glyph,
+            Packing::Glyph
+        ),
+        PageDecoding::OutlineAndGlyph {
+            outline: ALPHA,
+            glyph: RED
+        }
+    );
+    assert_eq!(
+        not_packed(
+            Packing::Outline,
+            Packing::Zero,
+            Packing::Zero,
+            Packing::Glyph
+        ),
+        PageDecoding::OutlineAndGlyph {
+            outline: ALPHA,
+            glyph: BLUE
+        }
+    );
+}
+
+#[test]
+fn only_decodings_with_glyph_and_outline_have_an_outline() {
+    let channel = |content| PageDecoding::Channel {
+        channel: RED,
+        content,
+    };
+    assert!(channel(ChannelContent::GlyphOutline).has_outline());
+    assert!(
+        PageDecoding::OutlineAndGlyph {
+            outline: ALPHA,
+            glyph: RED
+        }
+        .has_outline()
+    );
+    assert!(!channel(ChannelContent::Glyph).has_outline());
+    assert!(!channel(ChannelContent::Outline).has_outline());
+    assert!(!PageDecoding::AsIs.has_outline());
+}
+
+#[test]
+fn outline_layers_split_glyph_from_outline() {
+    use bevy_asset::RenderAssetUsages;
+    use wgpu_types::{Extent3d, TextureDimension};
+
+    let image = |data, format| {
+        Image::new(
+            Extent3d {
+                width: 2,
+                height: 1,
+                depth_or_array_layers: 1,
+            },
+            TextureDimension::D2,
+            data,
+            format,
+            RenderAssetUsages::default(),
+        )
+    };
+
+    let (outline, glyph) = outline_layers(&image(
+        vec![0, 0, 0, 255, 100, 100, 100, 200],
+        TextureFormat::Rgba8UnormSrgb,
+    ))
+    .unwrap();
+    assert_eq!(
+        outline.data.unwrap(),
+        [255, 255, 255, 255, 255, 255, 255, 200]
+    );
+    assert_eq!(glyph.data.unwrap(), [255, 255, 255, 0, 255, 255, 255, 100]);
+
+    assert!(outline_layers(&image(vec![0, 0], TextureFormat::R8Unorm)).is_none());
 }
 
 #[test]

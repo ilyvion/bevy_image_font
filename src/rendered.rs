@@ -12,9 +12,10 @@
 
 use bevy_app::{App, Plugin, PostUpdate};
 use bevy_asset::{Assets, Handle, RenderAssetUsages};
+use bevy_color::{Color, ColorToPacked as _, LinearRgba, Srgba};
 use bevy_ecs::{
     component::Component,
-    query::Changed,
+    query::{Changed, Or},
     schedule::IntoScheduleConfigs as _,
     system::{Query, Res, ResMut},
 };
@@ -25,6 +26,7 @@ use bevy_render::render_resource::{Extent3d, TextureDimension, TextureFormat};
 use bevy_sprite::Sprite;
 #[cfg(feature = "ui")]
 use bevy_ui::widget::ImageNode;
+use derive_setters::Setters;
 use image::{
     GenericImageView as _, ImageBuffer, ImageError, Rgba,
     imageops::{self, FilterType},
@@ -69,28 +71,123 @@ impl Plugin for RenderedPlugin {
 ///
 /// This component requires an `ImageFontText` component for determining its
 /// font and text. It renders its text into an image and sets it as the texture
-/// on its `Sprite` component.
-#[derive(Component, Debug, Default, Clone, Reflect)]
+/// on its `Sprite` component. The `Sprite`'s color tints the whole image,
+/// including any outline drawn in `outline_color`.
+#[derive(Component, Debug, Clone, Reflect, Setters)]
+#[setters(into)]
 #[require(ImageFontText, Sprite)]
 #[non_exhaustive]
-pub struct ImageFontPreRenderedText;
+pub struct ImageFontPreRenderedText {
+    /// The color the glyphs are drawn in, as a tint multiplied with the font
+    /// texture.
+    ///
+    /// The default value is white, which draws the glyphs as they are in the
+    /// font texture.
+    pub color: Color,
+
+    /// The color of the outline, for fonts whose textures hold an outline
+    /// around their glyphs (see [`ImageFont::outline_layers`]).
+    ///
+    /// When `None`, the outline keeps the color it has in the font texture,
+    /// tinted by `color` like the rest of the glyph. When set, every outline is
+    /// drawn in this color first, then the inside of every glyph in `color` on
+    /// top. Fonts without an outline ignore this setting.
+    ///
+    /// The default value is `None`.
+    pub outline_color: Option<Color>,
+}
+
+impl Default for ImageFontPreRenderedText {
+    fn default() -> Self {
+        Self {
+            color: Color::WHITE,
+            outline_color: None,
+        }
+    }
+}
 
 /// A component for displaying UI text that has been pre-rendered using an image
 /// font.
 ///
 /// This component requires an `ImageFontText` component for determining its
 /// font and text. It renders its text into an image and sets it as the texture
-/// on its `ImageNode` component.
-#[derive(Component, Debug, Default, Clone, Reflect)]
+/// on its `ImageNode` component. The `ImageNode`'s color tints the whole image,
+/// including any outline drawn in `outline_color`.
+#[derive(Component, Debug, Clone, Reflect, Setters)]
+#[setters(into)]
 #[cfg(feature = "ui")]
 #[require(ImageFontText, ImageNode)]
 #[non_exhaustive]
-pub struct ImageFontPreRenderedUiText;
+pub struct ImageFontPreRenderedUiText {
+    /// The color the glyphs are drawn in. See
+    /// [`ImageFontPreRenderedText::color`].
+    pub color: Color,
 
-/// System that renders each [`ImageFontText`] into its [`Sprite`]. This system
-/// only runs when the `ImageFontText` changes.
+    /// The color of the outline of fonts that have one. See
+    /// [`ImageFontPreRenderedText::outline_color`].
+    pub outline_color: Option<Color>,
+}
+
+#[cfg(feature = "ui")]
+impl Default for ImageFontPreRenderedUiText {
+    fn default() -> Self {
+        Self {
+            color: Color::WHITE,
+            outline_color: None,
+        }
+    }
+}
+
+/// The colors pre-rendered text is drawn in.
+#[derive(Debug, Clone, Copy, PartialEq)]
+struct TextColors {
+    /// The color the glyphs are tinted with.
+    color: Color,
+    /// The color of the outline of fonts that have one, if it is drawn in its
+    /// own color.
+    outline_color: Option<Color>,
+}
+
+impl Default for TextColors {
+    fn default() -> Self {
+        Self {
+            color: Color::WHITE,
+            outline_color: None,
+        }
+    }
+}
+
+impl From<&ImageFontPreRenderedText> for TextColors {
+    fn from(text: &ImageFontPreRenderedText) -> Self {
+        Self {
+            color: text.color,
+            outline_color: text.outline_color,
+        }
+    }
+}
+
+#[cfg(feature = "ui")]
+impl From<&ImageFontPreRenderedUiText> for TextColors {
+    fn from(text: &ImageFontPreRenderedUiText) -> Self {
+        Self {
+            color: text.color,
+            outline_color: text.outline_color,
+        }
+    }
+}
+
+/// System that renders each [`ImageFontText`] into its [`Sprite`], in the
+/// colors of its [`ImageFontPreRenderedText`]. This system only runs when the
+/// `ImageFontText` or the `ImageFontPreRenderedText` changes.
 pub fn render_text_to_sprite(
-    mut query: Query<(&ImageFontText, &mut Sprite), Changed<ImageFontText>>,
+    mut query: Query<
+        (
+            &ImageFontText,
+            Option<&ImageFontPreRenderedText>,
+            &mut Sprite,
+        ),
+        Or<(Changed<ImageFontText>, Changed<ImageFontPreRenderedText>)>,
+    >,
     image_fonts: Res<Assets<ImageFont>>,
     mut images: ResMut<Assets<Image>>,
     layouts: Res<Assets<TextureAtlasLayout>>,
@@ -98,7 +195,13 @@ pub fn render_text_to_sprite(
     render_text_to_image_holder(
         query
             .iter_mut()
-            .map(|(image_font_text, sprite)| (image_font_text, sprite.into_inner())),
+            .map(|(image_font_text, pre_rendered, sprite)| {
+                (
+                    image_font_text,
+                    pre_rendered.map_or_else(TextColors::default, TextColors::from),
+                    sprite.into_inner(),
+                )
+            }),
         &image_fonts,
         &mut images,
         &layouts,
@@ -106,10 +209,18 @@ pub fn render_text_to_sprite(
 }
 
 #[cfg(feature = "ui")]
-/// System that renders each [`ImageFontText`] into its [`ImageNode`]. This
-/// system only runs when the `ImageFontText` changes.
+/// System that renders each [`ImageFontText`] into its [`ImageNode`], in the
+/// colors of its [`ImageFontPreRenderedUiText`]. This system only runs when
+/// the `ImageFontText` or the `ImageFontPreRenderedUiText` changes.
 pub fn render_text_to_image_node(
-    mut query: Query<(&ImageFontText, &mut ImageNode), Changed<ImageFontText>>,
+    mut query: Query<
+        (
+            &ImageFontText,
+            Option<&ImageFontPreRenderedUiText>,
+            &mut ImageNode,
+        ),
+        Or<(Changed<ImageFontText>, Changed<ImageFontPreRenderedUiText>)>,
+    >,
     image_fonts: Res<Assets<ImageFont>>,
     mut images: ResMut<Assets<Image>>,
     layouts: Res<Assets<TextureAtlasLayout>>,
@@ -117,7 +228,13 @@ pub fn render_text_to_image_node(
     render_text_to_image_holder(
         query
             .iter_mut()
-            .map(|(image_font_text, image_node)| (image_font_text, image_node.into_inner())),
+            .map(|(image_font_text, pre_rendered, image_node)| {
+                (
+                    image_font_text,
+                    pre_rendered.map_or_else(TextColors::default, TextColors::from),
+                    image_node.into_inner(),
+                )
+            }),
         &image_fonts,
         &mut images,
         &layouts,
@@ -132,9 +249,9 @@ pub fn render_text_to_image_node(
 /// as sprites and UI elements.
 ///
 /// # Parameters
-/// - `font_text_to_image_iter`: An iterator over pairs of [`ImageFontText`] and
-///   mutable references to objects implementing [`ImageHandleHolder`]. Each
-///   item in the iterator represents a text-to-image mapping to be rendered.
+/// - `font_text_to_image_iter`: An iterator over each [`ImageFontText`], the
+///   colors to draw it in, and a mutable reference to the object implementing
+///   [`ImageHandleHolder`] that receives the rendered image.
 /// - `image_fonts`: A reference to the font assets used for rendering.
 /// - `images`: A mutable reference to the collection of image assets. This is
 ///   used to store the newly rendered images.
@@ -152,6 +269,7 @@ fn render_text_to_image_holder<'borrow>(
     font_text_to_image_iter: impl Iterator<
         Item = (
             &'borrow ImageFontText,
+            TextColors,
             &'borrow mut (impl ImageHandleHolder + 'borrow),
         ),
     >,
@@ -159,9 +277,9 @@ fn render_text_to_image_holder<'borrow>(
     images: &mut Assets<Image>,
     layouts: &Assets<TextureAtlasLayout>,
 ) {
-    for (image_font_text, image_handle_holder) in font_text_to_image_iter {
+    for (image_font_text, colors, image_handle_holder) in font_text_to_image_iter {
         bevy_log::debug!("Rendering [{}]", image_font_text.text);
-        match render_text_to_image(image_font_text, image_fonts, images, layouts) {
+        match render_text_to_image(image_font_text, colors, image_fonts, images, layouts) {
             Ok(image) => {
                 image_handle_holder.set_image_handle(images.add(image));
             }
@@ -185,6 +303,7 @@ fn render_text_to_image_holder<'borrow>(
 ///
 /// # Parameters
 /// - `image_font_text`: The text to render, along with its associated font.
+/// - `colors`: The colors to draw the text in.
 /// - `image_fonts`: The collection of available font assets.
 /// - `images`: The collection of image assets used to retrieve font textures.
 /// - `layouts`: The texture atlas layouts defining character positioning.
@@ -200,6 +319,7 @@ fn render_text_to_image_holder<'borrow>(
 ///   and generate the image.
 fn render_text_to_image(
     image_font_text: &ImageFontText,
+    colors: TextColors,
     image_fonts: &Assets<ImageFont>,
     images: &Assets<Image>,
     layouts: &Assets<TextureAtlasLayout>,
@@ -224,21 +344,41 @@ fn render_text_to_image(
 
     let (placements, size) = layout_glyphs(&render_context);
     let mut output_image = image::RgbaImage::new(size.x, size.y);
-    let font_textures: Vec<ImageBuffer<Rgba<u8>, _>> = textures
+    let pages = textures
         .iter()
-        .map(|texture| {
-            let data = texture.data.as_ref()?;
-            ImageBuffer::from_raw(texture.width(), texture.height(), data.as_slice())
+        .enumerate()
+        .map(|(page_index, texture)| {
+            let texture = image_buffer(texture).ok_or(ImageFontRenderError::UnknownError)?;
+            let outline_layers = colors
+                .outline_color
+                .and_then(|_| image_font.page_outline_layers(page_index))
+                .map(|layers| {
+                    let layer = |handle| {
+                        let image = images
+                            .get(handle)
+                            .ok_or(ImageFontRenderError::MissingTextureAsset)?;
+                        image_buffer(image).ok_or(ImageFontRenderError::UnknownError)
+                    };
+                    Ok::<_, ImageFontRenderError>(OutlineLayerBuffers {
+                        outline: layer(&layers.outline)?,
+                        glyph: layer(&layers.glyph)?,
+                    })
+                })
+                .transpose()?;
+            Ok(PageBuffers {
+                texture,
+                outline_layers,
+            })
         })
-        .collect::<Option<_>>()
-        .ok_or(ImageFontRenderError::UnknownError)?;
+        .collect::<Result<Vec<_>, ImageFontRenderError>>()?;
 
     render_glyphs_to_image(
         image_font,
         &render_context,
         &placements,
         &mut output_image,
-        &font_textures,
+        &pages,
+        colors,
     );
 
     #[expect(
@@ -337,38 +477,124 @@ fn layout_glyphs(render_context: &RenderContext<'_>) -> (Vec<GlyphPlacement>, UV
     (placements, size)
 }
 
+/// A font image's pixel data, borrowed from its [`Image`].
+type ImageBufferRef<'image> = ImageBuffer<Rgba<u8>, &'image [u8]>;
+
+/// Borrows the pixel data of an 8-bit RGBA image, or returns `None` if it has
+/// no data.
+fn image_buffer(image: &Image) -> Option<ImageBufferRef<'_>> {
+    let data = image.data.as_ref()?;
+    ImageBuffer::from_raw(image.width(), image.height(), data.as_slice())
+}
+
+/// The images glyphs on one font texture are drawn from.
+struct PageBuffers<'image> {
+    /// The font texture.
+    texture: ImageBufferRef<'image>,
+    /// The texture's outline layers, when the text is drawn with an outline
+    /// color and the texture has them.
+    outline_layers: Option<OutlineLayerBuffers<'image>>,
+}
+
+/// The outline and glyph layers of a font texture. See
+/// [`ImageFontOutlineLayers`](crate::ImageFontOutlineLayers).
+struct OutlineLayerBuffers<'image> {
+    /// The outline layer.
+    outline: ImageBufferRef<'image>,
+    /// The glyph layer.
+    glyph: ImageBufferRef<'image>,
+}
+
 /// Draws each placed glyph into the output image buffer, blending it over the
 /// glyphs drawn before it.
+///
+/// Glyphs are tinted with `colors.color`. When the text has an outline color,
+/// every outline is drawn first in that color, from the outline layers, and
+/// then the inside of every glyph on top, from the glyph layers.
 ///
 /// # Parameters
 /// - `image_font`: The font asset containing glyph metadata and character maps.
 /// - `render_context`: The context providing glyph texture regions.
 /// - `placements`: Where to draw each glyph, from [`layout_glyphs`].
 /// - `output_image`: The image buffer to which glyphs are rendered.
-/// - `font_textures`: The set of font texture images, one per atlas page.
+/// - `pages`: The images to draw from, one per font texture.
+/// - `colors`: The colors to draw the text in.
 fn render_glyphs_to_image(
     image_font: &ImageFont,
     render_context: &RenderContext<'_>,
     placements: &[GlyphPlacement],
     output_image: &mut ImageBuffer<Rgba<u8>, Vec<u8>>,
-    font_textures: &[ImageBuffer<Rgba<u8>, &[u8]>],
+    pages: &[PageBuffers<'_>],
+    colors: TextColors,
 ) {
-    for placement in placements {
-        let image_font_character = &image_font.atlas_character_map[&placement.character];
-        let rect = render_context.glyph_rect(placement.character);
+    if let Some(outline_color) = colors.outline_color {
+        for placement in placements {
+            let page_index = image_font.atlas_character_map[&placement.character].page_index;
+            if let Some(ref layers) = pages[page_index].outline_layers {
+                draw_glyph(
+                    output_image,
+                    &layers.outline,
+                    render_context,
+                    placement,
+                    outline_color,
+                );
+            }
+        }
+    }
 
-        imageops::overlay(
+    for placement in placements {
+        let page_index = image_font.atlas_character_map[&placement.character].page_index;
+        let page = &pages[page_index];
+        let source = page
+            .outline_layers
+            .as_ref()
+            .map_or(&page.texture, |layers| &layers.glyph);
+        draw_glyph(
             output_image,
-            &*font_textures[image_font_character.page_index].view(
-                rect.min.x,
-                rect.min.y,
-                rect.width(),
-                rect.height(),
-            ),
-            placement.position.x,
-            placement.position.y,
+            source,
+            render_context,
+            placement,
+            colors.color,
         );
     }
+}
+
+/// Draws a placed glyph from `source`, tinted with `tint`, blending it over
+/// the output image.
+fn draw_glyph(
+    output_image: &mut ImageBuffer<Rgba<u8>, Vec<u8>>,
+    source: &ImageBufferRef<'_>,
+    render_context: &RenderContext<'_>,
+    placement: &GlyphPlacement,
+    tint: Color,
+) {
+    let rect = render_context.glyph_rect(placement.character);
+    let glyph = source.view(rect.min.x, rect.min.y, rect.width(), rect.height());
+    let (x, y) = (placement.position.x, placement.position.y);
+
+    if tint == Color::WHITE {
+        imageops::overlay(output_image, &*glyph, x, y);
+    } else {
+        let tint = tint.to_linear();
+        let tinted = image::RgbaImage::from_fn(glyph.width(), glyph.height(), |x, y| {
+            tint_pixel(glyph.get_pixel(x, y), tint)
+        });
+        imageops::overlay(output_image, &tinted, x, y);
+    }
+}
+
+/// Multiplies an sRGB pixel by a tint in linear space, the way a sprite's
+/// color tints its image.
+fn tint_pixel(pixel: Rgba<u8>, tint: LinearRgba) -> Rgba<u8> {
+    let [red, green, blue, alpha] = pixel.0;
+    let linear = LinearRgba::from(Srgba::rgba_u8(red, green, blue, alpha));
+    let tinted = LinearRgba::new(
+        linear.red * tint.red,
+        linear.green * tint.green,
+        linear.blue * tint.blue,
+        linear.alpha * tint.alpha,
+    );
+    Rgba(Srgba::from(tinted).to_u8_array())
 }
 
 /// Prepares the rendering context for image font text rendering.
@@ -486,16 +712,30 @@ mod tests {
     #![allow(clippy::unwrap_used, reason = "test code panics to indicate errors")]
 
     use bevy_app::App;
+    use bevy_color::palettes::css;
     use image::RgbaImage;
 
     use super::*;
-    use crate::tests::utils::{ExampleFont, initialize_app_with_loaded_example_font};
+    use crate::tests::utils::{
+        ExampleFont, initialize_app_with_font, initialize_app_with_loaded_example_font,
+        wait_until_loaded,
+    };
 
     fn render(
         app: &App,
         font: &Handle<ImageFont>,
         text: &str,
         font_height: Option<f32>,
+    ) -> Result<RgbaImage, ImageFontRenderError> {
+        render_with_colors(app, font, text, font_height, TextColors::default())
+    }
+
+    fn render_with_colors(
+        app: &App,
+        font: &Handle<ImageFont>,
+        text: &str,
+        font_height: Option<f32>,
+        colors: TextColors,
     ) -> Result<RgbaImage, ImageFontRenderError> {
         let world = app.world();
         let image_font_text = ImageFontText {
@@ -505,6 +745,7 @@ mod tests {
         };
         let image = render_text_to_image(
             &image_font_text,
+            colors,
             world.resource::<Assets<ImageFont>>(),
             world.resource::<Assets<Image>>(),
             world.resource::<Assets<TextureAtlasLayout>>(),
@@ -573,6 +814,92 @@ mod tests {
                 };
             assert_eq!(pixel, expected, "pixel ({x}, {y})");
         }
+    }
+
+    /// Loads `tests/channels_outline.txt.fnt`, whose `A` is a 2×2 glyph made
+    /// of an outline pixel, a glyph pixel, an empty pixel and a partly covered
+    /// glyph pixel inside the outline, in that order.
+    fn outline_font() -> (App, Handle<ImageFont>) {
+        let (mut app, font) = initialize_app_with_font("tests/channels_outline.txt.fnt");
+        wait_until_loaded(&mut app, &font);
+        (app, font)
+    }
+
+    #[test]
+    #[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
+    fn outline_color_draws_outline_and_glyph_in_their_own_colors() {
+        let (app, font) = outline_font();
+
+        let image = render_with_colors(
+            &app,
+            &font,
+            "A",
+            None,
+            TextColors {
+                color: css::BLUE.into(),
+                outline_color: Some(css::RED.into()),
+            },
+        )
+        .unwrap();
+
+        assert_eq!(image.dimensions(), (2, 2));
+        assert_eq!(*image.get_pixel(0, 0), Rgba([255, 0, 0, 255]));
+        assert_eq!(*image.get_pixel(1, 0), Rgba([0, 0, 255, 255]));
+        assert_eq!(*image.get_pixel(0, 1), Rgba([0, 0, 0, 0]));
+        let partial = image.get_pixel(1, 1);
+        assert!(
+            partial[0] > 0 && partial[2] > 0 && partial[3] == 255,
+            "{partial:?}"
+        );
+    }
+
+    #[test]
+    #[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
+    fn color_tints_glyph_and_keeps_outline_without_outline_color() {
+        let (app, font) = outline_font();
+
+        let image = render_with_colors(
+            &app,
+            &font,
+            "A",
+            None,
+            TextColors {
+                color: css::BLUE.into(),
+                outline_color: None,
+            },
+        )
+        .unwrap();
+
+        assert_eq!(*image.get_pixel(0, 0), Rgba([0, 0, 0, 255]));
+        assert_eq!(*image.get_pixel(1, 0), Rgba([0, 0, 255, 255]));
+        assert_eq!(*image.get_pixel(0, 1), Rgba([0, 0, 0, 0]));
+    }
+
+    #[test]
+    #[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
+    fn changing_the_outline_color_renders_the_text_again() {
+        let (mut app, font) = outline_font();
+        let entity = app
+            .world_mut()
+            .spawn((
+                ImageFontPreRenderedText::default(),
+                ImageFontText::default().text("A").font(font),
+            ))
+            .id();
+        app.update();
+        let first_image = app.world().get::<Sprite>(entity).unwrap().image.clone();
+
+        app.world_mut()
+            .get_mut::<ImageFontPreRenderedText>(entity)
+            .unwrap()
+            .outline_color = Some(css::RED.into());
+        app.update();
+
+        let world = app.world();
+        let image = &world.get::<Sprite>(entity).unwrap().image;
+        assert_ne!(*image, first_image);
+        let image = world.resource::<Assets<Image>>().get(image).unwrap();
+        assert_eq!(image.data.as_ref().unwrap()[..4], [255, 0, 0, 255]);
     }
 
     #[test]

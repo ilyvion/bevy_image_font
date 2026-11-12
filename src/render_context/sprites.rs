@@ -1,13 +1,13 @@
 //! [`RenderContext`] methods for positioning and styling text as individual
 //! glyph sprites.
 
-use bevy_asset::Handle;
-use bevy_color::Color;
-use bevy_image::{Image, TextureAtlas};
+use bevy_image::TextureAtlas;
+use bevy_sprite::Sprite;
 use bevy_transform::components::Transform;
 
 use super::RenderContext;
 use super::anchors::{self, AnchorExt as _, AnchorOffsets, ComputeTransformParams};
+use crate::ImageFontOutlineLayers;
 
 impl RenderContext<'_> {
     /// Computes the uniform scaling factor for text glyphs.
@@ -88,14 +88,46 @@ impl RenderContext<'_> {
         (width, height)
     }
 
-    /// Retrieves the handle to the font texture image.
-    ///
-    /// This handle is used to assign the appropriate image to a text sprite.
-    #[inline]
-    pub(crate) fn font_image(&self, character: char) -> Handle<Image> {
+    /// The outline and glyph layers to draw a character with, if the text has
+    /// an outline color and the character's texture has outline layers.
+    fn outline_layers(&self, character: char) -> Option<&ImageFontOutlineLayers> {
+        self.render_config.outline_color?;
         let image_font_character = &self.image_font.atlas_character_map[&character];
+        self.image_font
+            .page_outline_layers(image_font_character.page_index)
+    }
 
-        self.image_font.textures[image_font_character.page_index].clone()
+    /// Constructs the sprite that draws a character's glyph in the text's
+    /// color. When the character is drawn with an outline color, the sprite
+    /// draws only the inside of the glyph, from the glyph layer, and
+    /// [`Self::outline_sprite`] draws the outline.
+    pub(crate) fn glyph_sprite(&self, character: char) -> Sprite {
+        let image = self.outline_layers(character).map_or_else(
+            || {
+                let image_font_character = &self.image_font.atlas_character_map[&character];
+                self.image_font.textures[image_font_character.page_index].clone()
+            },
+            |layers| layers.glyph.clone(),
+        );
+        Sprite {
+            image,
+            texture_atlas: Some(self.font_texture_atlas(character)),
+            color: self.render_config.color,
+            ..Sprite::default()
+        }
+    }
+
+    /// Constructs the sprite that draws a character's outline in the text's
+    /// outline color, to be drawn below the glyph sprites. Returns `None` if
+    /// the character is not drawn with an outline color.
+    pub(crate) fn outline_sprite(&self, character: char) -> Option<Sprite> {
+        let layers = self.outline_layers(character)?;
+        Some(Sprite {
+            image: layers.outline.clone(),
+            texture_atlas: Some(self.font_texture_atlas(character)),
+            color: self.render_config.outline_color?,
+            ..Sprite::default()
+        })
     }
 
     /// Constructs the texture atlas entry for a specific character.
@@ -115,31 +147,6 @@ impl RenderContext<'_> {
             layout: self.image_font.atlas_layouts[image_font_character.page_index].clone(),
             index: image_font_character.character_index,
         }
-    }
-
-    /// Updates the texture index for the specified character and assigns the
-    /// configured color.
-    ///
-    /// This function assigns the correct glyph index from the font atlas to
-    /// `texture_atlas`, ensuring that the correct character is selected for
-    /// rendering. Additionally, it assigns the configured text color from
-    /// `RenderConfig` to `color`.
-    ///
-    /// # Parameters
-    /// - `character`: The character whose corresponding glyph should be used.
-    /// - `texture_atlas`: The texture atlas entry that will be updated with the
-    ///   character's index.
-    /// - `color`: The variable that will be assigned the value of
-    ///   `RenderConfig::color`.
-    #[inline]
-    pub(crate) fn update_render_values(
-        &self,
-        character: char,
-        texture_atlas: &mut TextureAtlas,
-        color: &mut Color,
-    ) {
-        texture_atlas.index = self.image_font.atlas_character_map[&character].character_index;
-        *color = self.render_config.color;
     }
 
     /// Computes or retrieves the cached anchor offsets for the text and glyph

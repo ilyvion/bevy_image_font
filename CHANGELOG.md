@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `ImageFont::line_height`, the font's native line height. BMFont fonts set it from the font file's `lineHeight`.
 - BMFont fonts with packed channels (`packed=1`, each glyph stored in one color channel of the texture) can now be loaded. See the `bmf_packed` example. ([#16])
+- Two-colour outlines for BMFont fonts exported with an outline ([#16]):
+  - `ImageFontSpriteText::outline_color` draws the outline in its own color, with the inside of the glyphs in `color`. Outlines are drawn behind all glyphs, so they don't cover neighboring characters.
+  - `ImageFontPreRenderedText` and `ImageFontPreRenderedUiText` have new `color` and `outline_color` fields that do the same for pre-rendered text. `color` defaults to white, which leaves the text as before.
+  - `ImageFont::outline_layers` holds the extra outline and glyph textures these fonts are split into when loaded.
 
 ### Fixed
 
@@ -20,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Centered and right-aligned anchors now line text up correctly, because the text width is measured from character advances and kerning.
   - `letter_spacing` now affects BMFont text.
   - Text is sized and vertically anchored from the font's line height, so `font_height` gives the same size regardless of which characters the text contains, and top/bottom anchors line up with the line.
+- `ImageFontSpriteText` no longer draws the wrong glyphs after its text changes in fonts with more than one texture, when a character's glyph is on a different texture than the one it replaced.
 - BMFont fonts exported with the alpha channel set to "one" or "zero" no longer draw as solid boxes or invisible text; the glyphs are read from the color channels instead. Fonts exported with "glyph + outline" in a single channel draw as a white glyph with a black outline. ([#16])
 
 ### Removed

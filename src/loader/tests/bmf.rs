@@ -58,6 +58,132 @@ fn font_with_alpha_set_to_one_draws_glyph_from_color_channels() {
     assert_eq!(pixels[0].1, [255, 255, 255, 200]);
 }
 
+/// The pixel data of a font texture and its outline layers.
+struct TextureData {
+    /// The texture's pixel data.
+    texture: Vec<u8>,
+    /// The pixel data of the texture's outline layers, if it has them.
+    layers: Option<LayerData>,
+}
+
+/// The pixel data of a texture's outline layers.
+struct LayerData {
+    /// The outline layer's pixel data.
+    outline: Vec<u8>,
+    /// The glyph layer's pixel data.
+    glyph: Vec<u8>,
+}
+
+/// Loads the font at `path` and returns the pixel data of each of its textures
+/// and their outline layers.
+fn texture_and_layer_data(path: &str) -> Vec<TextureData> {
+    let (mut app, handle): (App, Handle<ImageFont>) = initialize_app_with_font(path);
+    wait_until_loaded(&mut app, &handle);
+
+    let world = app.world();
+    let font = world
+        .resource::<Assets<ImageFont>>()
+        .get(&handle)
+        .expect("font is loaded");
+    let images = world.resource::<Assets<Image>>();
+    let data = |handle: &Handle<Image>| {
+        images
+            .get(handle)
+            .expect("font image is loaded")
+            .data
+            .clone()
+            .expect("font image has data")
+    };
+    font.textures
+        .iter()
+        .enumerate()
+        .map(|(page_index, texture)| {
+            let layers = font
+                .outline_layers
+                .get(page_index)
+                .and_then(Option::as_ref)
+                .map(|layers| LayerData {
+                    outline: data(&layers.outline),
+                    glyph: data(&layers.glyph),
+                });
+            TextureData {
+                texture: data(texture),
+                layers,
+            }
+        })
+        .collect()
+}
+
+#[test]
+#[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
+fn font_with_outline_in_alpha_has_outline_and_glyph_layers() {
+    // The page's pixels are an outline (0, 0, 0, 255), a glyph
+    // (255, 255, 255, 255), nothing (0, 0, 0, 0) and a partly covered glyph
+    // inside the outline (100, 100, 100, 255).
+    let textures = texture_and_layer_data("tests/channels_outline.txt.fnt");
+
+    assert_eq!(textures.len(), 1);
+    assert_eq!(
+        textures[0].texture,
+        [
+            0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 0, 100, 100, 100, 255
+        ]
+    );
+    let layers = textures[0]
+        .layers
+        .as_ref()
+        .expect("the texture has outline layers");
+    assert_eq!(
+        layers.outline,
+        [
+            255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 255, 255, 255, 255
+        ]
+    );
+    assert_eq!(
+        layers.glyph,
+        [
+            255, 255, 255, 0, 255, 255, 255, 255, 255, 255, 255, 0, 255, 255, 255, 100
+        ]
+    );
+}
+
+#[test]
+#[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
+fn packed_font_with_glyph_and_outline_has_layers_for_every_channel() {
+    let textures = texture_and_layer_data("bmf_packed_outline.txt.fnt");
+
+    assert_eq!(textures.len(), 4);
+    for texture in &textures {
+        let layers = texture
+            .layers
+            .as_ref()
+            .expect("the texture has outline layers");
+        for ((pixel, outline_pixel), glyph_pixel) in texture
+            .texture
+            .as_chunks::<4>()
+            .0
+            .iter()
+            .zip(layers.outline.as_chunks::<4>().0)
+            .zip(layers.glyph.as_chunks::<4>().0)
+        {
+            assert_eq!(*outline_pixel, [255, 255, 255, pixel[3]]);
+            assert_eq!(*glyph_pixel, [255, 255, 255, pixel[0]]);
+        }
+    }
+}
+
+#[test]
+#[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
+fn fonts_without_outline_have_no_outline_layers() {
+    for path in ["bmf.txt.fnt", "bmf_packed.txt.fnt"] {
+        let textures = texture_and_layer_data(path);
+        assert!(
+            textures.iter().all(|texture| texture.layers.is_none()),
+            "{path}"
+        );
+    }
+}
+
 #[test]
 #[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
 fn packed_bmfont_output_draws_white_glyphs_from_four_textures() {

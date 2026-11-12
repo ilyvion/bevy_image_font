@@ -21,7 +21,6 @@
 pub mod gizmos;
 
 use std::fmt::Debug;
-use std::iter;
 
 use bevy_app::{App, Plugin, PostUpdate};
 use bevy_asset::Assets;
@@ -37,7 +36,6 @@ use bevy_reflect::Reflect;
 use bevy_sprite::{Anchor, Sprite};
 use bevy_transform::components::Transform;
 use derive_setters::Setters;
-use itertools::Itertools as _;
 
 #[cfg(feature = "gizmos")]
 use crate::atlas_sprites::gizmos::ImageFontTextGizmoData;
@@ -90,6 +88,19 @@ pub struct ImageFontSpriteText {
     /// equally, allowing you to tint the text uniformly.
     pub color: Color,
 
+    /// The color of the outline, for fonts whose textures hold an outline
+    /// around their glyphs (see [`ImageFont::outline_layers`]).
+    ///
+    /// When `None`, the outline keeps the color it has in the font texture,
+    /// tinted by `color` like the rest of the glyph. When set, each glyph is
+    /// drawn as two sprites: the outline in this color, and the inside of the
+    /// glyph in `color` on top of it. Every outline sprite is placed slightly
+    /// behind the glyph sprites, so outlines never cover neighboring glyphs.
+    /// Fonts without an outline ignore this setting.
+    ///
+    /// The default value is `None`.
+    pub outline_color: Option<Color>,
+
     /// Determines how scaling is applied to the glyph dimensions when adjusting
     /// them to match the desired font height.
     ///
@@ -116,6 +127,10 @@ struct ImageFontTextData {
 
     /// Basically a map between character index and character sprite
     sprites: Vec<Entity>,
+
+    /// The outline sprites of the characters drawn with an outline color, in
+    /// text order.
+    outline_sprites: Vec<Entity>,
 
     /// Tracks whether a missing font asset has already been reported for this
     /// entity.
@@ -157,6 +172,7 @@ impl ImageFontTextData {
         Self {
             self_entity: entity,
             sprites: Vec::default(),
+            outline_sprites: Vec::default(),
             has_reported_missing_font: false,
             #[cfg(feature = "gizmos")]
             gizmo_data: ImageFontTextGizmoData::default(),
@@ -188,7 +204,7 @@ pub fn set_up_sprites(
         ),
         Or<(Changed<ImageFontText>, Changed<ImageFontSpriteText>)>,
     >,
-    mut child_query: Query<(&mut Sprite, &mut Transform)>,
+    mut child_query: Query<ChildSprite>,
     image_fonts: Res<Assets<ImageFont>>,
     texture_atlas_layouts: Res<Assets<TextureAtlasLayout>>,
 ) {
@@ -211,6 +227,7 @@ pub fn set_up_sprites(
             apply_scaling: true,
             scaling_mode: image_font_sprite_text.scaling_mode,
             color: image_font_sprite_text.color,
+            outline_color: image_font_sprite_text.outline_color,
             text_anchor: image_font_sprite_text.anchor,
         };
 
@@ -245,20 +262,15 @@ pub fn set_up_sprites(
             continue;
         };
 
-        let mut sprite_context = SpriteContext {
-            entity,
-            image_font_text_data,
+        let (glyph_sprites, outline_sprites) = text_sprites(&render_context, image_font_text_data);
+
+        let mut sprite_sync = SpriteSync {
+            commands: &mut commands,
+            parent: entity,
+            child_query: &mut child_query,
         };
-
-        let x_pos = update_existing_sprites(&mut child_query, &mut sprite_context, &render_context);
-
-        adjust_sprite_count(
-            x_pos,
-            &mut commands,
-            &mut sprite_context,
-            &render_context,
-            image_font_sprite_text,
-        );
+        sprite_sync.sync(&mut image_font_text_data.sprites, glyph_sprites);
+        sprite_sync.sync(&mut image_font_text_data.outline_sprites, outline_sprites);
 
         maybe_insert_new_image_font_text_data(
             &mut commands,
@@ -299,69 +311,40 @@ fn maybe_insert_new_image_font_text_data(
     }
 }
 
-/// Updates existing sprites to match the filtered text content.
-///
-/// Adjusts the position, scale, and appearance of each sprite to reflect
-/// the corresponding glyph in the text and texture atlas.
-///
-/// # Parameters
-/// - `child_query`: Query for accessing child sprite components.
-/// - `sprite_context`: Context for managing the entity and its sprite data.
-/// - `render_context`: Context providing rendering-related information and
-///   operations.
+/// How far behind the glyph sprites the outline sprites are placed, so that
+/// every outline is drawn before every glyph.
+const OUTLINE_DEPTH: f32 = 0.001;
+
+/// Computes the sprites that draw the filtered text: one glyph sprite per
+/// character, and one outline sprite per character drawn with an outline
+/// color, placed [`OUTLINE_DEPTH`] behind its glyph sprite.
 ///
 /// # Returns
-/// The x-position to the right of the last processed sprite.
-fn update_existing_sprites(
-    child_query: &mut Query<(&mut Sprite, &mut Transform)>,
-    sprite_context: &mut SpriteContext,
+/// The glyph sprites and the outline sprites, each with its transform, in
+/// text order.
+fn text_sprites(
     render_context: &RenderContext,
-) -> f32 {
-    let SpriteContext {
-        ref mut image_font_text_data,
-        ..
-    } = *sprite_context;
-
+    #[cfg_attr(
+        not(feature = "gizmos"),
+        expect(unused_variables, reason = "gizmos only")
+    )]
+    image_font_text_data: &mut ImageFontTextData,
+) -> (Vec<(Sprite, Transform)>, Vec<(Sprite, Transform)>) {
+    let mut glyph_sprites = Vec::new();
+    let mut outline_sprites = Vec::new();
     let mut x_pos = 0.;
 
-    for ((sprite_entity, character), (next_sprite_entity, next_character)) in image_font_text_data
-        .sprites
-        .iter()
-        .copied()
-        .zip(render_context.text().filtered_chars())
-        .chain(iter::once((Entity::PLACEHOLDER, ' ')))
-        .tuple_windows()
-    {
-        let (mut sprite, mut transform) = match child_query.get_mut(sprite_entity) {
-            Ok(result) => result,
-            Err(error) => {
-                bevy_log::error!(
-                    "An ImageFontSpriteText unexpectedly failed: {error}. This will likely cause rendering bugs."
-                );
-                continue;
-            }
-        };
+    let mut characters = render_context.text().filtered_chars().peekable();
+    while let Some(character) = characters.next() {
+        let transform =
+            render_context.sprite_transform(&mut x_pos, character, characters.peek().copied());
 
-        let sprite = &mut *sprite;
-        let Some(sprite_texture) = sprite.texture_atlas.as_mut() else {
-            bevy_log::error!(
-                "An ImageFontSpriteText's child sprite was \
-            unexpectedly missing a `texture_atlas`. This will likely cause rendering bugs."
-            );
-            continue;
-        };
-
-        render_context.update_render_values(character, sprite_texture, &mut sprite.color);
-
-        *transform = render_context.sprite_transform(
-            &mut x_pos,
-            character,
-            if next_sprite_entity == Entity::PLACEHOLDER {
-                None
-            } else {
-                Some(next_character)
-            },
-        );
+        if let Some(outline_sprite) = render_context.outline_sprite(character) {
+            let mut outline_transform = transform;
+            outline_transform.translation.z -= OUTLINE_DEPTH;
+            outline_sprites.push((outline_sprite, outline_transform));
+        }
+        glyph_sprites.push((render_context.glyph_sprite(character), transform));
 
         #[cfg(feature = "gizmos")]
         gizmos::record_character_dimensions(
@@ -371,141 +354,58 @@ fn update_existing_sprites(
         );
     }
 
-    x_pos
+    (glyph_sprites, outline_sprites)
 }
 
-/// Ensures the number of sprites matches the number of characters in the text.
-///
-/// Adds missing sprites or removes excess sprites to maintain consistency
-/// between the text content and the entity's children.
-///
-/// # Parameters
-/// - `x_pos`: x-position of where the next sprite should go.
-/// - `commands`: A command buffer for spawning or despawning sprites to
-///   synchronize with the text content.
-/// - `sprite_context`: Context for managing the entity and its sprite data.
-/// - `render_context`: Context providing rendering-related information and
-///   operations.
-/// - `sprite_text`: Component defining text appearance (e.g., color).
-#[inline]
-fn adjust_sprite_count(
-    x_pos: f32,
-    commands: &mut Commands,
-    sprite_context: &mut SpriteContext,
-    render_context: &RenderContext,
-    sprite_text: &ImageFontSpriteText,
-) {
-    use std::cmp::Ordering;
+/// The components of a text entity's child sprite that are kept in sync with
+/// its text.
+type ChildSprite = (&'static mut Sprite, &'static mut Transform);
 
-    let char_count = render_context.text().filtered_chars().count();
-    let sprite_count = sprite_context.image_font_text_data.sprites.len();
+/// Keeps a text entity's child sprites in sync with the sprites its text
+/// should be drawn with.
+struct SpriteSync<'borrow, 'world, 'state, 'query_world, 'query_state> {
+    /// Command buffer for spawning and despawning sprites.
+    commands: &'borrow mut Commands<'world, 'state>,
+    /// The text entity the sprites are children of.
+    parent: Entity,
+    /// Query for updating existing child sprites.
+    child_query: &'borrow mut Query<'query_world, 'query_state, ChildSprite>,
+}
 
-    match sprite_count.cmp(&char_count) {
-        Ordering::Greater => {
-            remove_excess_sprites(commands, sprite_context, char_count);
+impl SpriteSync<'_, '_, '_, '_, '_> {
+    /// Makes `entities` draw `sprites`: existing entities are updated in
+    /// order, missing ones are spawned as children of the text entity, and
+    /// excess ones are despawned.
+    fn sync(&mut self, entities: &mut Vec<Entity>, sprites: Vec<(Sprite, Transform)>) {
+        for entity in entities.drain(sprites.len().min(entities.len())..) {
+            self.commands.entity(entity).despawn();
         }
-        Ordering::Less => {
-            add_missing_sprites(x_pos, commands, sprite_context, render_context, sprite_text);
+
+        let mut sprites = sprites.into_iter();
+        for (&entity, (new_sprite, new_transform)) in entities.iter().zip(sprites.by_ref()) {
+            match self.child_query.get_mut(entity) {
+                Ok((mut sprite, mut transform)) => {
+                    sprite.image = new_sprite.image;
+                    sprite.texture_atlas = new_sprite.texture_atlas;
+                    sprite.color = new_sprite.color;
+                    *transform = new_transform;
+                }
+                Err(error) => {
+                    bevy_log::error!(
+                        "An ImageFontSpriteText unexpectedly failed: {error}. This will likely \
+                        cause rendering bugs."
+                    );
+                }
+            }
         }
-        Ordering::Equal => {}
+
+        self.commands.entity(self.parent).with_children(|parent| {
+            for sprite in sprites {
+                entities.push(parent.spawn(sprite).id());
+            }
+        });
     }
 }
 
-/// Removes excess sprites from the text entity to match the new character
-/// count.
-///
-/// # Parameters
-/// - `commands`: Command buffer for despawning entities.
-/// - `sprite_context`: Context for managing the entity and its sprite data.
-/// - `char_count`: The number of characters in the filtered text.
-///
-/// # Side Effects
-/// Excess sprites are despawned from the ECS.
-#[inline]
-fn remove_excess_sprites(
-    commands: &mut Commands,
-    sprite_context: &mut SpriteContext,
-    char_count: usize,
-) {
-    for entity in sprite_context
-        .image_font_text_data
-        .sprites
-        .drain(char_count..)
-    {
-        commands.entity(entity).despawn();
-    }
-}
-
-/// Adds missing sprites to the text entity to match the new character count.
-///
-/// If the number of sprites is less than the number of characters in the text,
-/// this function spawns new sprites for the remaining characters and updates
-/// the sprite data accordingly.
-///
-/// # Parameters
-/// - `x_pos`: x-position of where the next sprite should go.
-/// - `commands`: Command buffer for spawning new sprite entities.
-/// - `sprite_context`: Context for managing the entity and its sprite data.
-/// - `render_context`: Context providing rendering-related information and
-///   operations.
-/// - `sprite_text`: Component defining text appearance (e.g., color).
-fn add_missing_sprites(
-    mut x_pos: f32,
-    commands: &mut Commands,
-    sprite_context: &mut SpriteContext,
-    render_context: &RenderContext,
-    sprite_text: &ImageFontSpriteText,
-) {
-    let SpriteContext {
-        entity,
-        ref mut image_font_text_data,
-    } = *sprite_context;
-
-    let current_sprite_count = image_font_text_data.sprites.len();
-
-    commands.entity(entity).with_children(|parent| {
-        for (character, next_character) in render_context
-            .text()
-            .filtered_chars()
-            .skip(current_sprite_count)
-            .map(Some)
-            .chain(iter::once(None))
-            .tuple_windows()
-        {
-            #[expect(
-                clippy::expect_used,
-                reason = "tuple_windows() guarantees that only the last next_character is None"
-            )]
-            let character = character.expect("Only the last character can be None");
-
-            let transform = render_context.sprite_transform(&mut x_pos, character, next_character);
-            let sprite = Sprite {
-                image: render_context.font_image(character),
-                texture_atlas: Some(render_context.font_texture_atlas(character)),
-                color: sprite_text.color,
-                ..Default::default()
-            };
-
-            let child = parent.spawn((sprite, transform));
-            image_font_text_data.sprites.push(child.id());
-
-            #[cfg(feature = "gizmos")]
-            gizmos::record_character_dimensions(
-                render_context,
-                character,
-                &mut image_font_text_data.gizmo_data,
-            );
-        }
-    });
-}
-
-/// Represents the entity and its associated text sprites during rendering.
-///
-/// Manages the commands for modifying the entity, its sprite data, and the
-/// filtered text to ensure the sprites match the text content.
-struct SpriteContext<'data> {
-    /// The entity associated with the text sprites.
-    entity: Entity,
-    /// The mutable text sprite data component for the entity.
-    image_font_text_data: &'data mut ImageFontTextData,
-}
+#[cfg(all(test, feature = "bmf"))]
+mod tests;

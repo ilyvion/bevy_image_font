@@ -92,7 +92,7 @@ See examples for more details:
 - [Rendered sprite example](https://github.com/ilyvion/bevy_image_font/blob/main/examples/rendered_sprite.rs): Using pixel fonts for in-world text like damage numbers.
 - [Rendered UI example](https://github.com/ilyvion/bevy_image_font/blob/main/examples/rendered_ui.rs): Using `bevy_asset_loader` for texture and font handling.
 - [Atlased Sprite Example](https://github.com/ilyvion/bevy_image_font/blob/main/examples/atlased_sprite.rs): Demonstrates rendering text with a texture atlas, including animations for dynamic text display and changing colors.
-- [Packed BMFont example](https://github.com/ilyvion/bevy_image_font/blob/main/examples/bmf_packed.rs): Loads BMFont fonts whose glyphs are packed into the texture's four color channels, including one with a baked outline.
+- [Packed BMFont example](https://github.com/ilyvion/bevy_image_font/blob/main/examples/bmf_packed.rs): Loads `BMFont` fonts whose glyphs are packed into the texture's four color channels, including one with a baked outline, drawn both in the font's black and in an outline color of your choice.
 
 #### Note on Pixel Accuracy
 

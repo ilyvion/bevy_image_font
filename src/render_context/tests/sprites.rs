@@ -291,32 +291,47 @@ fn sprite_transform_snaps_glyph_edges_to_whole_units() {
 
 #[test]
 #[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
-fn update_sprite_values() {
+fn glyph_sprite_draws_the_character_in_the_text_color() {
     let (app, handle) = initialize_app_with_loaded_example_font(ExampleFont::Monospace);
-    let render_context_tester = tester(&app, handle);
+    let mut render_context_tester = tester(&app, handle);
+    render_context_tester.render_config.color = css::AZURE.into();
 
     render_context_tester.test_with_defaults(|render_context| {
         let first_char = render_context.text().filtered_chars().next().unwrap();
+        let image_font_character = &render_context.image_font.atlas_character_map[&first_char];
 
-        let mut texture_atlas = render_context.font_texture_atlas('A');
-        let mut color: Color = css::AZURE.into();
+        let sprite = render_context.glyph_sprite(first_char);
 
-        // Make sure the values aren't what we expect after the change before we call
-        // update_sprite_values
-        assert_ne!(
-            texture_atlas.index,
-            render_context.image_font.atlas_character_map[&first_char].character_index
-        );
-        assert_ne!(color, render_context.render_config.color);
-
-        render_context.update_render_values(first_char, &mut texture_atlas, &mut color);
-
-        // Verify the texture atlas and color are updated
+        let texture_atlas = sprite.texture_atlas.unwrap();
+        assert_eq!(texture_atlas.index, image_font_character.character_index);
         assert_eq!(
-            texture_atlas.index,
-            render_context.image_font.atlas_character_map[&first_char].character_index
+            texture_atlas.layout,
+            render_context.image_font.atlas_layouts[image_font_character.page_index]
         );
-        assert_eq!(color, render_context.render_config.color);
+        assert_eq!(
+            sprite.image,
+            render_context.image_font.textures[image_font_character.page_index]
+        );
+        assert_eq!(sprite.color, Color::from(css::AZURE));
+    });
+}
+
+#[test]
+#[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
+fn font_without_outline_has_no_outline_sprite() {
+    let (app, handle) = initialize_app_with_loaded_example_font(ExampleFont::Monospace);
+    let mut render_context_tester = tester(&app, handle);
+    render_context_tester.render_config.outline_color = Some(css::RED.into());
+
+    render_context_tester.test_with_defaults(|render_context| {
+        let first_char = render_context.text().filtered_chars().next().unwrap();
+        let image_font_character = &render_context.image_font.atlas_character_map[&first_char];
+
+        assert!(render_context.outline_sprite(first_char).is_none());
+        assert_eq!(
+            render_context.glyph_sprite(first_char).image,
+            render_context.image_font.textures[image_font_character.page_index]
+        );
     });
 }
 

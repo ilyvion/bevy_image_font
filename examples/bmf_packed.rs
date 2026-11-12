@@ -6,7 +6,8 @@
 //! `assets/bmf_packed_outline.bmfc`.
 //! - `bmf_packed.txt.fnt` stores plain glyphs in each channel.
 //! - `bmf_packed_outline.txt.fnt` stores glyph and outline together in each
-//!   channel, and draws as a glyph in the text's color with a black outline.
+//!   channel. It draws as a glyph in the text's color with a black outline, or
+//!   with the outline in its own color when the text has an outline color.
 //!
 //! Each font is drawn as sprite text and as pre-rendered text.
 
@@ -38,42 +39,86 @@ fn main() {
         .run();
 }
 
+/// How a line of text is drawn.
+struct Line<'assets> {
+    /// The font the line is drawn with.
+    font: &'assets Handle<ImageFont>,
+    /// The color of the glyphs.
+    color: Color,
+    /// The color of the outline, for the font that has one.
+    outline_color: Option<Color>,
+    /// Whether the line is pre-rendered text instead of sprite text.
+    pre_rendered: bool,
+}
+
 /// Spawns sprite text and pre-rendered text for each packed font, one line
-/// each.
+/// each, and for the outlined font once more with a colored outline.
 fn setup(mut commands: Commands, assets: Res<DemoAssets>) {
     commands.spawn(Camera2d);
 
     let text = PANGRAMS[0];
-    let lines: [(&Handle<ImageFont>, Color, bool); 4] = [
-        (&assets.bmf_packed, tailwind::YELLOW_300.into(), false),
-        (&assets.bmf_packed, tailwind::SKY_300.into(), true),
-        (
-            &assets.bmf_packed_outline,
-            tailwind::YELLOW_300.into(),
-            false,
-        ),
-        (&assets.bmf_packed_outline, tailwind::SKY_300.into(), true),
+    let outline_color = Some(tailwind::RED_700.into());
+    let lines = [
+        Line {
+            font: &assets.bmf_packed,
+            color: tailwind::YELLOW_300.into(),
+            outline_color: None,
+            pre_rendered: false,
+        },
+        Line {
+            font: &assets.bmf_packed,
+            color: tailwind::SKY_300.into(),
+            outline_color: None,
+            pre_rendered: true,
+        },
+        Line {
+            font: &assets.bmf_packed_outline,
+            color: tailwind::YELLOW_300.into(),
+            outline_color: None,
+            pre_rendered: false,
+        },
+        Line {
+            font: &assets.bmf_packed_outline,
+            color: tailwind::SKY_300.into(),
+            outline_color: None,
+            pre_rendered: true,
+        },
+        Line {
+            font: &assets.bmf_packed_outline,
+            color: tailwind::YELLOW_300.into(),
+            outline_color,
+            pre_rendered: false,
+        },
+        Line {
+            font: &assets.bmf_packed_outline,
+            color: tailwind::SKY_300.into(),
+            outline_color,
+            pre_rendered: true,
+        },
     ];
 
-    for (line, &(font, color, pre_rendered)) in lines.iter().enumerate() {
-        let font_text = ImageFontText::default().text(text).font(font.clone());
+    for (line_no, line) in lines.iter().enumerate() {
+        let font_text = ImageFontText::default().text(text).font(line.font.clone());
         #[expect(
             clippy::cast_precision_loss,
             reason = "the magnitude of the numbers we're working on here are too small to lose \
             anything"
         )]
-        let transform = Transform::from_translation(Vec3::new(0., 90. - line as f32 * 60., 0.));
+        let transform = Transform::from_translation(Vec3::new(0., 150. - line_no as f32 * 60., 0.));
 
-        if pre_rendered {
+        if line.pre_rendered {
             commands.spawn((
-                ImageFontPreRenderedText::default(),
+                ImageFontPreRenderedText::default()
+                    .color(line.color)
+                    .outline_color(line.outline_color),
                 font_text,
-                Sprite { color, ..default() },
                 transform,
             ));
         } else {
             commands.spawn((
-                ImageFontSpriteText::default().color(color),
+                ImageFontSpriteText::default()
+                    .color(line.color)
+                    .outline_color(line.outline_color),
                 font_text,
                 transform,
             ));

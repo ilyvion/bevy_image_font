@@ -315,6 +315,12 @@ pub(crate) struct RenderConfig {
     /// dynamically.
     #[cfg(feature = "atlas_sprites")]
     pub color: bevy_color::Color,
+
+    /// The color of the outline of fonts that have one. When set, glyphs on
+    /// textures with outline layers are drawn as an outline in this color
+    /// with the glyph in [`Self::color`] on top.
+    #[cfg(feature = "atlas_sprites")]
+    pub outline_color: Option<bevy_color::Color>,
 }
 
 /// A lightweight wrapper around a [`Cell<Option<T>>`] for caching values.

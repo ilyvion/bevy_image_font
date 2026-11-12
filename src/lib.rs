@@ -130,6 +130,25 @@ pub struct ImageFont {
     /// When `None`, the height of the tallest glyph in the rendered text is
     /// used instead.
     pub line_height: Option<u32>,
+    /// The outline and glyph layers of each texture in `textures` that holds
+    /// an outline around its glyphs, at the same index as the texture. These
+    /// let the outline and the inside of the glyphs be drawn in different
+    /// colors. A missing or `None` entry means the texture has no outline.
+    pub outline_layers: Vec<Option<ImageFontOutlineLayers>>,
+}
+
+/// A font texture split into an outline layer and a glyph layer, so the
+/// outline can be drawn in a different color than the inside of the glyphs.
+/// Both layers have the same size and atlas layout as the texture they are
+/// split from.
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct ImageFontOutlineLayers {
+    /// A white image whose alpha is the coverage of the outline and the glyph
+    /// together.
+    pub outline: Handle<Image>,
+    /// A white image whose alpha is the coverage of the glyph.
+    pub glyph: Handle<Image>,
 }
 
 impl ImageFont {
@@ -204,7 +223,15 @@ impl ImageFont {
             atlas_character_map,
             image_sampler,
             line_height: None,
+            outline_layers: Vec::new(),
         }
+    }
+
+    /// The outline and glyph layers of the texture at `page_index`, if it
+    /// holds an outline.
+    #[cfg(any(feature = "rendered", feature = "atlas_sprites"))]
+    fn page_outline_layers(&self, page_index: usize) -> Option<&ImageFontOutlineLayers> {
+        self.outline_layers.get(page_index)?.as_ref()
     }
 
     /// Retrieves references to the font's textures.
