@@ -1,0 +1,9 @@
+(function() {
+    const implementors = Object.fromEntries([["bevy_image_font",[["impl Struct for <a class=\"struct\" href=\"bevy_image_font/atlas_sprites/gizmos/struct.AtlasSpritesGizmoConfigGroup.html\" title=\"struct bevy_image_font::atlas_sprites::gizmos::AtlasSpritesGizmoConfigGroup\">AtlasSpritesGizmoConfigGroup</a>",0],["impl Struct for <a class=\"struct\" href=\"bevy_image_font/struct.ImageFontCharacter.html\" title=\"struct bevy_image_font::ImageFontCharacter\">ImageFontCharacter</a>",0],["impl Struct for <a class=\"struct\" href=\"bevy_image_font/rendered/struct.ImageFontPreRenderedText.html\" title=\"struct bevy_image_font::rendered::ImageFontPreRenderedText\">ImageFontPreRenderedText</a>",0],["impl Struct for <a class=\"struct\" href=\"bevy_image_font/rendered/struct.ImageFontPreRenderedUiText.html\" title=\"struct bevy_image_font::rendered::ImageFontPreRenderedUiText\">ImageFontPreRenderedUiText</a>",0],["impl Struct for <a class=\"struct\" href=\"bevy_image_font/atlas_sprites/struct.ImageFontSpriteText.html\" title=\"struct bevy_image_font::atlas_sprites::ImageFontSpriteText\">ImageFontSpriteText</a>",0],["impl Struct for <a class=\"struct\" href=\"bevy_image_font/struct.ImageFontText.html\" title=\"struct bevy_image_font::ImageFontText\">ImageFontText</a>",0],["impl Struct for <a class=\"struct\" href=\"bevy_image_font/atlas_sprites/gizmos/struct.ShowAtlasSpritesGizmos.html\" title=\"struct bevy_image_font::atlas_sprites::gizmos::ShowAtlasSpritesGizmos\">ShowAtlasSpritesGizmos</a>",0]]]]);
+    if (window.register_implementors) {
+        window.register_implementors(implementors);
+    } else {
+        window.pending_implementors = implementors;
+    }
+})()
+//{"start":59,"fragment_lengths":[1466]}
