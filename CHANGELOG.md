@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `ImageFont::line_height`, the font's native line height. BMFont fonts set it from the font file's `lineHeight`.
+
+### Fixed
+
+- BMFont text layout ([#16]):
+  - Pre-rendered text (`ImageFontPreRenderedText`, `ImageFontPreRenderedUiText`) now places glyphs at their offsets instead of aligning them all to the top, and no longer fails to render text whose character advances are wider than its glyphs. Overlapping glyphs no longer cut into each other.
+  - `ImageFontSpriteText` with a `font_height` set now scales the spacing between characters along with the glyphs, so text no longer overlaps or spreads apart when scaled.
+  - Centered and right-aligned anchors now line text up correctly, because the text width is measured from character advances and kerning.
+  - `letter_spacing` now affects BMFont text.
+  - Text is sized and vertically anchored from the font's line height, so `font_height` gives the same size regardless of which characters the text contains, and top/bottom anchors line up with the line.
+
+[#16]: https://github.com/ilyvion/bevy_image_font/issues/16
+
 ## [0.13.0] - 2026-11-12
 
 ### Changed

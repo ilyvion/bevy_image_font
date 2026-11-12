@@ -19,6 +19,8 @@ pub(crate) fn initialize_app_with_example_font(font: ExampleFont) -> (App, Handl
     let font = match font {
         ExampleFont::Monospace => "example_font.image_font.ron",
         ExampleFont::VariableWidth => "example_variable_width_font.image_font.ron",
+        #[cfg(feature = "bmf")]
+        ExampleFont::BmFont => "bmf.txt.fnt",
     };
     initialize_app_with_font(font)
 }
@@ -36,6 +38,10 @@ pub(crate) fn initialize_app_with_loaded_example_font(
 pub(crate) enum ExampleFont {
     Monospace,
     VariableWidth,
+    /// `bmf.txt.fnt`, whose glyphs have offsets, advances and kerning. See
+    /// [`BMFONT_LINE_HEIGHT`].
+    #[cfg(feature = "bmf")]
+    BmFont,
 }
 
 pub(crate) fn wait_until_loaded<T: Asset>(app: &mut App, handle: &Handle<T>) {
@@ -90,6 +96,16 @@ pub(crate) const MONOSPACE_FONT_WIDTH: u32 = 5;
 /// This value is used to do math that involves the font height. Adjust as
 /// needed if the monospace font is later changed.
 pub(crate) const MONOSPACE_FONT_HEIGHT: u32 = 12;
+
+/// The `lineHeight` of the [`ExampleFont::BmFont`] font.
+///
+/// Glyph metrics used by tests, as `(width, height, xoffset, yoffset,
+/// xadvance)`: `A` (23, 23, -1, 6, 21), `V` (22, 23, 0, 6, 21), `.` (5, 3, 2,
+/// 26, 9), `a` (16, 17, 0, 12, 17), `g` (16, 23, 0, 12, 17), `H` (19, 23, 2, 6,
+/// 23), `e` and `o` (17, 17, 0, 12, 17), `l` (5, 23, 1, 6, 7). The kerning
+/// between `A` and `V` is -2.
+#[cfg(feature = "bmf")]
+pub(crate) const BMFONT_LINE_HEIGHT: u32 = 36;
 
 /// The tolerance used for checking that floating point values are the expected
 /// value

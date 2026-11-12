@@ -333,5 +333,6 @@ fn construct_image_font(
             .collect(),
         atlas_layouts: atlas_layout_handles,
         image_sampler: settings.image_sampler.clone(),
+        line_height: Some(u32::from(bm_font.common.line_height)),
     }
 }

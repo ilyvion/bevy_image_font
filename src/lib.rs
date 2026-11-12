@@ -123,6 +123,13 @@ pub struct ImageFont {
     /// `nearest`, which scales an image without blurring, keeping the text
     /// crisp and pixellated.
     pub image_sampler: ImageSampler,
+    /// The height of a line of text at the font's native size, in pixels.
+    /// Glyph vertical offsets are relative to the top of this line, and
+    /// [`ImageFontText::font_height`] scales text relative to it.
+    ///
+    /// When `None`, the height of the tallest glyph in the rendered text is
+    /// used instead.
+    pub line_height: Option<u32>,
 }
 
 impl ImageFont {
@@ -196,6 +203,7 @@ impl ImageFont {
             textures: texture,
             atlas_character_map,
             image_sampler,
+            line_height: None,
             // size: default(),
             // padding: default(),
             // spacing: default(),

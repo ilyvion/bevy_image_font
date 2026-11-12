@@ -31,25 +31,20 @@
 //! and is designed to work seamlessly with other components, such as
 //! `SpriteContext`.
 
+#[cfg(feature = "atlas_sprites")]
 mod anchors;
 mod filtered_string;
+#[cfg(feature = "atlas_sprites")]
+mod sprites;
 
 use std::cell::Cell;
 use std::fmt::Debug;
 
 use bevy_asset::Assets;
-#[cfg(feature = "atlas_sprites")]
-use bevy_asset::Handle;
-use bevy_color::Color;
-#[cfg(feature = "atlas_sprites")]
-use bevy_image::Image;
-use bevy_image::{TextureAtlas, TextureAtlasLayout};
-use bevy_math::Vec2;
-use bevy_sprite::Anchor;
-use bevy_transform::components::Transform;
+use bevy_image::TextureAtlasLayout;
+use bevy_math::{URect, Vec2};
 
 use crate::ImageFontScalingMode;
-use crate::render_context::anchors::{AnchorExt as _, AnchorOffsets, ComputeTransformParams};
 use crate::render_context::filtered_string::FilteredString;
 use crate::{ImageFont, ImageFontText};
 
@@ -133,35 +128,20 @@ impl<'assets> RenderContext<'assets> {
         })
     }
 
-    /// Computes the uniform scaling factor for text glyphs.
+    /// Calculates the height of the line of text at the font's native size.
     ///
-    /// Determines the scaling factor to apply to glyph dimensions based on
-    /// the specified font height and the maximum glyph height.
-    ///
-    /// # Returns
-    /// An `f32` representing the uniform scaling factor for text sprites.
-    #[expect(
-        clippy::cast_precision_loss,
-        reason = "`max_height` won't ever be particularly large"
-    )]
-    #[inline]
-    pub(crate) fn scale(&self) -> f32 {
-        let max_height = self.max_height();
-        self.image_font_text
-            .font_height
-            .map_or(1.0, |font_height| font_height / max_height as f32)
-    }
-
-    /// Calculates the maximum height of the filtered text.
-    ///
-    /// Iterates over the filtered text characters to determine the overall
-    /// height based on glyph sizes in the texture atlas.
+    /// This is the font's [`ImageFont::line_height`] if it has one, and
+    /// otherwise the height of the tallest glyph in the filtered text.
     ///
     /// # Returns
-    /// The height of the tallest glyph
+    /// The line height, in pixels.
     #[inline]
     pub(crate) fn max_height(&self) -> u32 {
         self.max_height.get_or_insert_with(|| {
+            if let Some(line_height) = self.image_font.line_height {
+                return line_height.max(1);
+            }
+
             let mut max_height = 1;
 
             for character in self.filtered_text.filtered_chars() {
@@ -175,65 +155,61 @@ impl<'assets> RenderContext<'assets> {
         })
     }
 
-    /// Calculates the total width of the rendered text based on the filtered
-    /// characters and glyph dimensions stored in the context.
+    /// Computes how far the pen moves after drawing a character: its x advance
+    /// (or glyph width if it has none), plus letter spacing and the kerning
+    /// towards `next_character`.
     ///
-    /// # Returns
-    /// The total width of the rendered text, in pixels, after applying the
-    /// scaling factor.
-    #[inline]
-    pub(crate) fn text_width(&self) -> f32 {
-        let mut text_width = 0.;
-
-        for character in self.filtered_text.filtered_chars() {
-            let (width, _) = self.character_dimensions(character);
-            text_width += width;
-        }
-        text_width
-    }
-
-    /// Computes the dimensions of a glyph for a given character, applying
-    /// scaling if a specific font height is provided.
-    ///
-    /// The dimensions are determined using the character's bounding rectangle
-    /// in the texture atlas, the configured letter spacing, and the
-    /// selected `ScalingMode`. Additionally, if
-    /// `RenderConfig::apply_scaling` is `true`, width scaling is
-    /// applied before rounding or truncation, ensuring consistent proportions
-    /// in certain scaling modes.
+    /// When [`RenderConfig::apply_scaling`] is set and the text has a font
+    /// height, the advance is scaled by the font height over the line height
+    /// using [`RenderConfig::scaling_mode`].
     ///
     /// # Parameters
-    /// - `character`: The character whose dimensions are being computed.
+    /// - `character`: The character being drawn.
+    /// - `next_character`: The character following this one, if any.
     ///
     /// # Returns
-    /// A tuple `(width, height)` representing the computed dimensions of the
-    /// glyph, where width scaling behavior depends on
-    /// `RenderConfig::apply_scaling`.
+    /// The distance to move the pen, in pixels.
     #[expect(
         clippy::cast_precision_loss,
         reason = "the magnitude of the numbers we're working on here are too small to lose anything"
     )]
-    pub(crate) fn character_dimensions(&self, character: char) -> (f32, f32) {
+    pub(crate) fn character_advance(&self, character: char, next_character: Option<char>) -> f32 {
         let image_font_character = &self.image_font.atlas_character_map[&character];
-        let rect = self.atlas_layouts[image_font_character.page_index].textures
-            [image_font_character.character_index];
-        let letter_spacing = self.render_config.letter_spacing;
-        let width = rect.width() as f32 + letter_spacing;
-        let height = rect.height() as f32;
-        let max_height = self.max_height() as f32;
+        let rect = self.glyph_rect(character);
+        let kerning = next_character
+            .and_then(|next_character| self.character_kerning(character, next_character))
+            .unwrap_or(0.0);
+        let advance = image_font_character
+            .x_advance
+            .unwrap_or(rect.width() as f32)
+            + self.render_config.letter_spacing
+            + kerning;
 
         if let Some(font_height) = self.image_font_text.font_height
             && self.render_config.apply_scaling
         {
-            let scaling_mode = self.render_config.scaling_mode;
-            let scale_factor = font_height / max_height;
-            return (
-                scaling_mode.apply_scale(width, scale_factor),
-                scaling_mode.apply_scale(height, scale_factor),
-            );
+            let scale_factor = font_height / self.max_height() as f32;
+            return self
+                .render_config
+                .scaling_mode
+                .apply_scale(advance, scale_factor);
         }
 
-        (width, height)
+        advance
+    }
+
+    /// Retrieves the region of the font texture holding a character's glyph.
+    ///
+    /// # Parameters
+    /// - `character`: The character whose glyph region should be retrieved.
+    ///
+    /// # Returns
+    /// The glyph's rectangle within its texture atlas page.
+    #[inline]
+    pub(crate) fn glyph_rect(&self, character: char) -> URect {
+        let image_font_character = &self.image_font.atlas_character_map[&character];
+        self.atlas_layouts[image_font_character.page_index].textures
+            [image_font_character.character_index]
     }
 
     /// Retrieves the offset for positioning a specific character in the text
@@ -252,24 +228,6 @@ impl<'assets> RenderContext<'assets> {
     pub(crate) fn character_offsets(&self, character: char) -> Vec2 {
         let image_font_character = &self.image_font.atlas_character_map[&character];
         image_font_character.offsets
-    }
-
-    /// Retrieves the horizontal advance for a given character.
-    ///
-    /// The advance value determines how much horizontal space the character
-    /// should take up in the rendered text. It is used to correctly space
-    /// characters relative to each other.
-    ///
-    /// # Parameters
-    /// - `character`: The character whose advance width should be retrieved.
-    ///
-    /// # Returns
-    /// - `Some(f32)`: If the font specifies an advance width for the character.
-    /// - `None`: If no specific advance width is defined.
-    #[inline]
-    pub(crate) fn character_x_advance(&self, character: char) -> Option<f32> {
-        let image_font_character = &self.image_font.atlas_character_map[&character];
-        image_font_character.x_advance
     }
 
     /// Retrieves the kerning value between two characters, if defined in the
@@ -294,36 +252,6 @@ impl<'assets> RenderContext<'assets> {
         image_font_character.kernings.get(&next_character).copied()
     }
 
-    /// Retrieves the handle to the font texture image.
-    ///
-    /// This handle is used to assign the appropriate image to a text sprite.
-    #[inline]
-    #[cfg(feature = "atlas_sprites")]
-    pub(crate) fn font_image(&self, character: char) -> Handle<Image> {
-        let image_font_character = &self.image_font.atlas_character_map[&character];
-
-        self.image_font.textures[image_font_character.page_index].clone()
-    }
-
-    /// Constructs the texture atlas entry for a specific character.
-    ///
-    /// This method provides the texture atlas layout and the character's index
-    /// within the atlas.
-    ///
-    /// # Parameters
-    /// - `character`: The character whose texture atlas entry is needed.
-    ///
-    /// # Returns
-    /// A [`TextureAtlas`] structure containing the layout and character index.
-    #[inline]
-    pub(crate) fn font_texture_atlas(&self, character: char) -> TextureAtlas {
-        let image_font_character = &self.image_font.atlas_character_map[&character];
-        TextureAtlas {
-            layout: self.image_font.atlas_layouts[image_font_character.page_index].clone(),
-            index: image_font_character.character_index,
-        }
-    }
-
     /// Returns the filtered text, which includes only characters supported by
     /// the font.
     ///
@@ -332,128 +260,6 @@ impl<'assets> RenderContext<'assets> {
     #[inline]
     pub(crate) fn text(&self) -> &FilteredString<'_, &String> {
         &self.filtered_text
-    }
-
-    /// Updates the texture index for the specified character and assigns the
-    /// configured color.
-    ///
-    /// This function assigns the correct glyph index from the font atlas to
-    /// `texture_atlas`, ensuring that the correct character is selected for
-    /// rendering. Additionally, it assigns the configured text color from
-    /// `RenderConfig` to `color`.
-    ///
-    /// # Parameters
-    /// - `character`: The character whose corresponding glyph should be used.
-    /// - `texture_atlas`: The texture atlas entry that will be updated with the
-    ///   character's index.
-    /// - `color`: The variable that will be assigned the value of
-    ///   `RenderConfig::color`.
-    #[inline]
-    pub(crate) fn update_render_values(
-        &self,
-        character: char,
-        texture_atlas: &mut TextureAtlas,
-        color: &mut Color,
-    ) {
-        texture_atlas.index = self.image_font.atlas_character_map[&character].character_index;
-        *color = self.render_config.color;
-    }
-
-    /// Computes or retrieves the cached anchor offsets for the text and glyph
-    /// alignment.
-    ///
-    /// The computed offsets depend on the `render_config.offset_characters`
-    /// setting:
-    /// - If `true`, per-character offsets are applied to adjust positioning.
-    /// - If `false`, glyphs are aligned strictly according to the text anchor.
-    ///
-    /// # Returns
-    /// An [`AnchorOffsets`] struct containing:
-    /// - `whole`: Offset for aligning the entire text block.
-    /// - `individual`: Offset for aligning each individual glyph.
-    #[inline]
-    pub(crate) fn anchor_offsets(&self) -> AnchorOffsets {
-        self.render_config
-            .text_anchor
-            .to_anchor_offsets(self.render_config.offset_characters)
-    }
-
-    /// Computes the transform for positioning and scaling a text sprite.
-    ///
-    /// This method calculates the sprite's translation and scale based on:
-    /// - The x-position of the sprite.
-    /// - The dimensions of the character's glyph.
-    /// - The alignment offsets and scaling configuration.
-    ///
-    /// # Parameters
-    /// - `x_pos`: A mutable reference to the current x-position of the sprite.
-    ///   This value is updated to reflect the position of the next sprite.
-    /// - `character`: The character associated with the sprite.
-    ///
-    /// # Returns
-    /// A [`Transform`] representing the position and scale of the sprite.
-    #[inline]
-    pub(crate) fn transform(
-        &self,
-        x_pos: &mut f32,
-        character: char,
-        next_character: Option<char>,
-    ) -> Transform {
-        let x = *x_pos;
-        let (width, height) = self.character_dimensions(character);
-        *x_pos += self.character_x_advance(character).unwrap_or(width);
-
-        let params = ComputeTransformParams {
-            x_pos: x,
-            scaled_text_width: self.text_width(),
-            scaled_width: width,
-            scaled_height: height,
-            max_height: self.max_height(),
-            character_offsets: self.character_offsets(character),
-            scale: self.scale(),
-        };
-        if let Some(next_character) = next_character
-            && let Some(kerning) = self.character_kerning(character, next_character)
-        {
-            *x_pos += kerning;
-        }
-        self.anchor_offsets().compute_transform(params)
-    }
-
-    /// Computes the transform for a glyph sprite, like [`Self::transform`],
-    /// with the glyph's edges snapped to whole units.
-    ///
-    /// A glyph edge on a half unit makes each pixel sample exactly between two
-    /// texels, where the renderer may pick either one per pixel, producing gaps,
-    /// stretching, and bleeding from neighboring atlas glyphs.
-    ///
-    /// # Parameters
-    /// - `x_pos`: A mutable reference to the current x-position of the sprite.
-    ///   This value is updated to reflect the position of the next sprite.
-    /// - `character`: The character associated with the sprite.
-    /// - `next_character`: The character following this one, used for
-    ///   kerning.
-    ///
-    /// # Returns
-    /// A [`Transform`] representing the snapped position and scale of the
-    /// sprite.
-    #[inline]
-    #[cfg(feature = "atlas_sprites")]
-    pub(crate) fn sprite_transform(
-        &self,
-        x_pos: &mut f32,
-        character: char,
-        next_character: Option<char>,
-    ) -> Transform {
-        let transform = self.transform(x_pos, character, next_character);
-
-        let image_font_character = &self.image_font.atlas_character_map[&character];
-        let glyph_size = self.atlas_layouts[image_font_character.page_index].textures
-            [image_font_character.character_index]
-            .size()
-            .as_vec2();
-
-        anchors::snap_to_whole_units(transform, glyph_size * transform.scale.truncate())
     }
 }
 
@@ -469,7 +275,8 @@ pub(crate) struct RenderConfig {
     /// This defines how the text is positioned relative to its origin.
     /// For example, `Anchor::TopLeft` aligns the text's top-left corner to its
     /// position.
-    pub text_anchor: Anchor,
+    #[cfg(feature = "atlas_sprites")]
+    pub text_anchor: bevy_sprite::Anchor,
 
     /// Determines whether individual characters should have per-character
     /// offsets applied.
@@ -477,6 +284,7 @@ pub(crate) struct RenderConfig {
     /// When `true`, additional spacing adjustments are made based on each
     /// character's properties. This setting affects how characters are
     /// positioned relative to each other.
+    #[cfg(feature = "atlas_sprites")]
     pub offset_characters: bool,
 
     /// Controls whether glyph dimensions should be scaled when a specific font
@@ -505,7 +313,8 @@ pub(crate) struct RenderConfig {
     ///
     /// This affects all glyphs uniformly, allowing text to be tinted or styled
     /// dynamically.
-    pub color: Color,
+    #[cfg(feature = "atlas_sprites")]
+    pub color: bevy_color::Color,
 }
 
 /// A lightweight wrapper around a [`Cell<Option<T>>`] for caching values.
