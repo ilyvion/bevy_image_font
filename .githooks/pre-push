@@ -1,6 +1,19 @@
 #!/bin/sh
 
-set -eux
+set -eu
+
+# Skip tests when every ref being pushed is a deletion (local sha is all zeros)
+only_deletes=true
+while read -r local_ref local_sha remote_ref remote_sha; do
+    case "$local_sha" in
+        *[!0]*) only_deletes=false ;;
+    esac
+done
+if [ "$only_deletes" = true ]; then
+    exit 0
+fi
+
+set -x
 
 # Let's make sure we don't push any broken tests
 cargo hack --each-feature nextest run

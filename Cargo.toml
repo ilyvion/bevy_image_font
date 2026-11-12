@@ -184,6 +184,10 @@ required-features = ["rendered", "atlas_sprites"]
 name = "sprites_thirds_alignment"
 required-features = ["rendered", "atlas_sprites"]
 
+# Debug info for dependencies (mostly Bevy) makes every test binary over 1 GB
+[profile.dev.package."*"]
+debug = false
+
 [lints.rust]
 absolute_paths_not_starting_with_crate = "warn"
 ambiguous_negative_literals = "warn"
