@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-11-12
+
 ### Changed
 
 - Crate updated to target Bevy 0.20.
@@ -285,7 +287,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First public release; prior versions are not on Cargo.
 
-[unreleased]: https://github.com/ilyvion/bevy_image_font/compare/v0.12.0...HEAD
+[unreleased]: https://github.com/ilyvion/bevy_image_font/compare/v0.13.0...HEAD
+[0.13.0]: https://github.com/ilyvion/bevy_image_font/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/ilyvion/bevy_image_font/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/ilyvion/bevy_image_font/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/ilyvion/bevy_image_font/compare/0.9.0...v0.10.0

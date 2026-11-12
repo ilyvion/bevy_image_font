@@ -43,8 +43,8 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-bevy = "0.19"
-bevy_image_font = "0.12"
+bevy = "0.20"
+bevy_image_font = "0.13"
 ```
 
 ### Usage
@@ -108,6 +108,7 @@ Bevy anchors sprites at the center by default, which may cause odd-dimensioned s
 
 | Bevy Version | Crate Version |
 | ------------ | ------------- |
+| 0.20         | 0.13          |
 | 0.19         | 0.12          |
 | 0.18         | 0.11          |
 | 0.17         | 0.10          |
