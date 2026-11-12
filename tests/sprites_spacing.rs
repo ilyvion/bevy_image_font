@@ -1,4 +1,5 @@
 #![allow(missing_docs, reason = "tests don't need docs")]
+#![recursion_limit = "256"]
 
 mod setup;
 

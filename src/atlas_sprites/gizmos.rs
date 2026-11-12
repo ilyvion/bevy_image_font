@@ -114,7 +114,7 @@ impl Default for AtlasSpritesGizmoConfigGroup {
 }
 
 /// This module exists entirely to circumvent an annoying Clippy bug
-#[expect(clippy::min_ident_chars, reason = "clippy bug")]
+// #[expect(clippy::min_ident_chars, reason = "clippy bug")]
 mod clippy_bug {
 
     use bevy_color::Color;

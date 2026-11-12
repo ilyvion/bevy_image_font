@@ -1,16 +1,4 @@
 #![allow(unused, reason = "not all items are used in every test case")]
-//
-// Based on
-// <https://github.com/bevyengine/bevy/blob/main/examples/app/headless_renderer.rs>
-
-//! 1. Render from camera to gpu-image render target
-//! 2. Copy from gpu image to buffer using `ImageCopyDriver` node in
-//!    `RenderGraph`
-//! 3. Copy from buffer to channel using `receive_image_from_buffer` after
-//!    `RenderSystems::Render`
-//! 4. Save from channel to random named file using `scene::update` at
-//!    `PostUpdate` in `MainWorld`
-//! 5. Exit if `single_image` setting is set
 
 use bevy::prelude::*;
 use bevy::sprite::Anchor;

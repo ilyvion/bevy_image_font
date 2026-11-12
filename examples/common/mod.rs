@@ -115,9 +115,9 @@ pub(crate) struct DemoAssets {
 /// Gizmos related example code
 #[cfg(all(feature = "gizmos", feature = "atlas_sprites"))]
 pub(crate) mod gizmos {
+    use bevy::gizmos::config::GizmoConfigStore;
     use bevy::{
         ecs::system::{Res, ResMut},
-        gizmos::config::GizmoConfigStore,
         input::{ButtonInput, keyboard::KeyCode},
     };
     use bevy_image_font::atlas_sprites::gizmos::AtlasSpritesGizmoConfigGroup;
