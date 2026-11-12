@@ -1,12 +1,3 @@
-// TODO: Remove this shit
-// #![allow(
-//     clippy::missing_docs_in_private_items,
-//     missing_docs,
-//     unused,
-//     clippy::unwrap_used,
-//     reason = "dev work"
-// )]
-
 //! Code for parsing an [`ImageFont`] off of an on-disk representation in `fnt`
 //! format.
 

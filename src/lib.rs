@@ -204,9 +204,6 @@ impl ImageFont {
             atlas_character_map,
             image_sampler,
             line_height: None,
-            // size: default(),
-            // padding: default(),
-            // spacing: default(),
         }
     }
 
@@ -234,22 +231,22 @@ impl ImageFont {
 /// Represents a character in an [`ImageFont`], storing metadata required for
 /// rendering.
 ///
-/// This struct contains information about a specific character in the font,
-/// including its location in the texture atlas and any additional properties
-/// that may be useful for rendering, alignment, or future extensions.
+/// This struct contains information about a specific character in the font:
+/// its location in the texture atlas and how it is placed and spaced in a line
+/// of text.
 ///
 /// # Fields
 /// - `character_index`: The index of the character's glyph in the texture
 ///   atlas.
 /// - `page_index`: The index of the texture atlas page where this character's
 ///   glyph is stored.
-/// - *(Planned: Additional metadata fields, such as offsets, kerning, or
-///   stylistic variants.)*
+/// - `offsets`: Where the glyph is drawn relative to the pen position.
+/// - `x_advance`: How far the pen moves after the character.
+/// - `kernings`: Spacing adjustments between this character and the ones that
+///   follow it.
 ///
 /// # Future Considerations
 /// This struct is designed to be extensible. In the future, it may include:
-/// - **Kerning Information:** Adjustments for character spacing.
-/// - **Per-Character Offsets:** Fine-tuned positioning for different glyphs.
 /// - **Stylistic Variants:** Alternative representations of characters.
 #[derive(Clone, Debug, Default, Reflect)]
 #[non_exhaustive]
@@ -269,7 +266,8 @@ pub struct ImageFontCharacter {
     /// specific texture contains the glyph.
     pub page_index: usize,
 
-    /// How to move the character relative to the baseline.
+    /// Where the glyph's top-left corner is drawn relative to the pen position
+    /// at the top of the line, with y pointing up.
     pub offsets: Vec2,
 
     /// How much to advance the x position after rendering the character. `None`
