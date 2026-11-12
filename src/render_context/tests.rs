@@ -10,7 +10,6 @@ use crate::tests::utils::{
 mod sprites;
 
 #[test]
-#[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
 fn render_context_creation() {
     let (app, handle) = initialize_app_with_loaded_example_font(ExampleFont::Monospace);
     let render_context_tester = RenderContextTester::new(&app, handle);
@@ -25,7 +24,6 @@ fn render_context_creation() {
 }
 
 #[test]
-#[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
 fn max_height() {
     let (app, handle) = initialize_app_with_loaded_example_font(ExampleFont::Monospace);
     let render_context_tester = RenderContextTester::new(&app, handle);
@@ -41,7 +39,6 @@ fn max_height() {
 }
 
 #[test]
-#[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
 fn empty_text() {
     let (app, handle) = initialize_app_with_loaded_example_font(ExampleFont::Monospace);
     let render_context_tester = RenderContextTester::new(&app, handle);
@@ -75,7 +72,6 @@ mod bmfont {
     }
 
     #[test]
-    #[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
     fn line_height_does_not_depend_on_text() {
         let (app, handle) = initialize_app_with_loaded_example_font(ExampleFont::BmFont);
 

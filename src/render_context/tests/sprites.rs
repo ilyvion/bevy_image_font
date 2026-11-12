@@ -16,7 +16,6 @@ fn tester(app: &App, handle: Handle<ImageFont>) -> RenderContextTester<'_> {
 }
 
 #[test]
-#[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
 #[expect(
     clippy::cast_precision_loss,
     reason = "the magnitude of the numbers we're working on here are too small to lose \
@@ -58,7 +57,6 @@ fn scale() {
 }
 
 #[test]
-#[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
 #[expect(
     clippy::cast_precision_loss,
     reason = "the magnitude of the numbers we're working on here are too small to lose \
@@ -102,7 +100,6 @@ fn extreme_scale_works() {
 }
 
 #[test]
-#[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
 #[expect(
     clippy::cast_precision_loss,
     reason = "the magnitude of the numbers we're working on here are too small to lose \
@@ -126,7 +123,6 @@ fn text_width() {
 }
 
 #[test]
-#[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
 #[expect(
     clippy::cast_precision_loss,
     reason = "the magnitude of the numbers we're working on here are too small to lose \
@@ -154,7 +150,6 @@ fn character_dimensions() {
 }
 
 #[test]
-#[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
 #[expect(
     clippy::cast_precision_loss,
     reason = "the magnitude of the numbers we're working on here are too small to lose \
@@ -199,7 +194,6 @@ fn test_mixed_character_widths() {
 }
 
 #[test]
-#[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
 fn anchor_offsets() {
     use crate::render_context::anchors::AnchorExt as _;
 
@@ -221,7 +215,6 @@ fn anchor_offsets() {
 }
 
 #[test]
-#[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
 #[expect(
     clippy::cast_precision_loss,
     reason = "the magnitude of the numbers we're working on here are too small to lose \
@@ -253,7 +246,6 @@ fn transform() {
 }
 
 #[test]
-#[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
 fn sprite_transform_snaps_glyph_edges_to_whole_units() {
     let (app, handle) = initialize_app_with_loaded_example_font(ExampleFont::Monospace);
     let render_context_tester = tester(&app, handle);
@@ -290,7 +282,6 @@ fn sprite_transform_snaps_glyph_edges_to_whole_units() {
 }
 
 #[test]
-#[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
 fn glyph_sprite_draws_the_character_in_the_text_color() {
     let (app, handle) = initialize_app_with_loaded_example_font(ExampleFont::Monospace);
     let mut render_context_tester = tester(&app, handle);
@@ -317,7 +308,6 @@ fn glyph_sprite_draws_the_character_in_the_text_color() {
 }
 
 #[test]
-#[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
 fn font_without_outline_has_no_outline_sprite() {
     let (app, handle) = initialize_app_with_loaded_example_font(ExampleFont::Monospace);
     let mut render_context_tester = tester(&app, handle);
@@ -336,7 +326,6 @@ fn font_without_outline_has_no_outline_sprite() {
 }
 
 #[test]
-#[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
 fn empty_text_has_no_width() {
     let (app, handle) = initialize_app_with_loaded_example_font(ExampleFont::Monospace);
     let render_context_tester = tester(&app, handle);
@@ -358,7 +347,6 @@ fn empty_text_has_no_width() {
 }
 
 #[test]
-#[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
 #[expect(
     clippy::cast_precision_loss,
     reason = "the magnitude of the numbers we're working on here are too small to lose \
@@ -405,7 +393,6 @@ mod bmfont {
     }
 
     #[test]
-    #[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
     fn scale_is_relative_to_line_height() {
         let (app, handle) = initialize_app_with_loaded_example_font(ExampleFont::BmFont);
 
@@ -422,7 +409,6 @@ mod bmfont {
     }
 
     #[test]
-    #[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
     fn text_width_sums_advances_and_kerning() {
         let (app, handle) = initialize_app_with_loaded_example_font(ExampleFont::BmFont);
 
@@ -437,7 +423,6 @@ mod bmfont {
     }
 
     #[test]
-    #[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
     fn advances_and_kerning_scale_with_font_height() {
         let (app, handle) = initialize_app_with_loaded_example_font(ExampleFont::BmFont);
 
@@ -463,7 +448,6 @@ mod bmfont {
     }
 
     #[test]
-    #[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
     fn letter_spacing_is_added_to_advances() {
         let (app, handle) = initialize_app_with_loaded_example_font(ExampleFont::BmFont);
 
@@ -486,7 +470,6 @@ mod bmfont {
     }
 
     #[test]
-    #[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
     fn glyph_top_is_line_top_minus_y_offset() {
         let (app, handle) = initialize_app_with_loaded_example_font(ExampleFont::BmFont);
 

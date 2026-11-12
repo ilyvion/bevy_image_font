@@ -52,7 +52,6 @@ fn sprites(app: &App, entity: Entity) -> (Vec<ChildSpriteData>, Vec<ChildSpriteD
 }
 
 #[test]
-#[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
 fn outline_color_draws_outlines_below_glyphs() {
     let (app, entity) = spawn_text(
         "tests/channels_outline.txt.fnt",
@@ -89,7 +88,6 @@ fn outline_color_draws_outlines_below_glyphs() {
 }
 
 #[test]
-#[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
 fn outline_sprites_follow_the_outline_color() {
     let (mut app, entity) = spawn_text(
         "tests/channels_outline.txt.fnt",
@@ -146,7 +144,6 @@ fn outline_sprites_follow_the_outline_color() {
 }
 
 #[test]
-#[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
 fn sprites_switch_texture_when_their_character_moves_to_another_texture() {
     // `A` and `B` are packed into different channels, so they are drawn from
     // different textures.

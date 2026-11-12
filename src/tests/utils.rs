@@ -72,6 +72,8 @@ pub(crate) fn initialize_app_with_font(
         AssetPlugin::default(),
         LogPlugin::default(),
     ));
+    #[cfg(feature = "gizmos")]
+    app.init_asset::<bevy_gizmos::GizmoAsset>();
     app.add_plugins(ImageFontPlugin);
 
     #[cfg(feature = "ui")]

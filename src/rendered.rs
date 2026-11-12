@@ -783,7 +783,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
     fn renders_text_whose_advances_exceed_glyph_widths() {
         let (app, font) = initialize_app_with_loaded_example_font(ExampleFont::BmFont);
 
@@ -795,7 +794,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
     fn glyphs_are_drawn_at_their_offsets() {
         let (app, font) = initialize_app_with_loaded_example_font(ExampleFont::BmFont);
         let glyph = glyph(&app, &font, '.');
@@ -826,7 +824,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
     fn outline_color_draws_outline_and_glyph_in_their_own_colors() {
         let (app, font) = outline_font();
 
@@ -854,7 +851,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
     fn color_tints_glyph_and_keeps_outline_without_outline_color() {
         let (app, font) = outline_font();
 
@@ -876,7 +872,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
     fn changing_the_outline_color_renders_the_text_again() {
         let (mut app, font) = outline_font();
         let entity = app
@@ -903,7 +898,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
     fn font_height_scales_the_whole_line() {
         let (app, font) = initialize_app_with_loaded_example_font(ExampleFont::BmFont);
 
@@ -913,7 +907,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(feature = "gizmos", ignore = "test cannot run with `gizmos` feature")]
     fn overlapping_glyphs_do_not_erase_each_other() {
         let (app, font) = initialize_app_with_loaded_example_font(ExampleFont::BmFont);
         let glyph_a = glyph(&app, &font, 'A');
