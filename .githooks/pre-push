@@ -2,7 +2,9 @@
 
 set -eu
 
-# Skip tests when every ref being pushed is a deletion (local sha is all zeros)
+# Skip tests when every ref being pushed is a deletion (local sha is all zeros).
+# Git supplies refs on stdin; when stdin is a terminal the hook was run manually.
+if [ ! -t 0 ]; then
 only_deletes=true
 while read -r local_ref local_sha remote_ref remote_sha; do
     case "$local_sha" in
@@ -11,6 +13,7 @@ while read -r local_ref local_sha remote_ref remote_sha; do
 done
 if [ "$only_deletes" = true ]; then
     exit 0
+fi
 fi
 
 set -x
