@@ -25,6 +25,9 @@ jobs:
             - name: Update changelog
               run: .github/scripts/prepare_changelog.sh "$VERSION"
 
+            - name: Update README
+              run: .github/scripts/update_readme.sh "$VERSION"
+
             - name: Install cargo-bump
               uses: taiki-e/install-action@v2
               with:
@@ -38,12 +41,12 @@ jobs:
               with:
                   verbose: true
 
-            - name: Commit changelog and manifest files
+            - name: Commit changelog, README and manifest files
               id: make-commit
               run: |
                   git config user.name "GitHub Actions"
                   git config user.email noreply@github.com
-                  git add CHANGELOG.md Cargo.toml
+                  git add CHANGELOG.md README.md Cargo.toml
                   git commit --message "chore: prepare release $VERSION"
 
                   echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
@@ -65,6 +68,6 @@ jobs:
                       --body "Hi @$GITHUB_ACTOR!
 
                   This PR was created in response to a manual trigger of the release workflow here: $RUN_URL.
-                  I've updated the changelog and bumped the version in the manifest in this commit: $COMMIT.
+                  I've updated the changelog and README and bumped the version in the manifest in this commit: $COMMIT.
 
                   Merging this PR will publish the crate to crates.io and create a GitHub release."
