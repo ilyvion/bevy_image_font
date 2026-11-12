@@ -2,7 +2,7 @@
 //! <https://github.com/bevyengine/bevy/blob/main/examples/app/headless_renderer.rs>
 //!
 //! 1. Render from camera to gpu-image render target
-//! 2. Copy from gpu image to buffer using `ImageCopyDriver` node in `RenderGraph`
+//! 2. Copy from gpu image to buffer using `image_copy_driver` in the `RenderGraph` schedule
 //! 3. Copy from buffer to channel using `receive_image_from_buffer` after `RenderSystems::Render`
 //! 4. Save from channel to random named file using `scene::update` at `PostUpdate` in `MainWorld`
 //! 5. Exit if `single_image` setting is set
@@ -24,21 +24,18 @@ use std::{
 
 use bevy::app::ScheduleRunnerPlugin;
 use bevy::camera::RenderTarget;
+use bevy::core_pipeline::schedule::camera_driver;
 use bevy::core_pipeline::tonemapping::Tonemapping;
 use bevy::ecs::system::ScheduleSystem;
 use bevy::image::TextureFormatPixelInfo as _;
 use bevy::log::LogPlugin;
 use bevy::prelude::*;
-use bevy::render::graph::CameraDriverLabel;
 use bevy::render::render_asset::RenderAssets;
-use bevy::render::render_graph::{
-    self, NodeRunError, RenderGraph, RenderGraphContext, RenderLabel,
-};
 use bevy::render::render_resource::{
     Buffer, BufferDescriptor, BufferUsages, CommandEncoderDescriptor, Extent3d, MapMode, PollType,
     TexelCopyBufferInfo, TexelCopyBufferLayout, TextureFormat, TextureUsages,
 };
-use bevy::render::renderer::{RenderContext, RenderDevice, RenderQueue};
+use bevy::render::renderer::{RenderContext, RenderDevice, RenderGraph, RenderQueue};
 use bevy::render::texture::GpuImage;
 use bevy::render::{Extract, Render, RenderApp, RenderSystems};
 use bevy::window::ExitCondition;
@@ -211,10 +208,6 @@ impl Plugin for ImageCopyPlugin {
             .insert_resource(MainWorldReceiver(receiver))
             .sub_app_mut(RenderApp);
 
-        let mut graph = render_app.world_mut().resource_mut::<RenderGraph>();
-        graph.add_node(ImageCopy, ImageCopyDriver);
-        graph.add_node_edge(CameraDriverLabel, ImageCopy);
-
         render_app
             .insert_resource(RenderWorldSender(sender))
             // Make ImageCopiers accessible in RenderWorld system and plugin
@@ -224,7 +217,8 @@ impl Plugin for ImageCopyPlugin {
             .add_systems(
                 Render,
                 receive_image_from_buffer.after(RenderSystems::Render),
-            );
+            )
+            .add_systems(RenderGraph, image_copy_driver.after(camera_driver));
     }
 }
 
@@ -260,14 +254,14 @@ fn setup_render_target(
 
 fn create_render_target_image(images: &mut ResMut<Assets<Image>>, size: Extent3d) -> Handle<Image> {
     let mut render_target_image =
-        Image::new_target_texture(size.width, size.height, TextureFormat::bevy_default(), None);
+        Image::new_target_texture(size.width, size.height, TextureFormat::Rgba8UnormSrgb, None);
     render_target_image.texture_descriptor.usage |= TextureUsages::COPY_SRC;
     images.add(render_target_image)
 }
 
 fn create_cpu_image(images: &mut ResMut<Assets<Image>>, size: Extent3d) -> Handle<Image> {
     let cpu_image =
-        Image::new_target_texture(size.width, size.height, TextureFormat::bevy_default(), None);
+        Image::new_target_texture(size.width, size.height, TextureFormat::Rgba8UnormSrgb, None);
     images.add(cpu_image)
 }
 
@@ -285,7 +279,7 @@ impl Plugin for CaptureFramePlugin {
 #[derive(Clone, Default, Resource, Deref, DerefMut)]
 struct ImageCopiers(pub Vec<ImageCopier>);
 
-/// Used by `ImageCopyDriver` for copying from render target to buffer
+/// Used by `image_copy_driver` for copying from render target to buffer
 #[derive(Clone, Component)]
 struct ImageCopier {
     buffer: Buffer,
@@ -317,7 +311,7 @@ impl ImageCopier {
     }
 }
 
-/// Extracting `ImageCopier`s into render world, because `ImageCopyDriver`
+/// Extracting `ImageCopier`s into render world, because `image_copy_driver`
 /// accesses them
 fn image_copy_extract(mut commands: Commands, image_copiers: Extract<Query<&ImageCopier>>) {
     commands.insert_resource(ImageCopiers(
@@ -325,80 +319,66 @@ fn image_copy_extract(mut commands: Commands, image_copiers: Extract<Query<&Imag
     ));
 }
 
-/// `RenderGraph` label for `ImageCopyDriver`
-#[derive(Debug, PartialEq, Eq, Clone, Hash, RenderLabel)]
-struct ImageCopy;
-
-/// `RenderGraph` node
-#[derive(Default)]
-struct ImageCopyDriver;
-
-// Copies image content from render target to buffer
+/// Copies image content from render target to buffer
 #[expect(
     clippy::unwrap_used,
     reason = "we want to panic if we're wrong about any of these"
 )]
-impl render_graph::Node for ImageCopyDriver {
-    fn run(
-        &self,
-        _graph: &mut RenderGraphContext,
-        render_context: &mut RenderContext,
-        world: &World,
-    ) -> Result<(), NodeRunError> {
-        let image_copiers = world.get_resource::<ImageCopiers>().unwrap();
-        let gpu_images = world.get_resource::<RenderAssets<GpuImage>>().unwrap();
-
-        for image_copier in image_copiers.iter() {
-            if !image_copier.enabled() {
-                continue;
-            }
-
-            let src_image = gpu_images.get(&image_copier.src_image).unwrap();
-
-            let mut encoder = render_context
-                .render_device()
-                .create_command_encoder(&CommandEncoderDescriptor::default());
-
-            let block_dimensions = src_image.texture_format.block_dimensions();
-            let block_size = src_image.texture_format.block_copy_size(None).unwrap();
-
-            // Calculating correct size of image row because
-            // copy_texture_to_buffer can copy image only by rows aligned
-            // wgpu::COPY_BYTES_PER_ROW_ALIGNMENT That's why image in buffer can
-            // be little bit wider This should be taken into account at copy
-            // from buffer stage
-            let padded_bytes_per_row = RenderDevice::align_copy_bytes_per_row(
-                (src_image.size.width as usize / block_dimensions.0 as usize) * block_size as usize,
-            );
-
-            encoder.copy_texture_to_buffer(
-                src_image.texture.as_image_copy(),
-                TexelCopyBufferInfo {
-                    buffer: &image_copier.buffer,
-                    layout: TexelCopyBufferLayout {
-                        offset: 0,
-                        #[expect(
-                            clippy::cast_possible_truncation,
-                            reason = "while usize can hold more data than u32, we're working on a \
-                            number here that should be substantially smaller than even u32's \
-                            capacity"
-                        )]
-                        bytes_per_row: Some(
-                            NonZero::<u32>::new(padded_bytes_per_row as u32)
-                                .map(Into::into)
-                                .unwrap(),
-                        ),
-                        rows_per_image: None,
-                    },
-                },
-                src_image.size,
-            );
-
-            let render_queue = world.get_resource::<RenderQueue>().unwrap();
-            render_queue.submit(iter::once(encoder.finish()));
+fn image_copy_driver(
+    render_context: RenderContext,
+    image_copiers: Res<ImageCopiers>,
+    render_queue: Res<RenderQueue>,
+    gpu_images: Res<RenderAssets<GpuImage>>,
+) {
+    for image_copier in image_copiers.iter() {
+        if !image_copier.enabled() {
+            continue;
         }
 
-        Ok(())
+        let src_image = gpu_images.get(&image_copier.src_image).unwrap();
+
+        let mut encoder = render_context
+            .render_device()
+            .create_command_encoder(&CommandEncoderDescriptor::default());
+
+        let format = src_image.texture_descriptor.format;
+        let size = src_image.texture_descriptor.size;
+        let block_dimensions = format.block_dimensions();
+        let block_size = format.block_copy_size(None).unwrap();
+
+        // Calculating correct size of image row because
+        // copy_texture_to_buffer can copy image only by rows aligned
+        // wgpu::COPY_BYTES_PER_ROW_ALIGNMENT That's why image in buffer can
+        // be little bit wider This should be taken into account at copy
+        // from buffer stage
+        let padded_bytes_per_row = RenderDevice::align_copy_bytes_per_row(
+            (size.width as usize / block_dimensions.0 as usize) * block_size as usize,
+        );
+
+        encoder.copy_texture_to_buffer(
+            src_image.texture.as_image_copy(),
+            TexelCopyBufferInfo {
+                buffer: &image_copier.buffer,
+                layout: TexelCopyBufferLayout {
+                    offset: 0,
+                    #[expect(
+                        clippy::cast_possible_truncation,
+                        reason = "while usize can hold more data than u32, we're working on a \
+                        number here that should be substantially smaller than even u32's \
+                        capacity"
+                    )]
+                    bytes_per_row: Some(
+                        NonZero::<u32>::new(padded_bytes_per_row as u32)
+                            .map(Into::into)
+                            .unwrap(),
+                    ),
+                    rows_per_image: None,
+                },
+            },
+            size,
+        );
+
+        render_queue.submit(iter::once(encoder.finish()));
     }
 }
 
@@ -541,8 +521,8 @@ fn render_scene(
     }
 
     let image = images_to_save.single().unwrap();
-    let img_bytes = images.get_mut(image.id()).unwrap();
-    let img = prepare_image_buffer(image_data, img_bytes);
+    let mut img_bytes = images.get_mut(image.id()).unwrap();
+    let img = prepare_image_buffer(image_data, &mut img_bytes);
 
     let image_paths = generate_image_paths(&scene_controller);
     let ImagePaths {

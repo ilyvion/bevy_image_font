@@ -419,11 +419,10 @@ impl AssetLoader for ImageFontLoader {
         // need the image loaded immediately because we need its size
         let image_path = load_context
             .path()
-            .resolve_embed(font_descriptor.image().as_str())?;
+            .resolve_embed_str(font_descriptor.image().as_str())?;
         let mut image: Image = load_context
-            .loader()
-            .immediate()
-            .load(image_path.clone())
+            .load_builder()
+            .load_value(image_path.clone())
             .await?
             .take();
 

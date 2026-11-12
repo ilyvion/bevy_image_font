@@ -200,7 +200,9 @@ fn with_image_font_text(
     system_state: &mut SystemState<Query<'static, 'static, Ref<'static, ImageFontText>>>,
     with_func: impl FnOnce(Ref<'_, ImageFontText>),
 ) {
-    let query = system_state.get(app.world());
+    let query = system_state
+        .get(app.world())
+        .expect("Query parameter is always valid");
     let image_font_text = query.single().expect("Missing ImageFontText");
     with_func(image_font_text);
 }

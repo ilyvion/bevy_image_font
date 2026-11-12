@@ -251,13 +251,12 @@ async fn load_images_and_textures(
     for (page_no, page) in bm_font.pages.iter().enumerate() {
         let image_path = load_context
             .path()
-            .resolve_embed(page)
+            .resolve_embed_str(page)
             .map_err(ImageFontLoadError::from)?;
 
         let mut image: Image = load_context
-            .loader()
-            .immediate()
-            .load(image_path.clone())
+            .load_builder()
+            .load_value(image_path.clone())
             .await
             .map_err(ImageFontLoadError::from)?
             .take();
