@@ -1,0 +1,220 @@
+use super::*;
+
+/// A `Common` block with the given channel settings.
+fn common(packed: bool, alpha: Packing, red: Packing, green: Packing, blue: Packing) -> Common {
+    Common::new(10, 8, 16, 16, 1, packed, alpha, red, green, blue)
+}
+
+/// The decoding of a font that is not packed.
+fn not_packed(alpha: Packing, red: Packing, green: Packing, blue: Packing) -> PageDecoding {
+    match ChannelSettings::new(&common(false, alpha, red, green, blue)) {
+        ChannelSettings::NotPacked(decoding) => decoding,
+        ChannelSettings::Packed(_) => panic!("expected a font that is not packed"),
+    }
+}
+
+#[test]
+fn alpha_holding_shape_is_used_as_is() {
+    for alpha in [Packing::Glyph, Packing::Outline] {
+        assert_eq!(
+            not_packed(alpha, Packing::One, Packing::One, Packing::One),
+            PageDecoding::AsIs,
+            "{alpha:?}"
+        );
+    }
+    assert_eq!(
+        not_packed(
+            Packing::Outline,
+            Packing::Glyph,
+            Packing::Glyph,
+            Packing::Glyph
+        ),
+        PageDecoding::AsIs
+    );
+}
+
+#[test]
+fn alpha_holding_glyph_and_outline_is_decoded() {
+    assert_eq!(
+        not_packed(
+            Packing::GlyphOutline,
+            Packing::One,
+            Packing::One,
+            Packing::One
+        ),
+        PageDecoding::Channel {
+            channel: ALPHA,
+            content: ChannelContent::GlyphOutline
+        }
+    );
+}
+
+#[test]
+fn constant_alpha_reads_shape_from_color_channels() {
+    for alpha in [Packing::One, Packing::Zero] {
+        assert_eq!(
+            not_packed(alpha, Packing::Glyph, Packing::Glyph, Packing::Glyph),
+            PageDecoding::Channel {
+                channel: RED,
+                content: ChannelContent::Glyph
+            },
+            "{alpha:?}"
+        );
+        assert_eq!(
+            not_packed(alpha, Packing::Zero, Packing::Outline, Packing::Zero),
+            PageDecoding::Channel {
+                channel: GREEN,
+                content: ChannelContent::Outline
+            },
+            "{alpha:?}"
+        );
+        assert_eq!(
+            not_packed(alpha, Packing::Glyph, Packing::Zero, Packing::GlyphOutline),
+            PageDecoding::Channel {
+                channel: BLUE,
+                content: ChannelContent::GlyphOutline
+            },
+            "{alpha:?}"
+        );
+        assert_eq!(
+            not_packed(alpha, Packing::Glyph, Packing::Outline, Packing::Glyph),
+            PageDecoding::OutlineAndGlyph {
+                outline: GREEN,
+                glyph: RED
+            },
+            "{alpha:?}"
+        );
+    }
+}
+
+#[test]
+fn no_channel_with_shape_is_used_as_is() {
+    assert_eq!(
+        not_packed(Packing::One, Packing::One, Packing::Zero, Packing::One),
+        PageDecoding::AsIs
+    );
+}
+
+#[test]
+fn packed_glyphs_are_read_from_their_channel() {
+    let settings = ChannelSettings::new(&common(
+        true,
+        Packing::GlyphOutline,
+        Packing::GlyphOutline,
+        Packing::GlyphOutline,
+        Packing::GlyphOutline,
+    ));
+    assert!(settings.is_packed());
+    for (chnl, channel) in [
+        (Chnl::RED, RED),
+        (Chnl::GREEN, GREEN),
+        (Chnl::BLUE, BLUE),
+        (Chnl::ALPHA, ALPHA),
+    ] {
+        assert_eq!(
+            settings.decoding_for(chnl),
+            PageDecoding::Channel {
+                channel,
+                content: ChannelContent::GlyphOutline
+            },
+            "{chnl:?}"
+        );
+    }
+    assert_eq!(settings.decoding_for(Chnl::ALL), PageDecoding::AsIs);
+}
+
+#[test]
+fn packed_font_with_constant_alpha_reads_glyphs() {
+    let settings = ChannelSettings::new(&common(
+        true,
+        Packing::One,
+        Packing::One,
+        Packing::One,
+        Packing::One,
+    ));
+    assert_eq!(
+        settings.decoding_for(Chnl::RED),
+        PageDecoding::Channel {
+            channel: RED,
+            content: ChannelContent::Glyph
+        }
+    );
+}
+
+#[test]
+fn not_packed_ignores_glyph_channel() {
+    let settings = ChannelSettings::new(&common(
+        false,
+        Packing::One,
+        Packing::Glyph,
+        Packing::Glyph,
+        Packing::Glyph,
+    ));
+    assert!(!settings.is_packed());
+    assert_eq!(
+        settings.decoding_for(Chnl::GREEN),
+        PageDecoding::Channel {
+            channel: RED,
+            content: ChannelContent::Glyph
+        }
+    );
+}
+
+#[test]
+fn glyph_and_outline_values_decode_to_white_glyph_with_black_outline() {
+    let decode = |value| ChannelContent::GlyphOutline.decode(value);
+    assert_eq!(decode(0), [0, 0, 0, 0]);
+    assert_eq!(decode(64), [0, 0, 0, 128]);
+    assert_eq!(decode(127), [0, 0, 0, 254]);
+    assert_eq!(decode(128), [1, 1, 1, 255]);
+    assert_eq!(decode(192), [129, 129, 129, 255]);
+    assert_eq!(decode(255), [255, 255, 255, 255]);
+}
+
+#[test]
+fn glyph_and_outline_content_decode_to_white_shape() {
+    for content in [ChannelContent::Glyph, ChannelContent::Outline] {
+        assert_eq!(content.decode(0), [255, 255, 255, 0], "{content:?}");
+        assert_eq!(content.decode(100), [255, 255, 255, 100], "{content:?}");
+    }
+}
+
+#[test]
+fn pixels_decode_from_their_channels() {
+    let decode = |decoding: PageDecoding| {
+        let mut pixel = [10, 20, 30, 40];
+        decoding.decode_pixel(&mut pixel);
+        pixel
+    };
+    assert_eq!(decode(PageDecoding::AsIs), [10, 20, 30, 40]);
+    assert_eq!(
+        decode(PageDecoding::Channel {
+            channel: BLUE,
+            content: ChannelContent::Glyph
+        }),
+        [255, 255, 255, 30]
+    );
+    assert_eq!(
+        decode(PageDecoding::OutlineAndGlyph {
+            outline: GREEN,
+            glyph: RED
+        }),
+        [10, 10, 10, 20]
+    );
+}
+
+#[test]
+fn packed_label_suffix_names_channel() {
+    let suffix = |channel| {
+        PageDecoding::Channel {
+            channel,
+            content: ChannelContent::Glyph,
+        }
+        .packed_label_suffix()
+    };
+    assert_eq!(suffix(RED), "_red");
+    assert_eq!(suffix(GREEN), "_green");
+    assert_eq!(suffix(BLUE), "_blue");
+    assert_eq!(suffix(ALPHA), "_alpha");
+    assert_eq!(PageDecoding::AsIs.packed_label_suffix(), "");
+}

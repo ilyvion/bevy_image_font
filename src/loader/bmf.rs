@@ -13,11 +13,14 @@ use bevy_reflect::TypePath;
 use strum::{AsRefStr, EnumIter, IntoEnumIterator as _, VariantNames};
 use thiserror::Error;
 
+use self::channels::{ChannelSettings, PageDecoding};
 use crate::ImageFontCharacter;
 use crate::{
     ImageFont,
     loader::{ImageFontLoadError, ImageFontLoaderSettings},
 };
+
+mod channels;
 
 /// Loader for [`ImageFont`]s.
 #[derive(Debug, Default, TypePath)]
@@ -45,10 +48,6 @@ pub enum BmFontLoadError {
     /// not.
     #[error("BmFontLoader only supports unicode fonts")]
     CharsetUnsupported,
-
-    /// BMF fonts must not be packed, but the loaded font is packed.
-    #[error("BmFontLoader only supports non-packed fonts")]
-    PackedUnsupported,
 }
 
 impl AssetLoader for BmFontLoader {
@@ -187,17 +186,24 @@ fn parse_bmf_data(
     if !bm_font.info.unicode {
         return Err(BmFontLoadError::CharsetUnsupported);
     }
-    if bm_font.common.packed {
-        return Err(BmFontLoadError::PackedUnsupported);
-    }
 
     Ok(bm_font)
 }
 
+/// A BMF character and where its glyph is in the font's textures.
+#[derive(Debug)]
+struct AtlasCharacter<'font> {
+    /// The character's definition in the font file.
+    font_char: &'font bmfont_rs::Char,
+    /// The glyph's rectangle on its page.
+    rect: URect,
+    /// The index of the glyph's texture and its index in that texture's atlas
+    /// layout, set by `load_images_and_textures`.
+    placement: Option<(usize, usize)>,
+}
+
 /// Processes BMF characters into an atlas character map.
-fn process_bmf_characters(
-    bm_font: &bmfont_rs::Font,
-) -> HashMap<char, (&bmfont_rs::Char, URect, Option<usize>)> {
+fn process_bmf_characters(bm_font: &bmfont_rs::Font) -> HashMap<char, AtlasCharacter<'_>> {
     let mut atlas_character_map = HashMap::new();
     for char in &bm_font.chars {
         let x = u32::from(char.x);
@@ -212,7 +218,14 @@ fn process_bmf_characters(
         };
 
         if let Some(character) = char::from_u32(char.id) {
-            atlas_character_map.insert(character, (char, rect, None));
+            atlas_character_map.insert(
+                character,
+                AtlasCharacter {
+                    font_char: char,
+                    rect,
+                    placement: None,
+                },
+            );
         } else {
             warn!(
                 "Skipping invalid character id {}. Full char definition: {char:?} ",
@@ -225,9 +238,12 @@ fn process_bmf_characters(
 }
 
 /// Loads font images and creates texture atlases.
+///
+/// Each page is decoded according to the font's channel settings. A packed
+/// page becomes one texture per channel its glyphs are in.
 async fn load_images_and_textures(
     bm_font: &bmfont_rs::Font,
-    atlas_character_map: &mut HashMap<char, (&bmfont_rs::Char, URect, Option<usize>)>,
+    atlas_character_map: &mut HashMap<char, AtlasCharacter<'_>>,
     settings: &ImageFontLoaderSettings,
     load_context: &mut LoadContext<'_>,
 ) -> Result<
@@ -237,6 +253,7 @@ async fn load_images_and_textures(
     ),
     BmFontLoadError,
 > {
+    let channel_settings = ChannelSettings::new(&bm_font.common);
     let mut image_handles = Vec::new();
     let mut atlas_layout_handles = Vec::new();
     for (page_no, page) in bm_font.pages.iter().enumerate() {
@@ -254,21 +271,53 @@ async fn load_images_and_textures(
 
         image.sampler = settings.image_sampler.clone();
 
-        let size = image.size();
-        let image_handle = load_context.add_labeled_asset(format!("texture_{page_no}"), image);
-        image_handles.push(image_handle);
-
-        let mut atlas_layout = TextureAtlasLayout::new_empty(size);
-        for (_, &mut (_, rect, ref mut texture_handle)) in atlas_character_map
-            .iter_mut()
-            .filter(|&(_, &mut (char, _, _))| char.page as usize == page_no)
-        {
-            texture_handle.replace(atlas_layout.add_texture(rect));
+        let page_characters = atlas_character_map
+            .values_mut()
+            .filter(|character| usize::from(character.font_char.page) == page_no);
+        let mut views: Vec<(PageDecoding, Vec<&mut AtlasCharacter<'_>>)> = Vec::new();
+        if let ChannelSettings::NotPacked(decoding) = channel_settings {
+            views.push((decoding, page_characters.collect()));
+        } else {
+            for character in page_characters {
+                let decoding = channel_settings.decoding_for(character.font_char.chnl);
+                match views.iter_mut().find(|&&mut (view, _)| view == decoding) {
+                    Some(&mut (_, ref mut characters)) => characters.push(character),
+                    None => views.push((decoding, vec![character])),
+                }
+            }
         }
 
-        let layout_handle =
-            load_context.add_labeled_asset(format!("layout_{page_no}"), atlas_layout);
-        atlas_layout_handles.push(layout_handle);
+        let size = image.size();
+        let view_count = views.len();
+        let mut page_image = Some(image);
+        for (view_no, (decoding, characters)) in views.into_iter().enumerate() {
+            let mut view_image = if view_no + 1 == view_count {
+                page_image.take()
+            } else {
+                page_image.clone()
+            }
+            .unwrap_or_else(|| unreachable!("the page image is taken by the last view only"));
+            decoding.decode_image(&mut view_image);
+
+            let suffix = if channel_settings.is_packed() {
+                decoding.packed_label_suffix()
+            } else {
+                ""
+            };
+            let texture_index = image_handles.len();
+            image_handles.push(
+                load_context.add_labeled_asset(format!("texture_{page_no}{suffix}"), view_image),
+            );
+
+            let mut atlas_layout = TextureAtlasLayout::new_empty(size);
+            for character in characters {
+                character.placement =
+                    Some((texture_index, atlas_layout.add_texture(character.rect)));
+            }
+            atlas_layout_handles.push(
+                load_context.add_labeled_asset(format!("layout_{page_no}{suffix}"), atlas_layout),
+            );
+        }
     }
 
     Ok((image_handles, atlas_layout_handles))
@@ -278,7 +327,7 @@ async fn load_images_and_textures(
 fn construct_image_font(
     bm_font: &bmfont_rs::Font,
     image_handles: Vec<bevy_asset::Handle<Image>>,
-    atlas_character_map: HashMap<char, (&bmfont_rs::Char, URect, Option<usize>)>,
+    atlas_character_map: HashMap<char, AtlasCharacter<'_>>,
     atlas_layout_handles: Vec<bevy_asset::Handle<TextureAtlasLayout>>,
     settings: &ImageFontLoaderSettings,
 ) -> ImageFont {
@@ -286,7 +335,8 @@ fn construct_image_font(
         textures: image_handles,
         atlas_character_map: atlas_character_map
             .into_iter()
-            .map(|(char, (font_char, _, atlas_index))| {
+            .map(|(char, character)| {
+                let font_char = character.font_char;
                 let kernings = bm_font.kernings.iter().filter_map(|kerning| {
                     if kerning.first == font_char.id {
                         if let Some(character) = char::from_u32(kerning.second) {
@@ -310,8 +360,8 @@ fn construct_image_font(
                         reason = "all Nones replaced in load_images_and_textures"
                     )]
                     ImageFontCharacter {
-                        character_index: atlas_index.unwrap(),
-                        page_index: font_char.page as usize,
+                        character_index: character.placement.unwrap().1,
+                        page_index: character.placement.unwrap().0,
                         offsets: Vec2::new(
                             f32::from(font_char.xoffset),
                             -f32::from(font_char.yoffset),

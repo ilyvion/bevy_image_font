@@ -107,6 +107,14 @@ pub(crate) struct DemoAssets {
     /// The handle to the image font asset loaded from the specified FNT file.
     #[asset(path = "bmf.bin.fnt")]
     pub(crate) bmf_bin: Handle<ImageFont>,
+    /// The handle to a `BMFont` font whose glyphs are packed into the texture's
+    /// four channels.
+    #[asset(path = "bmf_packed.txt.fnt")]
+    pub(crate) bmf_packed: Handle<ImageFont>,
+    /// The handle to a `BMFont` font whose glyphs are packed into the texture's
+    /// four channels, each holding glyph and outline together.
+    #[asset(path = "bmf_packed_outline.txt.fnt")]
+    pub(crate) bmf_packed_outline: Handle<ImageFont>,
     /// The handle to the image font asset loaded from the specified RON file.
     #[asset(path = "example_variable_width_font.image_font.ron")]
     pub(crate) variable_width: Handle<ImageFont>,

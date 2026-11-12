@@ -36,6 +36,7 @@ atlas_sprites = [
 bmf = [
     "dep:bmfont_rs",
     "dep:strum",
+    "dep:wgpu-types",
 ]
 gizmos = [
     "atlas_sprites",
@@ -81,6 +82,7 @@ ron = "0.12"
 serde = { version = "1", features = ["derive"] }
 strum = { version = "0.28", features = ["derive"], optional = true }
 thiserror = "2"
+wgpu-types = { version = "30", optional = true }
 
 [dependencies.image]
 version = "0.25"
@@ -131,6 +133,11 @@ doc-scrape-examples = true
 [[example]]
 name = "bmf"
 required-features = ["atlas_sprites"]
+doc-scrape-examples = true
+
+[[example]]
+name = "bmf_packed"
+required-features = ["atlas_sprites", "bmf", "rendered"]
 doc-scrape-examples = true
 
 [[test]]

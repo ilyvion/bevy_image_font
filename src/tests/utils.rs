@@ -5,7 +5,7 @@
 
 use std::sync::LazyLock;
 
-use bevy_asset::{AssetPlugin, AssetServer};
+use bevy_asset::{AssetPlugin, AssetServer, LoadState};
 use bevy_image::{CompressedImageFormats, ImageLoader};
 use bevy_log::LogPlugin;
 use bevy_platform::collections::HashMap;
@@ -47,17 +47,22 @@ pub(crate) enum ExampleFont {
 pub(crate) fn wait_until_loaded<T: Asset>(app: &mut App, handle: &Handle<T>) {
     while {
         let asset_server = app.world().resource::<AssetServer>();
-        let load_state = asset_server.get_load_state(handle.id());
+        let load_state = asset_server
+            .get_load_state(handle.id())
+            .expect("Expected load_state to be Some");
+        if let LoadState::Failed(ref error) = load_state {
+            panic!("Asset failed to load: {error}");
+        }
 
-        !load_state
-            .expect("Expected load_state to be Some")
-            .is_loaded()
+        !load_state.is_loaded()
     } {
         app.update();
     }
 }
 
-fn initialize_app_with_font(font_path: impl AsRef<Utf8Path>) -> (App, Handle<ImageFont>) {
+pub(crate) fn initialize_app_with_font(
+    font_path: impl AsRef<Utf8Path>,
+) -> (App, Handle<ImageFont>) {
     let mut app = App::new();
 
     app.add_plugins((

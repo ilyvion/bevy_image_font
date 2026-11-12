@@ -3,6 +3,8 @@
 
 use super::*;
 
+#[cfg(feature = "bmf")]
+mod bmf;
 mod image_font_descriptor;
 mod image_font_layout;
 mod image_font_loader;
