@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - The `gizmos` feature now enables the `atlas_sprites` feature.
+- Dependencies are now only pulled in by the features that need them, reducing the dependency tree when not all features are enabled. `bevy_sprite_render` and `bevy_ui_render` are no longer dependencies. (PR [#31], thank you [Thanos1716](https://github.com/Thanos1716)!)
+
+[#31]: https://github.com/ilyvion/bevy_image_font/pull/31
 
 ## [0.11.0] - 2026-02-20
 
