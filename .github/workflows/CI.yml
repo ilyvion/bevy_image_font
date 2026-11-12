@@ -24,7 +24,7 @@ jobs:
             RUSTFLAGS: "-Dwarnings --cfg ci"
             RUST_BACKTRACE: 1
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v7
               with:
                   submodules: true
 
@@ -87,7 +87,7 @@ jobs:
             # df -h
 
             - name: Checkout source code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
               with:
                   submodules: true
 
@@ -141,7 +141,7 @@ jobs:
         runs-on: ubuntu-latest
         needs: check
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v7
               with:
                   submodules: true
 
@@ -179,7 +179,7 @@ jobs:
 
     #     steps:
     #         - name: Checkout repository
-    #           uses: actions/checkout@v4
+    #           uses: actions/checkout@v7
 
     #         # XXX: container is missing 'jq' used by action
     #         # - name: Cache the Cargo build files
@@ -192,7 +192,7 @@ jobs:
     #               cargo +nightly tarpaulin --verbose --all-features --workspace --timeout 120 --out xml
 
     #         - name: Upload coverage reports to Codecov
-    #           uses: codecov/codecov-action@v5
+    #           uses: codecov/codecov-action@v7
     #           with:
     #               token: ${{ secrets.CODECOV_TOKEN }}
     #               fail_ci_if_error: true
@@ -206,7 +206,7 @@ jobs:
             contents: write
         steps:
             - name: Checkout source code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
               with:
                   persist-credentials: false
 
@@ -232,7 +232,7 @@ jobs:
                   touch target/doc/.nojekyll
 
             - name: Upload as artifact
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: Documentation
                   path: target/doc

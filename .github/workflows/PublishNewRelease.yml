@@ -28,7 +28,7 @@ jobs:
                   VERSION="${VERSION#hotfix/}"
                   echo "RELEASE_VERSION=$VERSION" >> "$GITHUB_ENV"
 
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v7
               with:
                   ref: ${{ env.MERGE_SHA }}
 
