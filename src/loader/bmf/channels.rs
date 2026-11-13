@@ -149,6 +149,43 @@ impl PageDecoding {
     }
 }
 
+/// Expands an 8-bit grayscale page image into 8-bit RGBA; other images are
+/// left as-is.
+///
+/// A grayscale image without alpha is a `BMFont` 8-bit page, which holds the
+/// alpha channel, when `alpha` (the font's `alphaChnl`) holds shape data; it
+/// is then expanded to white with the gray value as alpha, and its content is
+/// returned. Otherwise, the gray value is copied to the color channels with
+/// opaque alpha, as is the gray value of a grayscale image with alpha.
+pub(super) fn expand_grayscale_page(image: &mut Image, alpha: Packing) -> Option<ChannelContent> {
+    let format = image.texture_descriptor.format;
+    let data = image.data.as_mut()?;
+    let alpha_content = ChannelContent::from_packing(alpha);
+    if format == TextureFormat::R8Unorm {
+        *data = data
+            .iter()
+            .flat_map(|&value| {
+                if alpha_content.is_some() {
+                    [u8::MAX, u8::MAX, u8::MAX, value]
+                } else {
+                    [value, value, value, u8::MAX]
+                }
+            })
+            .collect();
+    } else if format == TextureFormat::Rg8Unorm {
+        *data = data
+            .as_chunks::<2>()
+            .0
+            .iter()
+            .flat_map(|&[gray, alpha]| [gray, gray, gray, alpha])
+            .collect();
+    } else {
+        return None;
+    }
+    image.texture_descriptor.format = TextureFormat::Rgba8UnormSrgb;
+    alpha_content.filter(|_| format == TextureFormat::R8Unorm)
+}
+
 /// Splits a decoded page that holds an outline (see
 /// [`PageDecoding::has_outline`]) into its outline layer and its glyph layer.
 /// Both are white, with alpha holding the coverage of the outline and of the
@@ -209,6 +246,21 @@ impl ChannelSettings {
             Self::Packed(content)
         } else {
             Self::NotPacked(not_packed_decoding(common))
+        }
+    }
+
+    /// The settings for a `BMFont` 8-bit page expanded by
+    /// [`expand_grayscale_page`], whose alpha channel holds `alpha`.
+    pub(super) fn for_8_bit_page(self, alpha: ChannelContent) -> Self {
+        match self {
+            Self::NotPacked(_) => Self::NotPacked(match alpha {
+                ChannelContent::Glyph | ChannelContent::Outline => PageDecoding::AsIs,
+                ChannelContent::GlyphOutline => PageDecoding::Channel {
+                    channel: ALPHA,
+                    content: ChannelContent::GlyphOutline,
+                },
+            }),
+            Self::Packed(_) => self,
         }
     }
 

@@ -3,8 +3,8 @@
 
 use bevy_asset::AssetPath;
 use bevy_asset::{AssetLoader, Handle, LoadContext, io::Reader};
-use bevy_image::Image;
 use bevy_image::TextureAtlasLayout;
+use bevy_image::{Image, ImageLoaderSettings};
 use bevy_log::warn;
 use bevy_math::Vec2;
 use bevy_math::{URect, UVec2};
@@ -13,7 +13,7 @@ use bevy_reflect::TypePath;
 use strum::{AsRefStr, EnumIter, IntoEnumIterator as _, VariantNames};
 use thiserror::Error;
 
-use self::channels::{ChannelSettings, PageDecoding, outline_layers};
+use self::channels::{ChannelSettings, PageDecoding, expand_grayscale_page, outline_layers};
 use self::charset::CharIds;
 use crate::{
     ImageFont,
@@ -267,7 +267,8 @@ struct FontTextures {
 
 /// Loads font images and creates texture atlases.
 ///
-/// Each page is decoded according to the font's channel settings. A packed
+/// Grayscale pages are expanded to RGBA, and each page is decoded according to
+/// the font's channel settings. A packed
 /// page becomes one texture per channel its glyphs are in. Textures that hold
 /// an outline are also split into outline and glyph layers.
 async fn load_images_and_textures(
@@ -286,12 +287,19 @@ async fn load_images_and_textures(
 
         let mut image: Image = load_context
             .load_builder()
+            .with_settings(|settings: &mut ImageLoaderSettings| {
+                settings.expand_grayscale = false;
+            })
             .load_value(image_path.clone())
             .await
             .map_err(ImageFontLoadError::from)?
             .take();
 
         image.sampler = settings.image_sampler.clone();
+        let channel_settings = match expand_grayscale_page(&mut image, bm_font.common.alpha_chnl) {
+            Some(alpha) => channel_settings.for_8_bit_page(alpha),
+            None => channel_settings,
+        };
 
         let page_characters = atlas_character_map
             .values_mut()

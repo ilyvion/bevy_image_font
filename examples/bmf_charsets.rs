@@ -3,7 +3,7 @@
 //!
 //! `cp437_10x10.txt.fnt` is a code page 437 font: its `charset` is `OEM` and
 //! its character ids are the font's 256 code page 437 codes, laid out as a
-//! 16×16 grid of 10×10 glyphs in `cp437_10x10_rgba.png`. The loader decodes
+//! 16×16 grid of 10×10 glyphs in `cp437_10x10.png`. The loader decodes
 //! the ids, so the text below is ordinary Unicode, including the box-drawing,
 //! shading and Greek characters code page 437 is known for.
 //!

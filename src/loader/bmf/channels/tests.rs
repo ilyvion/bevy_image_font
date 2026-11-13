@@ -300,3 +300,103 @@ fn packed_label_suffix_names_channel() {
     assert_eq!(suffix(ALPHA), "_alpha");
     assert_eq!(PageDecoding::AsIs.packed_label_suffix(), "");
 }
+
+/// A 2×1 image with the given data and format.
+fn two_pixel_image(data: Vec<u8>, format: TextureFormat) -> Image {
+    use bevy_asset::RenderAssetUsages;
+    use wgpu_types::{Extent3d, TextureDimension};
+
+    Image::new(
+        Extent3d {
+            width: 2,
+            height: 1,
+            depth_or_array_layers: 1,
+        },
+        TextureDimension::D2,
+        data,
+        format,
+        RenderAssetUsages::default(),
+    )
+}
+
+#[test]
+fn gray_page_with_shape_in_alpha_expands_to_white_with_value_as_alpha() {
+    for (alpha, content) in [
+        (Packing::Glyph, ChannelContent::Glyph),
+        (Packing::Outline, ChannelContent::Outline),
+        (Packing::GlyphOutline, ChannelContent::GlyphOutline),
+    ] {
+        let mut image = two_pixel_image(vec![0, 200], TextureFormat::R8Unorm);
+        assert_eq!(expand_grayscale_page(&mut image, alpha), Some(content));
+        assert_eq!(
+            image.texture_descriptor.format,
+            TextureFormat::Rgba8UnormSrgb
+        );
+        assert_eq!(image.data.unwrap(), [255, 255, 255, 0, 255, 255, 255, 200]);
+    }
+}
+
+#[test]
+fn gray_page_with_constant_alpha_expands_to_opaque_gray() {
+    for alpha in [Packing::One, Packing::Zero] {
+        let mut image = two_pixel_image(vec![0, 200], TextureFormat::R8Unorm);
+        assert_eq!(expand_grayscale_page(&mut image, alpha), None);
+        assert_eq!(
+            image.texture_descriptor.format,
+            TextureFormat::Rgba8UnormSrgb
+        );
+        assert_eq!(image.data.unwrap(), [0, 0, 0, 255, 200, 200, 200, 255]);
+    }
+}
+
+#[test]
+fn gray_and_alpha_page_expands_to_gray_with_its_alpha() {
+    let mut image = two_pixel_image(vec![0, 255, 100, 50], TextureFormat::Rg8Unorm);
+    assert_eq!(expand_grayscale_page(&mut image, Packing::Glyph), None);
+    assert_eq!(
+        image.texture_descriptor.format,
+        TextureFormat::Rgba8UnormSrgb
+    );
+    assert_eq!(image.data.unwrap(), [0, 0, 0, 255, 100, 100, 100, 50]);
+}
+
+#[test]
+fn rgba_page_is_not_expanded() {
+    let data = vec![1, 2, 3, 4, 5, 6, 7, 8];
+    let mut image = two_pixel_image(data.clone(), TextureFormat::Rgba8UnormSrgb);
+    assert_eq!(expand_grayscale_page(&mut image, Packing::Glyph), None);
+    assert_eq!(image.data.unwrap(), data);
+}
+
+#[test]
+fn eight_bit_page_is_decoded_from_alpha_content_only() {
+    let page_decoding = |alpha, color| match ChannelSettings::new(&common(
+        false,
+        Packing::One,
+        color,
+        color,
+        color,
+    ))
+    .for_8_bit_page(alpha)
+    {
+        ChannelSettings::NotPacked(decoding) => decoding,
+        ChannelSettings::Packed(_) => panic!("expected a font that is not packed"),
+    };
+    for color in [Packing::One, Packing::Glyph, Packing::Outline] {
+        for alpha in [ChannelContent::Glyph, ChannelContent::Outline] {
+            assert_eq!(
+                page_decoding(alpha, color),
+                PageDecoding::AsIs,
+                "alpha {alpha:?}, color {color:?}"
+            );
+        }
+        assert_eq!(
+            page_decoding(ChannelContent::GlyphOutline, color),
+            PageDecoding::Channel {
+                channel: ALPHA,
+                content: ChannelContent::GlyphOutline
+            },
+            "color {color:?}"
+        );
+    }
+}
