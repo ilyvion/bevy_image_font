@@ -19,7 +19,6 @@ use bevy_app::{App, Update};
 use bevy_color::Color;
 use bevy_color::palettes::css;
 use bevy_ecs::component::Component;
-use bevy_ecs::hierarchy::Children;
 use bevy_ecs::query::{With, Without};
 use bevy_ecs::resource::Resource;
 use bevy_ecs::system::Query;
@@ -172,28 +171,45 @@ pub use clippy_bug::ShowAtlasSpritesGizmos;
 /// by the `gizmos` feature.
 #[derive(Debug, Clone, Default, Component)]
 pub struct ImageFontTextGizmoData {
-    /// The width of the gizmo, representing the rendered font's bounding box
-    /// or visualized area in the scene.
-    width: f32,
-
-    /// The height of the gizmo, representing the rendered font's bounding box
-    /// or visualized area in the scene.
-    height: f32,
+    /// The bounding box size of each glyph sprite, in the same order as the
+    /// glyph sprites of the text.
+    glyph_sizes: Vec<Vec2>,
 }
 
-/// Records the width and height of a character for gizmo visualization.
+impl ImageFontTextGizmoData {
+    /// Forgets the recorded glyph sizes, before the sizes of a new layout are
+    /// recorded.
+    pub(crate) fn clear(&mut self) {
+        self.glyph_sizes.clear();
+    }
+}
+
+/// Records the width and height of the next glyph sprite for gizmo
+/// visualization.
 ///
 /// This function queries the `RenderContext` for the dimensions of the given
-/// character and stores them in the provided `ImageFontTextGizmoData`.
+/// character and appends them to the provided `ImageFontTextGizmoData`.
 pub(crate) fn record_character_dimensions(
     render_context: &RenderContext,
     character: char,
     gizmo_data: &mut ImageFontTextGizmoData,
 ) {
-    let (new_width, new_height) = render_context.character_dimensions(character);
+    let (width, height) = render_context.character_dimensions(character);
+    gizmo_data.glyph_sizes.push(Vec2::new(width, height));
+}
 
-    gizmo_data.width = new_width;
-    gizmo_data.height = new_height;
+/// The position and bounding box size of each glyph sprite of a text.
+pub(super) fn glyph_boxes<'data>(
+    data: &'data ImageFontTextData,
+    child_query: &'data Query<&GlobalTransform, Without<ImageFontText>>,
+) -> impl Iterator<Item = (Vec2, Vec2)> + 'data {
+    data.sprites
+        .iter()
+        .zip(&data.gizmo_data.glyph_sizes)
+        .filter_map(|(&sprite, &size)| {
+            let transform = child_query.get(sprite).ok()?;
+            Some((transform.translation().truncate(), size))
+        })
 }
 
 /// Renders gizmos for debugging `ImageFontText` and its associated glyphs in
@@ -210,20 +226,13 @@ pub(crate) fn record_character_dimensions(
 fn render_all_sprite_gizmos(
     mut gizmos: Gizmos<AtlasSpritesGizmoConfigGroup>,
     query: Query<
-        (&GlobalTransform, &Children, &ImageFontTextData),
+        (&GlobalTransform, &ImageFontTextData),
         (With<ImageFontText>, Without<ShowAtlasSpritesGizmos>),
     >,
     child_query: Query<&GlobalTransform, Without<ImageFontText>>,
 ) {
-    for (global_transform, children, data) in &query {
-        render_gizmos(
-            &mut gizmos,
-            &child_query,
-            None,
-            global_transform,
-            children,
-            data,
-        );
+    for (global_transform, data) in &query {
+        render_gizmos(&mut gizmos, &child_query, None, global_transform, data);
     }
 }
 
@@ -244,20 +253,18 @@ fn render_sprite_gizmos(
         (
             &ShowAtlasSpritesGizmos,
             &GlobalTransform,
-            &Children,
             &ImageFontTextData,
         ),
         (With<ImageFontText>, With<ShowAtlasSpritesGizmos>),
     >,
     child_query: Query<&GlobalTransform, Without<ImageFontText>>,
 ) {
-    for (sprite_gizmos, global_transform, children, data) in &query {
+    for (sprite_gizmos, global_transform, data) in &query {
         render_gizmos(
             &mut gizmos,
             &child_query,
             Some(sprite_gizmos),
             global_transform,
-            children,
             data,
         );
     }
@@ -288,10 +295,10 @@ macro_rules! gizmo_config_value {
 }
 
 /// Renders debug gizmos for a single `ImageFontText` entity and its glyph
-/// children.
+/// sprites.
 ///
 /// This function draws rectangles and crosshairs to visualize the bounding
-/// boxes and anchor points of each glyph (child) and the text entity itself,
+/// boxes and anchor points of each glyph sprite and the text entity itself,
 /// according to the current gizmo configuration. Per-entity overrides are
 /// supported via `ShowAtlasSpritesGizmos`.
 fn render_gizmos(
@@ -299,36 +306,21 @@ fn render_gizmos(
     child_query: &Query<&GlobalTransform, Without<ImageFontText>>,
     sprite_gizmos: Option<&ShowAtlasSpritesGizmos>,
     global_transform: &GlobalTransform,
-    children: &Children,
     data: &ImageFontTextData,
 ) {
-    for &child in children {
-        if let Ok(child_global_transform) = child_query.get(child) {
-            let width = data.gizmo_data.width;
-            let height = data.gizmo_data.height;
+    for (position, size) in glyph_boxes(data, child_query) {
+        if gizmo_config_value!(gizmos, sprite_gizmos, render_character_box) {
+            let color = gizmo_config_value!(gizmos, sprite_gizmos, character_box_color);
+            gizmos.rect_2d(
+                bevy_math::Isometry2d::from_translation(position),
+                size,
+                color,
+            );
+        }
 
-            if gizmo_config_value!(gizmos, sprite_gizmos, render_character_box) {
-                let color = gizmo_config_value!(gizmos, sprite_gizmos, character_box_color);
-                gizmos.rect_2d(
-                    bevy_math::Isometry2d::from_translation(
-                        child_global_transform.translation().truncate(),
-                    ),
-                    Vec2::new(width, height),
-                    color,
-                );
-            }
-
-            if gizmo_config_value!(gizmos, sprite_gizmos, render_character_anchor_point) {
-                let color =
-                    gizmo_config_value!(gizmos, sprite_gizmos, character_anchor_point_color);
-                gizmos.cross_2d(
-                    bevy_math::Isometry2d::from_translation(
-                        child_global_transform.translation().truncate(),
-                    ),
-                    5.,
-                    color,
-                );
-            }
+        if gizmo_config_value!(gizmos, sprite_gizmos, render_character_anchor_point) {
+            let color = gizmo_config_value!(gizmos, sprite_gizmos, character_anchor_point_color);
+            gizmos.cross_2d(bevy_math::Isometry2d::from_translation(position), 5., color);
         }
     }
 

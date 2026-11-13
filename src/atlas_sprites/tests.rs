@@ -219,6 +219,70 @@ fn removing_a_new_sprite_does_not_break_other_systems_inserting_on_it() {
     assert_eq!(glyph_sprites.len(), 1);
 }
 
+#[cfg(feature = "gizmos")]
+mod gizmos {
+    use bevy_ecs::hierarchy::Children;
+    use bevy_ecs::query::Without;
+    use bevy_ecs::system::RunSystemOnce as _;
+    use bevy_math::Vec2;
+    use bevy_transform::components::GlobalTransform;
+
+    use super::*;
+    use crate::atlas_sprites::gizmos::glyph_boxes;
+
+    /// The position and size of each glyph box the gizmos draw for the text
+    /// entity.
+    fn glyph_boxes_of(app: &mut App, entity: Entity) -> Vec<(Vec2, Vec2)> {
+        app.world_mut()
+            .run_system_once(
+                move |texts: Query<&ImageFontTextData>,
+                      child_query: Query<&GlobalTransform, Without<ImageFontText>>| {
+                    glyph_boxes(texts.get(entity).unwrap(), &child_query).collect::<Vec<_>>()
+                },
+            )
+            .unwrap()
+    }
+
+    /// The sizes of the glyph boxes the gizmos draw for the text entity.
+    fn glyph_box_sizes(app: &mut App, entity: Entity) -> Vec<Vec2> {
+        glyph_boxes_of(app, entity)
+            .into_iter()
+            .map(|(_, size)| size)
+            .collect()
+    }
+
+    #[test]
+    fn each_glyph_box_has_the_size_of_its_own_character() {
+        // `#` is 19×23 and `'` is 4×8 in this font.
+        let (mut app, entity) = spawn_text("bmf.txt.fnt", "#'", ImageFontSpriteText::default());
+
+        assert_eq!(
+            glyph_box_sizes(&mut app, entity),
+            [Vec2::new(19., 23.), Vec2::new(4., 8.)]
+        );
+
+        app.world_mut()
+            .get_mut::<ImageFontText>(entity)
+            .unwrap()
+            .text = String::from("'");
+        app.update();
+
+        assert_eq!(glyph_box_sizes(&mut app, entity), [Vec2::new(4., 8.)]);
+    }
+
+    #[test]
+    fn outline_sprites_get_no_glyph_boxes() {
+        let (mut app, entity) = spawn_text(
+            "tests/channels_outline.txt.fnt",
+            "AB",
+            ImageFontSpriteText::default().outline_color(Color::from(css::RED)),
+        );
+        assert_eq!(app.world().get::<Children>(entity).unwrap().len(), 4);
+
+        assert_eq!(glyph_boxes_of(&mut app, entity).len(), 2);
+    }
+}
+
 #[test]
 fn each_line_starts_at_the_left_edge_one_line_height_below_the_previous() {
     let (app, entity) = spawn_text(

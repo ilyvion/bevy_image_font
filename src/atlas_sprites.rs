@@ -337,6 +337,8 @@ fn text_sprites(
 ) -> (Vec<(Sprite, Transform)>, Vec<(Sprite, Transform)>) {
     let mut glyph_sprites = Vec::new();
     let mut outline_sprites = Vec::new();
+    #[cfg(feature = "gizmos")]
+    image_font_text_data.gizmo_data.clear();
 
     for (line_index, line) in render_context.lines().iter().enumerate() {
         let mut x_pos = 0.;

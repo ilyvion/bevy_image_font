@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pre-rendered text with a very small `font_height` now renders as an image at least 1 pixel wide and tall, instead of an empty image the GPU rejects. A `font_height` that is zero, negative, NaN or infinite is reported as the new `ImageFontRenderError::InvalidFontHeight` error and leaves the text's previous image in place, instead of producing an invalid image or using up memory on a huge one.
 - BMFont fonts with a character on a page the font file doesn't list now fail to load with a `BmFontLoadError::BmFontError` error naming the character and page, instead of crashing the font loader. In builds with `panic = "abort"`, this used to abort the app.
 - Pre-rendering text with a font whose texture isn't in `Assets<Image>`, such as a texture removed with `Assets::remove` or a hand-built `ImageFont` with a handle to an image that was never added, now logs an `ImageFontRenderError::MissingTextureAsset` error instead of crashing the app.
+- With the `gizmos` feature, the character bounding boxes of `ImageFontSpriteText` are drawn at each character's own size, instead of all at the size of the text's last character.
 
 ### Removed
 
