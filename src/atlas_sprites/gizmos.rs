@@ -341,3 +341,21 @@ fn render_gizmos(
         );
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use bevy::DefaultPlugins;
+    use bevy::app::PluginGroup as _;
+    use bevy::gizmos_render::GizmoRenderPlugin;
+
+    /// The examples draw gizmos through `DefaultPlugins`, which only renders
+    /// them when the `gizmos` feature enables Bevy's gizmo rendering.
+    #[test]
+    fn gizmos_feature_makes_default_plugins_render_gizmos() {
+        assert!(
+            DefaultPlugins.build().enabled::<GizmoRenderPlugin>(),
+            "`DefaultPlugins` should include `GizmoRenderPlugin` when the `gizmos` feature is \
+            enabled, or the examples draw no gizmos"
+        );
+    }
+}

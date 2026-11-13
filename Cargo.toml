@@ -46,7 +46,7 @@ bmf_charsets = [
 gizmos = [
     "atlas_sprites",
     "dep:bevy_gizmos",
-    "bevy/bevy_gizmos",
+    "bevy/bevy_gizmos_render",
 ]
 rendered = [
     "dep:bevy_render",
