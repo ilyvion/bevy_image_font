@@ -325,6 +325,9 @@ pub struct ImageFontText {
     /// If set, overrides the height the font is rendered at. This should be an
     /// integer multiple of the 'native' height if you want pixel accuracy,
     /// but we allow float values for things like animations.
+    ///
+    /// Pre-rendered text is not rendered when this is not a finite number
+    /// greater than zero.
     #[doc(alias = "line_height")]
     pub font_height: Option<f32>,
 }

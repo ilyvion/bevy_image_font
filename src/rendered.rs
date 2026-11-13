@@ -315,6 +315,10 @@ fn render_text_to_image_holder<'borrow>(
 /// # Behavior
 /// - If the text is empty, a **1x1 transparent image** is returned to avoid
 ///   invalid texture sizes.
+/// - A font height that is not a finite number greater than zero fails with
+///   [`ImageFontRenderError::InvalidFontHeight`]. A font height small enough
+///   to scale the image below 1 pixel gives an image at least 1 pixel wide and
+///   tall.
 /// - The function leverages [`RenderContext`] to compute character positions
 ///   and generate the image.
 fn render_text_to_image(
@@ -324,6 +328,12 @@ fn render_text_to_image(
     images: &Assets<Image>,
     layouts: &Assets<TextureAtlasLayout>,
 ) -> Result<Image, ImageFontRenderError> {
+    if let Some(font_height) = image_font_text.font_height
+        && !(font_height.is_finite() && font_height > 0.0)
+    {
+        return Err(ImageFontRenderError::InvalidFontHeight(font_height));
+    }
+
     let (image_font, textures, render_context) =
         prepare_context(image_font_text, image_fonts, images, layouts)?;
 
@@ -389,8 +399,9 @@ fn render_text_to_image(
     )]
     if let Some(font_height) = image_font_text.font_height {
         let line_height = render_context.max_height() as f32;
+        // A texture must be at least 1×1.
         let scale_dimension =
-            |dimension: u32| (dimension as f32 * font_height / line_height) as u32;
+            |dimension: u32| ((dimension as f32 * font_height / line_height) as u32).max(1);
 
         output_image = imageops::resize(
             &output_image,
@@ -685,6 +696,11 @@ pub enum ImageFontRenderError {
     /// when there is an issue with the image data or the copying process.
     #[error("failed to copy from atlas: {0}")]
     CopyFailure(#[from] ImageError),
+
+    /// The text's [`ImageFontText::font_height`] is not a finite number
+    /// greater than zero.
+    #[error("font height {0} is not a finite number greater than zero")]
+    InvalidFontHeight(f32),
 }
 
 /// A helper trait that represents types that can hold an image handle.
@@ -960,6 +976,59 @@ mod tests {
         let image = render(&app, &font, ".\n.", Some(72.0)).unwrap();
 
         assert_eq!(image.dimensions(), (18, 144));
+    }
+
+    #[test]
+    fn tiny_font_height_renders_at_least_one_pixel() {
+        let (app, font) = initialize_app_with_loaded_example_font(ExampleFont::BmFont);
+
+        let image = render(&app, &font, ".", Some(1e-6)).unwrap();
+
+        assert_eq!(image.dimensions(), (1, 1));
+    }
+
+    #[test]
+    fn invalid_font_height_fails_to_render() {
+        let (app, font) = initialize_app_with_loaded_example_font(ExampleFont::BmFont);
+
+        for font_height in [0.0, -0.0, -36.0, f32::NAN, f32::INFINITY, f32::NEG_INFINITY] {
+            for text in ["Hello", ""] {
+                let result = render(&app, &font, text, Some(font_height));
+                assert!(
+                    matches!(
+                        result,
+                        Err(ImageFontRenderError::InvalidFontHeight(height))
+                            if height.to_bits() == font_height.to_bits()
+                    ),
+                    "{font_height} {text:?}: {result:?}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn invalid_font_height_keeps_the_previous_image() {
+        let (mut app, font) = initialize_app_with_loaded_example_font(ExampleFont::BmFont);
+        let entity = app
+            .world_mut()
+            .spawn((
+                ImageFontPreRenderedText::default(),
+                ImageFontText::default().text("Hello").font(font),
+            ))
+            .id();
+        app.update();
+        let first_image = app.world().get::<Sprite>(entity).unwrap().image.clone();
+
+        app.world_mut()
+            .get_mut::<ImageFontText>(entity)
+            .unwrap()
+            .font_height = Some(0.0);
+        app.update();
+
+        assert_eq!(
+            app.world().get::<Sprite>(entity).unwrap().image,
+            first_image
+        );
     }
 
     #[test]
