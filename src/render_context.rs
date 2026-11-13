@@ -60,8 +60,9 @@ pub(crate) struct RenderContext<'assets> {
     /// The text component defining the content and font height.
     image_font_text: &'assets ImageFontText,
     /// Configuration for rendering the text, including anchor alignment,
-    /// color, letter spacing, and scaling behavior.
-    pub render_config: RenderConfig,
+    /// color, letter spacing, and scaling behavior. It is read-only after
+    /// construction because the cached values depend on it on changing.
+    render_config: RenderConfig,
     /// The lines of the text, each filtered to include only supported
     /// characters in the font atlas.
     lines: Vec<FilteredString<'assets, &'assets str>>,
@@ -137,6 +138,12 @@ impl<'assets> RenderContext<'assets> {
         })
     }
 
+    /// Returns the configuration the text is rendered with.
+    #[inline]
+    pub(crate) fn render_config(&self) -> &RenderConfig {
+        &self.render_config
+    }
+
     /// Calculates the height of the line of text at the font's native size.
     ///
     /// This is the font's [`ImageFont::line_height`] if it has one, and
@@ -191,15 +198,15 @@ impl<'assets> RenderContext<'assets> {
         let advance = image_font_character
             .x_advance
             .unwrap_or(rect.width() as f32)
-            + self.render_config.letter_spacing
+            + self.render_config().letter_spacing
             + kerning;
 
         if let Some(font_height) = self.image_font_text.font_height
-            && self.render_config.apply_scaling
+            && self.render_config().apply_scaling
         {
             let scale_factor = font_height / self.max_height() as f32;
             return self
-                .render_config
+                .render_config()
                 .scaling_mode
                 .apply_scale(advance, scale_factor);
         }

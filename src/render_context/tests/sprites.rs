@@ -237,7 +237,7 @@ fn anchor_offsets() {
         assert_eq!(
             offsets,
             render_context
-                .render_config
+                .render_config()
                 .text_anchor
                 .to_anchor_offsets(true)
         );

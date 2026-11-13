@@ -76,15 +76,15 @@ impl RenderContext<'_> {
     )]
     pub(crate) fn character_dimensions(&self, character: char) -> (f32, f32) {
         let rect = self.glyph_rect(character);
-        let letter_spacing = self.render_config.letter_spacing;
+        let letter_spacing = self.render_config().letter_spacing;
         let width = rect.width() as f32 + letter_spacing;
         let height = rect.height() as f32;
         let max_height = self.max_height() as f32;
 
         if let Some(font_height) = self.image_font_text.font_height
-            && self.render_config.apply_scaling
+            && self.render_config().apply_scaling
         {
-            let scaling_mode = self.render_config.scaling_mode;
+            let scaling_mode = self.render_config().scaling_mode;
             let scale_factor = font_height / max_height;
             return (
                 scaling_mode.apply_scale(width, scale_factor),
@@ -98,7 +98,7 @@ impl RenderContext<'_> {
     /// The outline and glyph layers to draw a character with, if the text has
     /// an outline color and the character's texture has outline layers.
     fn outline_layers(&self, character: char) -> Option<&ImageFontOutlineLayers> {
-        self.render_config.outline_color?;
+        self.render_config().outline_color?;
         let image_font_character = &self.image_font.atlas_character_map[&character];
         self.image_font
             .page_outline_layers(image_font_character.page_index)
@@ -119,7 +119,7 @@ impl RenderContext<'_> {
         Sprite {
             image,
             texture_atlas: Some(self.font_texture_atlas(character)),
-            color: self.render_config.color,
+            color: self.render_config().color,
             ..Sprite::default()
         }
     }
@@ -132,7 +132,7 @@ impl RenderContext<'_> {
         Some(Sprite {
             image: layers.outline.clone(),
             texture_atlas: Some(self.font_texture_atlas(character)),
-            color: self.render_config.outline_color?,
+            color: self.render_config().outline_color?,
             ..Sprite::default()
         })
     }
@@ -170,9 +170,9 @@ impl RenderContext<'_> {
     /// - `individual`: Offset for aligning each individual glyph.
     #[inline]
     pub(crate) fn anchor_offsets(&self) -> AnchorOffsets {
-        self.render_config
+        self.render_config()
             .text_anchor
-            .to_anchor_offsets(self.render_config.offset_characters)
+            .to_anchor_offsets(self.render_config().offset_characters)
     }
 
     /// Computes the transform for positioning and scaling a text sprite.
