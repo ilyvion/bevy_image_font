@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/loader.rs`."><title>loader.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-1f5a765c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="bevy_image_font" data-themes="" data-resource-suffix="" data-rustdoc-version="1.102.0-nightly (3ef0c22cd 2026-11-11)" data-channel="nightly" data-search-js="search-69faa2c4.js" data-stringdex-js="stringdex-b5109af9.js" data-settings-js="settings-9b351432.js" ><script src="../../static.files/storage-41dd4d93.js"></script><script defer src="../../static.files/src-script-813739b1.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-419f3a3f.js"></script><script defer src="../../static.files/scrape-examples-2bbcccac.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-101b5a15.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">bevy_image_font/</div>loader.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="doccomment">//! Code for parsing an [`ImageFont`] off of an on-disk representation.
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/loader.rs`."><title>loader.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-1f5a765c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="bevy_image_font" data-themes="" data-resource-suffix="" data-rustdoc-version="1.102.0-nightly (8eb778d04 2026-11-12)" data-channel="nightly" data-search-js="search-69faa2c4.js" data-stringdex-js="stringdex-b5109af9.js" data-settings-js="settings-9b351432.js" ><script src="../../static.files/storage-41dd4d93.js"></script><script defer src="../../static.files/src-script-813739b1.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-419f3a3f.js"></script><script defer src="../../static.files/scrape-examples-2bbcccac.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-101b5a15.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">bevy_image_font/</div>loader.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="doccomment">//! Code for parsing an [`ImageFont`] off of an on-disk representation.
 <a href=#2 id=2 data-nosnippet>2</a>
 <a href=#3 id=3 data-nosnippet>3</a></span><span class="attr">#![expect(clippy::absolute_paths, reason = <span class="string">"false positives"</span>)]
 <a href=#4 id=4 data-nosnippet>4</a>
@@ -388,134 +388,168 @@
 <a href=#388 id=388 data-nosnippet>388</a>    /// preserving a crisp, pixelated appearance. This is usually ideal for
 <a href=#389 id=389 data-nosnippet>389</a>    /// pixel-art fonts.
 <a href=#390 id=390 data-nosnippet>390</a>    </span><span class="kw">pub </span>image_sampler: ImageSampler,
-<a href=#391 id=391 data-nosnippet>391</a>}
-<a href=#392 id=392 data-nosnippet>392</a>
-<a href=#393 id=393 data-nosnippet>393</a><span class="kw">impl </span>Default <span class="kw">for </span>ImageFontLoaderSettings {
-<a href=#394 id=394 data-nosnippet>394</a>    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
-<a href=#395 id=395 data-nosnippet>395</a>        <span class="self">Self </span>{
-<a href=#396 id=396 data-nosnippet>396</a>            image_sampler: ImageSampler::Descriptor(ImageSamplerDescriptor::nearest()),
-<a href=#397 id=397 data-nosnippet>397</a>        }
-<a href=#398 id=398 data-nosnippet>398</a>    }
-<a href=#399 id=399 data-nosnippet>399</a>}
+<a href=#391 id=391 data-nosnippet>391</a>
+<a href=#392 id=392 data-nosnippet>392</a>    <span class="doccomment">/// The Windows code page that the character ids of non-Unicode `BMFont`
+<a href=#393 id=393 data-nosnippet>393</a>    /// fonts with the `ANSI` or `DEFAULT` charset are in. These charsets
+<a href=#394 id=394 data-nosnippet>394</a>    /// stand for the ANSI code page of the system the font was exported on.
+<a href=#395 id=395 data-nosnippet>395</a>    ///
+<a href=#396 id=396 data-nosnippet>396</a>    /// The default is 1252 (Western European).
+<a href=#397 id=397 data-nosnippet>397</a>    </span><span class="attr">#[cfg(feature = <span class="string">"bmf_charsets"</span>)]
+<a href=#398 id=398 data-nosnippet>398</a>    #[serde(default = <span class="string">"default_bmf_ansi_code_page"</span>)]
+<a href=#399 id=399 data-nosnippet>399</a>    </span><span class="kw">pub </span>bmf_ansi_code_page: u16,
 <a href=#400 id=400 data-nosnippet>400</a>
-<a href=#401 id=401 data-nosnippet>401</a><span class="kw">impl </span>AssetLoader <span class="kw">for </span>ImageFontLoader {
-<a href=#402 id=402 data-nosnippet>402</a>    <span class="kw">type </span>Asset = ImageFont;
-<a href=#403 id=403 data-nosnippet>403</a>
-<a href=#404 id=404 data-nosnippet>404</a>    <span class="kw">type </span>Settings = ImageFontLoaderSettings;
-<a href=#405 id=405 data-nosnippet>405</a>
-<a href=#406 id=406 data-nosnippet>406</a>    <span class="kw">type </span>Error = ImageFontLoadError;
-<a href=#407 id=407 data-nosnippet>407</a>
-<a href=#408 id=408 data-nosnippet>408</a>    <span class="comment">// NOTE: Until I or someone else thinks of a way to reliably run `AssetLoaders`
-<a href=#409 id=409 data-nosnippet>409</a>    //       in a unit test, parts of this method will unfortunately remain
-<a href=#410 id=410 data-nosnippet>410</a>    //       uncovered by tests.
-<a href=#411 id=411 data-nosnippet>411</a>    </span><span class="kw">async fn </span>load(
-<a href=#412 id=412 data-nosnippet>412</a>        <span class="kw-2">&amp;</span><span class="self">self</span>,
-<a href=#413 id=413 data-nosnippet>413</a>        reader: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>Reader,
-<a href=#414 id=414 data-nosnippet>414</a>        settings: <span class="kw-2">&amp;</span><span class="self">Self</span>::Settings,
-<a href=#415 id=415 data-nosnippet>415</a>        load_context: <span class="kw-2">&amp;mut </span>LoadContext&lt;<span class="lifetime">'_</span>&gt;,
-<a href=#416 id=416 data-nosnippet>416</a>    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Asset, <span class="self">Self</span>::Error&gt; {
-<a href=#417 id=417 data-nosnippet>417</a>        <span class="kw">let </span>font_descriptor = read_and_validate_font_descriptor(reader).<span class="kw">await</span><span class="question-mark">?</span>;
-<a href=#418 id=418 data-nosnippet>418</a>
-<a href=#419 id=419 data-nosnippet>419</a>        <span class="comment">// need the image loaded immediately because we need its size
-<a href=#420 id=420 data-nosnippet>420</a>        </span><span class="kw">let </span>image_path = load_context
-<a href=#421 id=421 data-nosnippet>421</a>            .path()
-<a href=#422 id=422 data-nosnippet>422</a>            .resolve_embed_str(font_descriptor.image().as_str())<span class="question-mark">?</span>;
-<a href=#423 id=423 data-nosnippet>423</a>        <span class="kw">let </span><span class="kw-2">mut </span>image: Image = load_context
-<a href=#424 id=424 data-nosnippet>424</a>            .load_builder()
-<a href=#425 id=425 data-nosnippet>425</a>            .load_value(image_path.clone())
-<a href=#426 id=426 data-nosnippet>426</a>            .<span class="kw">await</span><span class="question-mark">?
-<a href=#427 id=427 data-nosnippet>427</a>            </span>.take();
-<a href=#428 id=428 data-nosnippet>428</a>
-<a href=#429 id=429 data-nosnippet>429</a>        image.sampler = settings.image_sampler.clone();
-<a href=#430 id=430 data-nosnippet>430</a>        <span class="kw">let </span>size = image.size();
-<a href=#431 id=431 data-nosnippet>431</a>
-<a href=#432 id=432 data-nosnippet>432</a>        <span class="kw">let </span>(atlas_character_map, layout) =
-<a href=#433 id=433 data-nosnippet>433</a>            descriptor_to_character_map_and_layout(font_descriptor, size)<span class="question-mark">?</span>;
+<a href=#401 id=401 data-nosnippet>401</a>    <span class="doccomment">/// The Windows code page that the character ids of non-Unicode `BMFont`
+<a href=#402 id=402 data-nosnippet>402</a>    /// fonts with the `OEM` charset are in. This charset stands for the OEM
+<a href=#403 id=403 data-nosnippet>403</a>    /// code page of the system the font was exported on.
+<a href=#404 id=404 data-nosnippet>404</a>    ///
+<a href=#405 id=405 data-nosnippet>405</a>    /// The default is 437 (US).
+<a href=#406 id=406 data-nosnippet>406</a>    </span><span class="attr">#[cfg(feature = <span class="string">"bmf_charsets"</span>)]
+<a href=#407 id=407 data-nosnippet>407</a>    #[serde(default = <span class="string">"default_bmf_oem_code_page"</span>)]
+<a href=#408 id=408 data-nosnippet>408</a>    </span><span class="kw">pub </span>bmf_oem_code_page: u16,
+<a href=#409 id=409 data-nosnippet>409</a>}
+<a href=#410 id=410 data-nosnippet>410</a>
+<a href=#411 id=411 data-nosnippet>411</a><span class="doccomment">/// The default of [`ImageFontLoaderSettings::bmf_ansi_code_page`].
+<a href=#412 id=412 data-nosnippet>412</a></span><span class="attr">#[cfg(feature = <span class="string">"bmf_charsets"</span>)]
+<a href=#413 id=413 data-nosnippet>413</a></span><span class="kw">fn </span>default_bmf_ansi_code_page() -&gt; u16 {
+<a href=#414 id=414 data-nosnippet>414</a>    <span class="number">1252
+<a href=#415 id=415 data-nosnippet>415</a></span>}
+<a href=#416 id=416 data-nosnippet>416</a>
+<a href=#417 id=417 data-nosnippet>417</a><span class="doccomment">/// The default of [`ImageFontLoaderSettings::bmf_oem_code_page`].
+<a href=#418 id=418 data-nosnippet>418</a></span><span class="attr">#[cfg(feature = <span class="string">"bmf_charsets"</span>)]
+<a href=#419 id=419 data-nosnippet>419</a></span><span class="kw">fn </span>default_bmf_oem_code_page() -&gt; u16 {
+<a href=#420 id=420 data-nosnippet>420</a>    <span class="number">437
+<a href=#421 id=421 data-nosnippet>421</a></span>}
+<a href=#422 id=422 data-nosnippet>422</a>
+<a href=#423 id=423 data-nosnippet>423</a><span class="kw">impl </span>Default <span class="kw">for </span>ImageFontLoaderSettings {
+<a href=#424 id=424 data-nosnippet>424</a>    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+<a href=#425 id=425 data-nosnippet>425</a>        <span class="self">Self </span>{
+<a href=#426 id=426 data-nosnippet>426</a>            image_sampler: ImageSampler::Descriptor(ImageSamplerDescriptor::nearest()),
+<a href=#427 id=427 data-nosnippet>427</a>            <span class="attr">#[cfg(feature = <span class="string">"bmf_charsets"</span>)]
+<a href=#428 id=428 data-nosnippet>428</a>            </span>bmf_ansi_code_page: default_bmf_ansi_code_page(),
+<a href=#429 id=429 data-nosnippet>429</a>            <span class="attr">#[cfg(feature = <span class="string">"bmf_charsets"</span>)]
+<a href=#430 id=430 data-nosnippet>430</a>            </span>bmf_oem_code_page: default_bmf_oem_code_page(),
+<a href=#431 id=431 data-nosnippet>431</a>        }
+<a href=#432 id=432 data-nosnippet>432</a>    }
+<a href=#433 id=433 data-nosnippet>433</a>}
 <a href=#434 id=434 data-nosnippet>434</a>
-<a href=#435 id=435 data-nosnippet>435</a>        <span class="kw">let </span>image_handle = load_context.add_labeled_asset(String::from(<span class="string">"texture"</span>), image);
-<a href=#436 id=436 data-nosnippet>436</a>        <span class="kw">let </span>layout_handle = load_context.add_labeled_asset(String::from(<span class="string">"layout"</span>), layout);
+<a href=#435 id=435 data-nosnippet>435</a><span class="kw">impl </span>AssetLoader <span class="kw">for </span>ImageFontLoader {
+<a href=#436 id=436 data-nosnippet>436</a>    <span class="kw">type </span>Asset = ImageFont;
 <a href=#437 id=437 data-nosnippet>437</a>
-<a href=#438 id=438 data-nosnippet>438</a>        <span class="kw">let </span>image_font = ImageFont::new(
-<a href=#439 id=439 data-nosnippet>439</a>            <span class="macro">vec!</span>[image_handle],
-<a href=#440 id=440 data-nosnippet>440</a>            atlas_character_map,
-<a href=#441 id=441 data-nosnippet>441</a>            <span class="macro">vec!</span>[layout_handle],
-<a href=#442 id=442 data-nosnippet>442</a>            settings.image_sampler.clone(),
-<a href=#443 id=443 data-nosnippet>443</a>        );
-<a href=#444 id=444 data-nosnippet>444</a>        <span class="prelude-val">Ok</span>(image_font)
-<a href=#445 id=445 data-nosnippet>445</a>    }
-<a href=#446 id=446 data-nosnippet>446</a>
-<a href=#447 id=447 data-nosnippet>447</a>    <span class="kw">fn </span>extensions(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>str] {
-<a href=#448 id=448 data-nosnippet>448</a>        <span class="kw-2">&amp;</span>[<span class="string">"image_font.ron"</span>]
-<a href=#449 id=449 data-nosnippet>449</a>    }
-<a href=#450 id=450 data-nosnippet>450</a>}
-<a href=#451 id=451 data-nosnippet>451</a>
-<a href=#452 id=452 data-nosnippet>452</a><span class="doccomment">/// Reads and validates an `ImageFontDescriptor` from a reader.
-<a href=#453 id=453 data-nosnippet>453</a>///
-<a href=#454 id=454 data-nosnippet>454</a>/// This function reads the entirety of the data provided by the `reader`,
-<a href=#455 id=455 data-nosnippet>455</a>/// deserializes it into an `ImageFontDescriptor`, and performs validation
-<a href=#456 id=456 data-nosnippet>456</a>/// to ensure the descriptor is valid.
-<a href=#457 id=457 data-nosnippet>457</a>///
-<a href=#458 id=458 data-nosnippet>458</a>/// # Parameters
-<a href=#459 id=459 data-nosnippet>459</a>/// - `reader`: A mutable reference to an object implementing the [`Reader`]
-<a href=#460 id=460 data-nosnippet>460</a>///   trait. This reader provides the serialized data for the font descriptor.
-<a href=#461 id=461 data-nosnippet>461</a>///
-<a href=#462 id=462 data-nosnippet>462</a>/// # Returns
-<a href=#463 id=463 data-nosnippet>463</a>/// A `Result` containing either a valid `ImageFontDescriptor` or an error if
-<a href=#464 id=464 data-nosnippet>464</a>/// reading, deserialization, or validation fails.
-<a href=#465 id=465 data-nosnippet>465</a>///
-<a href=#466 id=466 data-nosnippet>466</a>/// # Errors
-<a href=#467 id=467 data-nosnippet>467</a>/// Returns an error in the following cases:
-<a href=#468 id=468 data-nosnippet>468</a>/// - If reading from the `reader` fails.
-<a href=#469 id=469 data-nosnippet>469</a>/// - If the data cannot be deserialized into an `ImageFontDescriptor`.
-<a href=#470 id=470 data-nosnippet>470</a>/// - If the resulting `ImageFontDescriptor` does not pass validation.
-<a href=#471 id=471 data-nosnippet>471</a></span><span class="kw">async fn </span>read_and_validate_font_descriptor(
-<a href=#472 id=472 data-nosnippet>472</a>    reader: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>Reader,
-<a href=#473 id=473 data-nosnippet>473</a>) -&gt; <span class="prelude-ty">Result</span>&lt;ImageFontDescriptor, ImageFontLoadError&gt; {
-<a href=#474 id=474 data-nosnippet>474</a>    <span class="comment">// Read data
-<a href=#475 id=475 data-nosnippet>475</a>    </span><span class="kw">let </span><span class="kw-2">mut </span>data = Vec::new();
-<a href=#476 id=476 data-nosnippet>476</a>    reader.read_to_end(<span class="kw-2">&amp;mut </span>data).<span class="kw">await</span><span class="question-mark">?</span>;
-<a href=#477 id=477 data-nosnippet>477</a>
-<a href=#478 id=478 data-nosnippet>478</a>    <span class="comment">// Deserialize into ImageFontDescriptor and validate
-<a href=#479 id=479 data-nosnippet>479</a>    </span><span class="kw">let </span>font_descriptor: ImageFontDescriptor = ron::de::from_bytes(<span class="kw-2">&amp;</span>data)<span class="question-mark">?</span>;
-<a href=#480 id=480 data-nosnippet>480</a>    font_descriptor.validate()<span class="question-mark">?</span>;
-<a href=#481 id=481 data-nosnippet>481</a>
-<a href=#482 id=482 data-nosnippet>482</a>    <span class="prelude-val">Ok</span>(font_descriptor)
-<a href=#483 id=483 data-nosnippet>483</a>}
-<a href=#484 id=484 data-nosnippet>484</a>
-<a href=#485 id=485 data-nosnippet>485</a><span class="doccomment">/// Converts an `ImageFontDescriptor` into a character map and texture atlas
-<a href=#486 id=486 data-nosnippet>486</a>/// layout.
+<a href=#438 id=438 data-nosnippet>438</a>    <span class="kw">type </span>Settings = ImageFontLoaderSettings;
+<a href=#439 id=439 data-nosnippet>439</a>
+<a href=#440 id=440 data-nosnippet>440</a>    <span class="kw">type </span>Error = ImageFontLoadError;
+<a href=#441 id=441 data-nosnippet>441</a>
+<a href=#442 id=442 data-nosnippet>442</a>    <span class="comment">// NOTE: Until I or someone else thinks of a way to reliably run `AssetLoaders`
+<a href=#443 id=443 data-nosnippet>443</a>    //       in a unit test, parts of this method will unfortunately remain
+<a href=#444 id=444 data-nosnippet>444</a>    //       uncovered by tests.
+<a href=#445 id=445 data-nosnippet>445</a>    </span><span class="kw">async fn </span>load(
+<a href=#446 id=446 data-nosnippet>446</a>        <span class="kw-2">&amp;</span><span class="self">self</span>,
+<a href=#447 id=447 data-nosnippet>447</a>        reader: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>Reader,
+<a href=#448 id=448 data-nosnippet>448</a>        settings: <span class="kw-2">&amp;</span><span class="self">Self</span>::Settings,
+<a href=#449 id=449 data-nosnippet>449</a>        load_context: <span class="kw-2">&amp;mut </span>LoadContext&lt;<span class="lifetime">'_</span>&gt;,
+<a href=#450 id=450 data-nosnippet>450</a>    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Asset, <span class="self">Self</span>::Error&gt; {
+<a href=#451 id=451 data-nosnippet>451</a>        <span class="kw">let </span>font_descriptor = read_and_validate_font_descriptor(reader).<span class="kw">await</span><span class="question-mark">?</span>;
+<a href=#452 id=452 data-nosnippet>452</a>
+<a href=#453 id=453 data-nosnippet>453</a>        <span class="comment">// need the image loaded immediately because we need its size
+<a href=#454 id=454 data-nosnippet>454</a>        </span><span class="kw">let </span>image_path = load_context
+<a href=#455 id=455 data-nosnippet>455</a>            .path()
+<a href=#456 id=456 data-nosnippet>456</a>            .resolve_embed_str(font_descriptor.image().as_str())<span class="question-mark">?</span>;
+<a href=#457 id=457 data-nosnippet>457</a>        <span class="kw">let </span><span class="kw-2">mut </span>image: Image = load_context
+<a href=#458 id=458 data-nosnippet>458</a>            .load_builder()
+<a href=#459 id=459 data-nosnippet>459</a>            .load_value(image_path.clone())
+<a href=#460 id=460 data-nosnippet>460</a>            .<span class="kw">await</span><span class="question-mark">?
+<a href=#461 id=461 data-nosnippet>461</a>            </span>.take();
+<a href=#462 id=462 data-nosnippet>462</a>
+<a href=#463 id=463 data-nosnippet>463</a>        image.sampler = settings.image_sampler.clone();
+<a href=#464 id=464 data-nosnippet>464</a>        <span class="kw">let </span>size = image.size();
+<a href=#465 id=465 data-nosnippet>465</a>
+<a href=#466 id=466 data-nosnippet>466</a>        <span class="kw">let </span>(atlas_character_map, layout) =
+<a href=#467 id=467 data-nosnippet>467</a>            descriptor_to_character_map_and_layout(font_descriptor, size)<span class="question-mark">?</span>;
+<a href=#468 id=468 data-nosnippet>468</a>
+<a href=#469 id=469 data-nosnippet>469</a>        <span class="kw">let </span>image_handle = load_context.add_labeled_asset(String::from(<span class="string">"texture"</span>), image);
+<a href=#470 id=470 data-nosnippet>470</a>        <span class="kw">let </span>layout_handle = load_context.add_labeled_asset(String::from(<span class="string">"layout"</span>), layout);
+<a href=#471 id=471 data-nosnippet>471</a>
+<a href=#472 id=472 data-nosnippet>472</a>        <span class="kw">let </span>image_font = ImageFont::new(
+<a href=#473 id=473 data-nosnippet>473</a>            <span class="macro">vec!</span>[image_handle],
+<a href=#474 id=474 data-nosnippet>474</a>            atlas_character_map,
+<a href=#475 id=475 data-nosnippet>475</a>            <span class="macro">vec!</span>[layout_handle],
+<a href=#476 id=476 data-nosnippet>476</a>            settings.image_sampler.clone(),
+<a href=#477 id=477 data-nosnippet>477</a>        );
+<a href=#478 id=478 data-nosnippet>478</a>        <span class="prelude-val">Ok</span>(image_font)
+<a href=#479 id=479 data-nosnippet>479</a>    }
+<a href=#480 id=480 data-nosnippet>480</a>
+<a href=#481 id=481 data-nosnippet>481</a>    <span class="kw">fn </span>extensions(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>str] {
+<a href=#482 id=482 data-nosnippet>482</a>        <span class="kw-2">&amp;</span>[<span class="string">"image_font.ron"</span>]
+<a href=#483 id=483 data-nosnippet>483</a>    }
+<a href=#484 id=484 data-nosnippet>484</a>}
+<a href=#485 id=485 data-nosnippet>485</a>
+<a href=#486 id=486 data-nosnippet>486</a><span class="doccomment">/// Reads and validates an `ImageFontDescriptor` from a reader.
 <a href=#487 id=487 data-nosnippet>487</a>///
-<a href=#488 id=488 data-nosnippet>488</a>/// This function processes the given `ImageFontDescriptor` to generate a
-<a href=#489 id=489 data-nosnippet>489</a>/// character-to-index map and a [`TextureAtlasLayout`], based on the provided
-<a href=#490 id=490 data-nosnippet>490</a>/// image size. It uses the descriptor's layout information to map characters to
-<a href=#491 id=491 data-nosnippet>491</a>/// specific regions within the texture atlas.
-<a href=#492 id=492 data-nosnippet>492</a>///
-<a href=#493 id=493 data-nosnippet>493</a>/// # Parameters
-<a href=#494 id=494 data-nosnippet>494</a>/// - `font_descriptor`: The `ImageFontDescriptor` containing the layout.
-<a href=#495 id=495 data-nosnippet>495</a>/// - `image_size`: A [`UVec2`] representing the dimensions of the image
-<a href=#496 id=496 data-nosnippet>496</a>///   containing the font glyphs.
-<a href=#497 id=497 data-nosnippet>497</a>///
-<a href=#498 id=498 data-nosnippet>498</a>/// # Returns
-<a href=#499 id=499 data-nosnippet>499</a>/// A tuple where
-<a href=#500 id=500 data-nosnippet>500</a>/// - the first element is a `HashMap&lt;char, usize&gt;` mapping characters to
-<a href=#501 id=501 data-nosnippet>501</a>///   indices in the texture atlas.
-<a href=#502 id=502 data-nosnippet>502</a>/// - the second element is a [`TextureAtlasLayout`] describing the texture
-<a href=#503 id=503 data-nosnippet>503</a>///   atlas layout.
-<a href=#504 id=504 data-nosnippet>504</a>///
-<a href=#505 id=505 data-nosnippet>505</a>/// # Errors
-<a href=#506 id=506 data-nosnippet>506</a>/// This function will return an [`ImageFontLoadError`] in the following cases:
-<a href=#507 id=507 data-nosnippet>507</a>/// - If there are any validation errors in the layout. See
-<a href=#508 id=508 data-nosnippet>508</a>///   [`ImageFontLayoutValidationError`] for details.
-<a href=#509 id=509 data-nosnippet>509</a></span><span class="kw">fn </span>descriptor_to_character_map_and_layout(
-<a href=#510 id=510 data-nosnippet>510</a>    font_descriptor: ImageFontDescriptor,
-<a href=#511 id=511 data-nosnippet>511</a>    image_size: UVec2,
-<a href=#512 id=512 data-nosnippet>512</a>) -&gt; <span class="prelude-ty">Result</span>&lt;(HashMap&lt;char, ImageFontCharacter&gt;, TextureAtlasLayout), ImageFontLoadError&gt; {
-<a href=#513 id=513 data-nosnippet>513</a>    <span class="kw">let </span>rect_character_map = font_descriptor.layout.into_character_rect_map(image_size)<span class="question-mark">?</span>;
-<a href=#514 id=514 data-nosnippet>514</a>    <span class="kw">let </span>(atlas_character_map, layout) =
-<a href=#515 id=515 data-nosnippet>515</a>        ImageFont::mapped_atlas_layout_from_char_map(<span class="number">0</span>, image_size, rect_character_map.into_iter());
-<a href=#516 id=516 data-nosnippet>516</a>    <span class="prelude-val">Ok</span>((atlas_character_map, layout))
+<a href=#488 id=488 data-nosnippet>488</a>/// This function reads the entirety of the data provided by the `reader`,
+<a href=#489 id=489 data-nosnippet>489</a>/// deserializes it into an `ImageFontDescriptor`, and performs validation
+<a href=#490 id=490 data-nosnippet>490</a>/// to ensure the descriptor is valid.
+<a href=#491 id=491 data-nosnippet>491</a>///
+<a href=#492 id=492 data-nosnippet>492</a>/// # Parameters
+<a href=#493 id=493 data-nosnippet>493</a>/// - `reader`: A mutable reference to an object implementing the [`Reader`]
+<a href=#494 id=494 data-nosnippet>494</a>///   trait. This reader provides the serialized data for the font descriptor.
+<a href=#495 id=495 data-nosnippet>495</a>///
+<a href=#496 id=496 data-nosnippet>496</a>/// # Returns
+<a href=#497 id=497 data-nosnippet>497</a>/// A `Result` containing either a valid `ImageFontDescriptor` or an error if
+<a href=#498 id=498 data-nosnippet>498</a>/// reading, deserialization, or validation fails.
+<a href=#499 id=499 data-nosnippet>499</a>///
+<a href=#500 id=500 data-nosnippet>500</a>/// # Errors
+<a href=#501 id=501 data-nosnippet>501</a>/// Returns an error in the following cases:
+<a href=#502 id=502 data-nosnippet>502</a>/// - If reading from the `reader` fails.
+<a href=#503 id=503 data-nosnippet>503</a>/// - If the data cannot be deserialized into an `ImageFontDescriptor`.
+<a href=#504 id=504 data-nosnippet>504</a>/// - If the resulting `ImageFontDescriptor` does not pass validation.
+<a href=#505 id=505 data-nosnippet>505</a></span><span class="kw">async fn </span>read_and_validate_font_descriptor(
+<a href=#506 id=506 data-nosnippet>506</a>    reader: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>Reader,
+<a href=#507 id=507 data-nosnippet>507</a>) -&gt; <span class="prelude-ty">Result</span>&lt;ImageFontDescriptor, ImageFontLoadError&gt; {
+<a href=#508 id=508 data-nosnippet>508</a>    <span class="comment">// Read data
+<a href=#509 id=509 data-nosnippet>509</a>    </span><span class="kw">let </span><span class="kw-2">mut </span>data = Vec::new();
+<a href=#510 id=510 data-nosnippet>510</a>    reader.read_to_end(<span class="kw-2">&amp;mut </span>data).<span class="kw">await</span><span class="question-mark">?</span>;
+<a href=#511 id=511 data-nosnippet>511</a>
+<a href=#512 id=512 data-nosnippet>512</a>    <span class="comment">// Deserialize into ImageFontDescriptor and validate
+<a href=#513 id=513 data-nosnippet>513</a>    </span><span class="kw">let </span>font_descriptor: ImageFontDescriptor = ron::de::from_bytes(<span class="kw-2">&amp;</span>data)<span class="question-mark">?</span>;
+<a href=#514 id=514 data-nosnippet>514</a>    font_descriptor.validate()<span class="question-mark">?</span>;
+<a href=#515 id=515 data-nosnippet>515</a>
+<a href=#516 id=516 data-nosnippet>516</a>    <span class="prelude-val">Ok</span>(font_descriptor)
 <a href=#517 id=517 data-nosnippet>517</a>}
 <a href=#518 id=518 data-nosnippet>518</a>
-<a href=#519 id=519 data-nosnippet>519</a><span class="attr">#[cfg(test)]
-<a href=#520 id=520 data-nosnippet>520</a></span><span class="kw">mod </span>tests;
+<a href=#519 id=519 data-nosnippet>519</a><span class="doccomment">/// Converts an `ImageFontDescriptor` into a character map and texture atlas
+<a href=#520 id=520 data-nosnippet>520</a>/// layout.
+<a href=#521 id=521 data-nosnippet>521</a>///
+<a href=#522 id=522 data-nosnippet>522</a>/// This function processes the given `ImageFontDescriptor` to generate a
+<a href=#523 id=523 data-nosnippet>523</a>/// character-to-index map and a [`TextureAtlasLayout`], based on the provided
+<a href=#524 id=524 data-nosnippet>524</a>/// image size. It uses the descriptor's layout information to map characters to
+<a href=#525 id=525 data-nosnippet>525</a>/// specific regions within the texture atlas.
+<a href=#526 id=526 data-nosnippet>526</a>///
+<a href=#527 id=527 data-nosnippet>527</a>/// # Parameters
+<a href=#528 id=528 data-nosnippet>528</a>/// - `font_descriptor`: The `ImageFontDescriptor` containing the layout.
+<a href=#529 id=529 data-nosnippet>529</a>/// - `image_size`: A [`UVec2`] representing the dimensions of the image
+<a href=#530 id=530 data-nosnippet>530</a>///   containing the font glyphs.
+<a href=#531 id=531 data-nosnippet>531</a>///
+<a href=#532 id=532 data-nosnippet>532</a>/// # Returns
+<a href=#533 id=533 data-nosnippet>533</a>/// A tuple where
+<a href=#534 id=534 data-nosnippet>534</a>/// - the first element is a `HashMap&lt;char, usize&gt;` mapping characters to
+<a href=#535 id=535 data-nosnippet>535</a>///   indices in the texture atlas.
+<a href=#536 id=536 data-nosnippet>536</a>/// - the second element is a [`TextureAtlasLayout`] describing the texture
+<a href=#537 id=537 data-nosnippet>537</a>///   atlas layout.
+<a href=#538 id=538 data-nosnippet>538</a>///
+<a href=#539 id=539 data-nosnippet>539</a>/// # Errors
+<a href=#540 id=540 data-nosnippet>540</a>/// This function will return an [`ImageFontLoadError`] in the following cases:
+<a href=#541 id=541 data-nosnippet>541</a>/// - If there are any validation errors in the layout. See
+<a href=#542 id=542 data-nosnippet>542</a>///   [`ImageFontLayoutValidationError`] for details.
+<a href=#543 id=543 data-nosnippet>543</a></span><span class="kw">fn </span>descriptor_to_character_map_and_layout(
+<a href=#544 id=544 data-nosnippet>544</a>    font_descriptor: ImageFontDescriptor,
+<a href=#545 id=545 data-nosnippet>545</a>    image_size: UVec2,
+<a href=#546 id=546 data-nosnippet>546</a>) -&gt; <span class="prelude-ty">Result</span>&lt;(HashMap&lt;char, ImageFontCharacter&gt;, TextureAtlasLayout), ImageFontLoadError&gt; {
+<a href=#547 id=547 data-nosnippet>547</a>    <span class="kw">let </span>rect_character_map = font_descriptor.layout.into_character_rect_map(image_size)<span class="question-mark">?</span>;
+<a href=#548 id=548 data-nosnippet>548</a>    <span class="kw">let </span>(atlas_character_map, layout) =
+<a href=#549 id=549 data-nosnippet>549</a>        ImageFont::mapped_atlas_layout_from_char_map(<span class="number">0</span>, image_size, rect_character_map.into_iter());
+<a href=#550 id=550 data-nosnippet>550</a>    <span class="prelude-val">Ok</span>((atlas_character_map, layout))
+<a href=#551 id=551 data-nosnippet>551</a>}
+<a href=#552 id=552 data-nosnippet>552</a>
+<a href=#553 id=553 data-nosnippet>553</a><span class="attr">#[cfg(test)]
+<a href=#554 id=554 data-nosnippet>554</a></span><span class="kw">mod </span>tests;
 </code></pre></div></section></main></body></html>
