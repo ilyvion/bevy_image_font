@@ -68,6 +68,33 @@ fn font_with_glyph_past_page_edge_fails_to_load() {
 }
 
 #[test]
+fn font_with_char_on_missing_page_fails_to_load() {
+    // The font has only page 0, and `B` is on page 1.
+    let (mut app, handle): (App, Handle<ImageFont>) =
+        initialize_app_with_font("tests/char_on_missing_page.txt.fnt");
+
+    let error = wait_until_failed(&mut app, &handle);
+
+    let AssetLoadError::AssetLoaderError(ref loader_error) = error else {
+        panic!("expected a loader error, got {error}");
+    };
+    let bmf_error = loader_error
+        .error()
+        .downcast_ref::<BmFontLoadError>()
+        .expect("the loader error is a BmFontLoadError");
+    assert!(
+        matches!(
+            *bmf_error,
+            BmFontLoadError::BmFontError(bmfont_rs::Error::InvalidCharPage {
+                char_id: 66,
+                page_id: 1,
+            })
+        ),
+        "{bmf_error:?}"
+    );
+}
+
+#[test]
 fn packed_font_draws_each_glyph_from_its_channel() {
     // Every pixel of the page is (200, 100, 50, 25). `A` is in the red
     // channel, `B` in the green channel and `C` in all channels.

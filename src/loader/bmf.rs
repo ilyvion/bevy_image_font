@@ -216,7 +216,20 @@ fn parse_bmf_data(
         extension => unreachable!("{extension:?}"),
     };
 
-    Ok(from_bytes(data)?)
+    let bm_font = from_bytes(data)?;
+    if let Some(char) = bm_font
+        .chars
+        .iter()
+        .find(|char| usize::from(char.page) >= bm_font.pages.len())
+    {
+        return Err(bmfont_rs::Error::InvalidCharPage {
+            char_id: char.id,
+            page_id: u32::from(char.page),
+        }
+        .into());
+    }
+
+    Ok(bm_font)
 }
 
 /// A BMF character and where its glyph is in the font's textures.
@@ -428,7 +441,8 @@ fn construct_image_font(
                     char,
                     #[expect(
                         clippy::unwrap_used,
-                        reason = "all Nones replaced in load_images_and_textures"
+                        reason = "parse_bmf_data rejects chars on missing pages, so \
+                                  load_images_and_textures places every character"
                     )]
                     ImageFontCharacter {
                         character_index: character.placement.unwrap().1,

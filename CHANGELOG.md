@@ -36,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fonts whose glyph rectangles extend past the edge of the font image now fail to load instead of crashing the app when their text is pre-rendered. `.image_font.ron` fonts report the new `ImageFontLayoutValidationError::CharacterRectOutOfBounds` error, or `ImageFontLayoutValidationError::InvertedCharacterRect` for a `Manual` rectangle whose `min` corner is past its `max` corner. BMFont fonts report the new `BmFontLoadError::CharacterRectOutOfBounds` error.
 - `ImageFontPlugin` with the default `ui` feature no longer crashes apps that don't add Bevy's `UiPlugin`, such as headless apps, apps using `MinimalPlugins` or apps with only sprite text, with a missing `UiScale` resource error.
 - Pre-rendered text with a very small `font_height` now renders as an image at least 1 pixel wide and tall, instead of an empty image the GPU rejects. A `font_height` that is zero, negative, NaN or infinite is reported as the new `ImageFontRenderError::InvalidFontHeight` error and leaves the text's previous image in place, instead of producing an invalid image or using up memory on a huge one.
+- BMFont fonts with a character on a page the font file doesn't list now fail to load with a `BmFontLoadError::BmFontError` error naming the character and page, instead of crashing the font loader. In builds with `panic = "abort"`, this used to abort the app.
 
 ### Removed
 
