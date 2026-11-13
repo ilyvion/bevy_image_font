@@ -22,15 +22,16 @@ pub mod gizmos;
 
 use std::fmt::Debug;
 
-use bevy_app::{App, Plugin, PostUpdate};
+use bevy_app::{App, Last, Plugin, PostUpdate};
 use bevy_asset::Assets;
 use bevy_camera::visibility::Visibility;
 use bevy_color::Color;
 use bevy_ecs::component::Component;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::query::{Changed, Or};
+use bevy_ecs::resource::Resource;
 use bevy_ecs::schedule::IntoScheduleConfigs as _;
-use bevy_ecs::system::{Commands, Query, Res};
+use bevy_ecs::system::{Commands, Query, Res, ResMut};
 use bevy_image::TextureAtlasLayout;
 use bevy_reflect::Reflect;
 use bevy_sprite::{Anchor, Sprite};
@@ -52,12 +53,14 @@ pub(crate) struct AtlasSpritesPlugin;
 
 impl Plugin for AtlasSpritesPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(
-            PostUpdate,
-            set_up_sprites
-                .after(sync_texts_with_font_changes)
-                .in_set(ImageFontSet),
-        );
+        app.init_resource::<ExcessSprites>()
+            .add_systems(
+                PostUpdate,
+                set_up_sprites
+                    .after(sync_texts_with_font_changes)
+                    .in_set(ImageFontSet),
+            )
+            .add_systems(Last, despawn_excess_sprites.in_set(ImageFontSet));
 
         #[cfg(feature = "gizmos")]
         {
@@ -205,6 +208,7 @@ pub fn set_up_sprites(
         Or<(Changed<ImageFontText>, Changed<ImageFontSpriteText>)>,
     >,
     mut child_query: Query<ChildSprite>,
+    mut excess_sprites: ResMut<ExcessSprites>,
     image_fonts: Res<Assets<ImageFont>>,
     texture_atlas_layouts: Res<Assets<TextureAtlasLayout>>,
 ) {
@@ -268,6 +272,7 @@ pub fn set_up_sprites(
             commands: &mut commands,
             parent: entity,
             child_query: &mut child_query,
+            excess_sprites: &mut excess_sprites.0,
         };
         sprite_sync.sync(&mut image_font_text_data.sprites, glyph_sprites);
         sprite_sync.sync(&mut image_font_text_data.outline_sprites, outline_sprites);
@@ -367,25 +372,43 @@ fn text_sprites(
 /// its text.
 type ChildSprite = (&'static mut Sprite, &'static mut Transform);
 
+/// Sprites no longer used by their text, despawned by
+/// [`despawn_excess_sprites`].
+///
+/// They are despawned in [`Last`] because other `PostUpdate` systems, such as
+/// Bevy's sprite rendering, may queue commands for them that panic if they are
+/// applied after the sprite is despawned.
+#[derive(Debug, Default, Resource)]
+struct ExcessSprites(Vec<Entity>);
+
+/// Despawns the sprites in [`ExcessSprites`].
+fn despawn_excess_sprites(mut commands: Commands, mut excess_sprites: ResMut<ExcessSprites>) {
+    for entity in excess_sprites.0.drain(..) {
+        // The text entity may have been despawned along with its sprites.
+        commands.entity(entity).try_despawn();
+    }
+}
+
 /// Keeps a text entity's child sprites in sync with the sprites its text
 /// should be drawn with.
 struct SpriteSync<'borrow, 'world, 'state, 'query_world, 'query_state> {
-    /// Command buffer for spawning and despawning sprites.
+    /// Command buffer for spawning sprites.
     commands: &'borrow mut Commands<'world, 'state>,
     /// The text entity the sprites are children of.
     parent: Entity,
     /// Query for updating existing child sprites.
     child_query: &'borrow mut Query<'query_world, 'query_state, ChildSprite>,
+    /// Where sprites that are no longer needed are collected for despawning.
+    excess_sprites: &'borrow mut Vec<Entity>,
 }
 
 impl SpriteSync<'_, '_, '_, '_, '_> {
     /// Makes `entities` draw `sprites`: existing entities are updated in
     /// order, missing ones are spawned as children of the text entity, and
-    /// excess ones are despawned.
+    /// excess ones are queued in [`ExcessSprites`] for despawning.
     fn sync(&mut self, entities: &mut Vec<Entity>, sprites: Vec<(Sprite, Transform)>) {
-        for entity in entities.drain(sprites.len().min(entities.len())..) {
-            self.commands.entity(entity).despawn();
-        }
+        self.excess_sprites
+            .extend(entities.drain(sprites.len().min(entities.len())..));
 
         let mut sprites = sprites.into_iter();
         for (&entity, (new_sprite, new_transform)) in entities.iter().zip(sprites.by_ref()) {

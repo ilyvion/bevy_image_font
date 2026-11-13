@@ -4,6 +4,7 @@
 use bevy_app::App;
 use bevy_asset::Handle;
 use bevy_color::palettes::css;
+use bevy_ecs::query::Added;
 
 use super::*;
 use crate::tests::utils::{initialize_app_with_font, wait_until_loaded};
@@ -173,6 +174,49 @@ fn sprites_switch_texture_when_their_character_moves_to_another_texture() {
             "{character}"
         );
     }
+}
+
+/// Marks a sprite that [`insert_marker_on_new_sprites`] saw.
+#[derive(Component)]
+struct SeenSprite;
+
+/// Queues an `insert` on every newly added sprite, like Bevy's sprite
+/// rendering does, running in `PostUpdate` alongside [`set_up_sprites`]
+/// without seeing its commands applied.
+fn insert_marker_on_new_sprites(mut commands: Commands, sprites: Query<Entity, Added<Sprite>>) {
+    for entity in &sprites {
+        commands.entity(entity).insert(SeenSprite);
+    }
+}
+
+#[test]
+fn removing_a_new_sprite_does_not_break_other_systems_inserting_on_it() {
+    let (mut app, entity) = spawn_text("bmf.txt.fnt", "A", ImageFontSpriteText::default());
+    app.add_systems(
+        PostUpdate,
+        insert_marker_on_new_sprites.after_ignore_deferred(set_up_sprites),
+    );
+
+    app.world_mut()
+        .get_mut::<ImageFontText>(entity)
+        .unwrap()
+        .text = String::from("AV");
+    app.update();
+    let removed_sprite = app
+        .world()
+        .get::<ImageFontTextData>(entity)
+        .unwrap()
+        .sprites[1];
+
+    app.world_mut()
+        .get_mut::<ImageFontText>(entity)
+        .unwrap()
+        .text = String::from("A");
+    app.update();
+
+    assert!(app.world().get_entity(removed_sprite).is_err());
+    let (glyph_sprites, _) = sprites(&app, entity);
+    assert_eq!(glyph_sprites.len(), 1);
 }
 
 #[test]
