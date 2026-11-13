@@ -169,6 +169,27 @@ fn text_changed_when_ui_scale_changes() {
     });
 }
 
+/// The plugin runs in apps without `UiPlugin`, which have no `UiScale`
+/// resource.
+#[test]
+fn runs_without_ui_scale_resource() {
+    let (mut app, font_handle) = initialize_app_with_example_font(ExampleFont::Monospace);
+    #[cfg(feature = "ui")]
+    assert!(!app.world().contains_resource::<UiScale>());
+
+    app.world_mut().spawn(ImageFontText {
+        text: String::from("Hello"),
+        font: font_handle.clone(),
+        font_height: None,
+    });
+    app.update();
+
+    app.world_mut().write_message(AssetEvent::Modified {
+        id: font_handle.id(),
+    });
+    app.update();
+}
+
 /// Helper function to set up the app, set up the `SystemState` we use for
 /// validating change and spawn an `ImageFontText` entity.
 fn setup_app_system_state_and_entity() -> (

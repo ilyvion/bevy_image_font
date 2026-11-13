@@ -339,14 +339,15 @@ pub fn sync_texts_with_font_changes(
     mut events: MessageReader<AssetEvent<ImageFont>>,
     mut query: Query<&mut ImageFontText>,
     mut changed_fonts: Local<CachedHashSet>,
-    #[cfg(feature = "ui")] ui_scale: Res<UiScale>,
+    #[cfg(feature = "ui")] ui_scale: Option<Res<UiScale>>,
 ) {
     #[cfg(feature = "ui")]
     {
-        // If the UI scale changed, mark all texts as changed
+        // If the UI scale changed, mark all texts as changed. `UiScale` only
+        // exists in apps with `UiPlugin`.
 
         use bevy_ecs::change_detection::DetectChanges as _;
-        if ui_scale.is_changed() && !ui_scale.is_added() {
+        if ui_scale.is_some_and(|ui_scale| ui_scale.is_changed() && !ui_scale.is_added()) {
             for mut image_font_text in &mut query {
                 use bevy_ecs::change_detection::DetectChangesMut as _;
 

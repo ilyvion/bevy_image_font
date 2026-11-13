@@ -9,8 +9,6 @@ use bevy_asset::{AssetLoadError, AssetPlugin, AssetServer, LoadState};
 use bevy_image::{CompressedImageFormats, ImageLoader};
 use bevy_log::LogPlugin;
 use bevy_platform::collections::HashMap;
-#[cfg(feature = "ui")]
-use bevy_ui::UiScale;
 use camino::Utf8Path;
 
 use super::*;
@@ -92,9 +90,6 @@ pub(crate) fn initialize_app_with_font(
     #[cfg(feature = "gizmos")]
     app.init_asset::<bevy_gizmos::GizmoAsset>();
     app.add_plugins(ImageFontPlugin);
-
-    #[cfg(feature = "ui")]
-    app.init_resource::<UiScale>();
 
     app.register_asset_loader(ImageLoader::new(CompressedImageFormats::NONE))
         .init_asset::<TextureAtlasLayout>()
