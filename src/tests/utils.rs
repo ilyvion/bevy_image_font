@@ -5,7 +5,7 @@
 
 use std::sync::LazyLock;
 
-use bevy_asset::{AssetPlugin, AssetServer, LoadState};
+use bevy_asset::{AssetLoadError, AssetPlugin, AssetServer, LoadState};
 use bevy_image::{CompressedImageFormats, ImageLoader};
 use bevy_log::LogPlugin;
 use bevy_platform::collections::HashMap;
@@ -56,6 +56,23 @@ pub(crate) fn wait_until_loaded<T: Asset>(app: &mut App, handle: &Handle<T>) {
 
         !load_state.is_loaded()
     } {
+        app.update();
+    }
+}
+
+/// Updates `app` until the asset of `handle` fails to load, and returns the
+/// error. Panics if it loads.
+pub(crate) fn wait_until_failed<T: Asset>(app: &mut App, handle: &Handle<T>) -> AssetLoadError {
+    loop {
+        let asset_server = app.world().resource::<AssetServer>();
+        let load_state = asset_server
+            .get_load_state(handle.id())
+            .expect("Expected load_state to be Some");
+        if let LoadState::Failed(ref error) = load_state {
+            return (**error).clone();
+        }
+        assert!(!load_state.is_loaded(), "Asset loaded without failing");
+
         app.update();
     }
 }

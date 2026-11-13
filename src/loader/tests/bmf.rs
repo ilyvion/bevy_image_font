@@ -1,9 +1,11 @@
 use bevy_app::App;
-use bevy_asset::{Assets, Handle};
+use bevy_asset::{AssetLoadError, Assets, Handle};
 use bevy_image::{Image, TextureAtlasLayout};
+use bevy_math::{URect, UVec2};
 
 use crate::ImageFont;
-use crate::tests::utils::{initialize_app_with_font, wait_until_loaded};
+use crate::loader::BmFontLoadError;
+use crate::tests::utils::{initialize_app_with_font, wait_until_failed, wait_until_loaded};
 
 /// Loads the font at `path` and returns the first pixel of the texture each of
 /// `characters` is drawn from, along with that texture's index.
@@ -31,6 +33,38 @@ fn first_pixels(path: &str, characters: &[char]) -> Vec<(usize, [u8; 4])> {
             )
         })
         .collect()
+}
+
+#[test]
+fn font_with_glyph_past_page_edge_fails_to_load() {
+    // The page is 2x2, and `A` is 2 pixels wide starting at x = 1.
+    let (mut app, handle): (App, Handle<ImageFont>) =
+        initialize_app_with_font("tests/glyph_out_of_bounds.txt.fnt");
+
+    let error = wait_until_failed(&mut app, &handle);
+
+    let AssetLoadError::AssetLoaderError(ref loader_error) = error else {
+        panic!("expected a loader error, got {error}");
+    };
+    let bmf_error = loader_error
+        .error()
+        .downcast_ref::<BmFontLoadError>()
+        .expect("the loader error is a BmFontLoadError");
+    assert!(
+        matches!(
+            *bmf_error,
+            BmFontLoadError::CharacterRectOutOfBounds {
+                character: 'A',
+                rect: URect {
+                    min: UVec2 { x: 1, y: 0 },
+                    max: UVec2 { x: 3, y: 2 }
+                },
+                page: 0,
+                page_size: UVec2 { x: 2, y: 2 },
+            }
+        ),
+        "{bmf_error:?}"
+    );
 }
 
 #[test]

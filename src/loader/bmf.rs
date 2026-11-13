@@ -66,6 +66,22 @@ pub enum BmFontLoadError {
     #[cfg(feature = "bmf_charsets")]
     #[error("BMFont code page {0} is not supported")]
     CodePageUnsupported(u16),
+
+    /// A character's rectangle extends past the edges of its page's image.
+    #[error(
+        "The rectangle {rect:?} of character '{character}' does not fit inside the {}x{} image of \
+        page {page}", page_size.x, page_size.y
+    )]
+    CharacterRectOutOfBounds {
+        /// The character whose rectangle is out of bounds.
+        character: char,
+        /// The out-of-bounds rectangle.
+        rect: URect,
+        /// The index of the character's page.
+        page: usize,
+        /// The size of the page's image.
+        page_size: UVec2,
+    },
 }
 
 impl AssetLoader for BmFontLoader {
@@ -301,6 +317,21 @@ async fn load_images_and_textures(
             None => channel_settings,
         };
 
+        let size = image.size();
+        if let Some((&character, &AtlasCharacter { rect, .. })) =
+            atlas_character_map.iter().find(|&(_, character)| {
+                usize::from(character.font_char.page) == page_no
+                    && character.rect.max.cmpgt(size).any()
+            })
+        {
+            return Err(BmFontLoadError::CharacterRectOutOfBounds {
+                character,
+                rect,
+                page: page_no,
+                page_size: size,
+            });
+        }
+
         let page_characters = atlas_character_map
             .values_mut()
             .filter(|character| usize::from(character.font_char.page) == page_no);
@@ -317,7 +348,6 @@ async fn load_images_and_textures(
             }
         }
 
-        let size = image.size();
         let view_count = views.len();
         let mut page_image = Some(image);
         for (view_no, (decoding, characters)) in views.into_iter().enumerate() {

@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - BMFont fonts exported with the alpha channel set to "one" or "zero" no longer draw as solid boxes or invisible text; the glyphs are read from the color channels instead. Fonts exported with "glyph + outline" in a single channel draw as a white glyph with a black outline. ([#16])
 - BMFont fonts exported with 8-bit textures no longer draw as solid boxes; the grayscale texture is read as the glyph's alpha. ([#16])
 - Shortening an `ImageFontSpriteText`'s text no longer sometimes crashes the app with an "Entity despawned" error. This could happen when the text got shorter within a frame or two of a character being added or changed, for example when the text changes on consecutive frames. Sprites for removed characters are now despawned in the `Last` schedule.
+- Fonts whose glyph rectangles extend past the edge of the font image now fail to load instead of crashing the app when their text is pre-rendered. `.image_font.ron` fonts report the new `ImageFontLayoutValidationError::CharacterRectOutOfBounds` error, or `ImageFontLayoutValidationError::InvertedCharacterRect` for a `Manual` rectangle whose `min` corner is past its `max` corner. BMFont fonts report the new `BmFontLoadError::CharacterRectOutOfBounds` error.
 
 ### Removed
 

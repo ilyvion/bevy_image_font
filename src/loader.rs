@@ -140,16 +140,70 @@ pub enum ImageFontLayoutValidationError {
         /// The character that was repeated in the layout string.
         character: char,
     },
+
+    /// A character's rectangle has a `min` corner that is right of or below
+    /// its `max` corner.
+    #[error(
+        "The rectangle {rect:?} of character '{character}' has its min corner past its max corner."
+    )]
+    InvertedCharacterRect {
+        /// The character whose rectangle is inverted.
+        character: char,
+        /// The inverted rectangle.
+        rect: URect,
+    },
+
+    /// A character's rectangle extends past the edges of the font image.
+    #[error(
+        "The rectangle {rect:?} of character '{character}' does not fit inside the {}x{} font \
+        image.", image_size.x, image_size.y
+    )]
+    CharacterRectOutOfBounds {
+        /// The character whose rectangle is out of bounds.
+        character: char,
+        /// The out-of-bounds rectangle.
+        rect: URect,
+        /// The size of the font image.
+        image_size: UVec2,
+    },
 }
 
 impl ImageFontLayout {
     /// Given the image size, returns a map from each codepoint to its location.
+    ///
+    /// Every rectangle is checked to have its `min` corner at or above-left of
+    /// its `max` corner and to fit inside the image.
+    fn into_character_rect_map(
+        self,
+        size: UVec2,
+    ) -> Result<HashMap<char, URect>, ImageFontLayoutValidationError> {
+        let rect_map = self.into_unchecked_character_rect_map(size)?;
+        for (&character, &rect) in &rect_map {
+            if rect.min.cmpgt(rect.max).any() {
+                return Err(ImageFontLayoutValidationError::InvertedCharacterRect {
+                    character,
+                    rect,
+                });
+            }
+            if rect.max.cmpgt(size).any() {
+                return Err(ImageFontLayoutValidationError::CharacterRectOutOfBounds {
+                    character,
+                    rect,
+                    image_size: size,
+                });
+            }
+        }
+        Ok(rect_map)
+    }
+
+    /// Given the image size, returns a map from each codepoint to its location,
+    /// without checking the locations against the image.
     #[expect(
         clippy::cast_possible_truncation,
         reason = "while usize can hold more data than u32, we're working on a number here that \
         should be substantially smaller than even u32's capacity"
     )]
-    fn into_character_rect_map(
+    fn into_unchecked_character_rect_map(
         self,
         size: UVec2,
     ) -> Result<HashMap<char, URect>, ImageFontLayoutValidationError> {
@@ -218,7 +272,10 @@ impl ImageFontLayout {
             ImageFontLayout::ManualMonospace { size, coords } => Ok(coords
                 .into_iter()
                 .map(|(character, top_left)| {
-                    (character, URect::from_corners(top_left, size + top_left))
+                    (
+                        character,
+                        URect::from_corners(top_left, top_left.saturating_add(size)),
+                    )
                 })
                 .collect()),
             ImageFontLayout::Manual(urect_map) => Ok(urect_map),
