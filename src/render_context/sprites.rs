@@ -38,17 +38,19 @@ impl RenderContext<'_> {
     /// scaling factor.
     #[inline]
     pub(crate) fn text_width(&self) -> f32 {
-        self.lines()
-            .iter()
-            .map(|line| {
-                let mut line_width = 0.;
-                let mut characters = line.filtered_chars().peekable();
-                while let Some(character) = characters.next() {
-                    line_width += self.character_advance(character, characters.peek().copied());
-                }
-                line_width
-            })
-            .fold(0., f32::max)
+        self.text_width.get_or_insert_with(|| {
+            self.lines()
+                .iter()
+                .map(|line| {
+                    let mut line_width = 0.;
+                    let mut characters = line.filtered_chars().peekable();
+                    while let Some(character) = characters.next() {
+                        line_width += self.character_advance(character, characters.peek().copied());
+                    }
+                    line_width
+                })
+                .fold(0., f32::max)
+        })
     }
 
     /// Computes the dimensions of a glyph for a given character, applying

@@ -24,8 +24,8 @@
 //!   scaling factors.
 //! - **Unified Rendering Support**: Handles both `atlas_sprites` (sprite-based)
 //!   and `rendered` (pre-rendered image-based) text rendering.
-//! - **Caching**: Uses `CacheCell` to lazily compute and store values like
-//!   maximum height and anchor offsets.
+//! - **Caching**: Uses `CacheCell` to lazily compute and store the maximum
+//!   height and text width.
 //!
 //! This module is intended for internal use within the text rendering system
 //! and is designed to work seamlessly with other components, such as
@@ -68,6 +68,9 @@ pub(crate) struct RenderContext<'assets> {
 
     /// Cached maximum glyph height.
     max_height: CacheCell<u32>,
+    /// Cached text width.
+    #[cfg(feature = "atlas_sprites")]
+    text_width: CacheCell<f32>,
 }
 
 impl<'assets> RenderContext<'assets> {
@@ -129,6 +132,8 @@ impl<'assets> RenderContext<'assets> {
             lines,
 
             max_height: CacheCell::default(),
+            #[cfg(feature = "atlas_sprites")]
+            text_width: CacheCell::default(),
         })
     }
 

@@ -122,6 +122,37 @@ fn text_width() {
 }
 
 #[test]
+fn text_width_is_computed_once() {
+    let (app, handle) = initialize_app_with_loaded_example_font(ExampleFont::Monospace);
+    let render_context_tester = tester(&app, handle);
+
+    render_context_tester.test_with_defaults(|render_context| {
+        assert!(render_context.text_width.0.get().is_none());
+        let width = render_context.text_width();
+        assert_eq!(render_context.text_width.0.get(), Some(width));
+    });
+
+    render_context_tester.test_with_defaults(|render_context| {
+        let character = render_context.filtered_chars().next().unwrap();
+        let computed_transform = render_context.transform(0, &mut 0.0, character, None);
+
+        let sentinel = render_context.text_width() + 1000.0;
+        render_context.text_width.0.set(Some(sentinel));
+        assert_float_eq!(
+            render_context.text_width(),
+            sentinel,
+            abs <= COMPARISON_TOLERANCE
+        );
+
+        let cached_transform = render_context.transform(0, &mut 0.0, character, None);
+        assert_ne!(
+            computed_transform.translation, cached_transform.translation,
+            "transform() must lay out glyphs using the cached text width"
+        );
+    });
+}
+
+#[test]
 #[expect(
     clippy::cast_precision_loss,
     reason = "the magnitude of the numbers we're working on here are too small to lose \
