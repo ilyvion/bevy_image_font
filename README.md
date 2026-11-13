@@ -18,11 +18,11 @@
 - Unicode (single codepoints)
 - Defining character coordinates via strings (see example asset)
 - Manual specification of rectangles (including non-uniform sizes)
+- Inline newlines in strings (`\n` or `\r\n`), with each line starting at the left edge
 
 ### Planned Enhancements
 
 - Padding and offsets for texture layouts
-- Inline newlines in strings
 
 ### Out of Scope
 
@@ -32,7 +32,6 @@
 ### Known Limitations
 
 - Space characters require a blank texture region.
-- Newlines are currently unsupported.
 - On Bevy 0.20, thousands of `ImageFontPreRenderedText` entities on screen at once can take seconds per frame, because each text is a sprite with its own image and Bevy's bindless sprite materials scale poorly with many distinct images. Workarounds:
   - Use `ImageFontSpriteText`, whose glyphs share the font's atlas images.
   - Disable bindless materials by setting `disabled_features: Some(WgpuFeatures::TEXTURE_BINDING_ARRAY)` in the `WgpuSettings` of Bevy's `RenderPlugin`. This can make scenes with many sprites sharing a few images slower.
@@ -92,6 +91,7 @@ See examples for more details:
 - [Rendered sprite example](https://github.com/ilyvion/bevy_image_font/blob/main/examples/rendered_sprite.rs): Using pixel fonts for in-world text like damage numbers.
 - [Rendered UI example](https://github.com/ilyvion/bevy_image_font/blob/main/examples/rendered_ui.rs): Using `bevy_asset_loader` for texture and font handling.
 - [Atlased Sprite Example](https://github.com/ilyvion/bevy_image_font/blob/main/examples/atlased_sprite.rs): Demonstrates rendering text with a texture atlas, including animations for dynamic text display and changing colors.
+- [Newlines example](https://github.com/ilyvion/bevy_image_font/blob/main/examples/newlines.rs): Draws multi-line text as atlased sprites, as a pre-rendered sprite, and with a `BMFont` font.
 - [Packed BMFont example](https://github.com/ilyvion/bevy_image_font/blob/main/examples/bmf_packed.rs): Loads `BMFont` fonts whose glyphs are packed into the texture's four color channels, including one with a baked outline, drawn both in the font's black and in an outline color of your choice.
 - [Non-Unicode BMFont example](https://github.com/ilyvion/bevy_image_font/blob/main/examples/bmf_charsets.rs): Loads a code page 437 `BMFont` font with the `bmf_charsets` feature and draws box-drawing, shading and Greek characters with it from ordinary Unicode text.
 

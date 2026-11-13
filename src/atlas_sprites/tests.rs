@@ -174,3 +174,26 @@ fn sprites_switch_texture_when_their_character_moves_to_another_texture() {
         );
     }
 }
+
+#[test]
+fn each_line_starts_at_the_left_edge_one_line_height_below_the_previous() {
+    let (app, entity) = spawn_text(
+        "bmf.txt.fnt",
+        "AV\r\nA\nA",
+        ImageFontSpriteText::default().anchor(Anchor::TOP_LEFT),
+    );
+
+    let (glyph_sprites, _) = sprites(&app, entity);
+
+    assert_eq!(glyph_sprites.len(), 4);
+    let first_line_a = glyph_sprites[0].transform.translation;
+    for (line_index, glyph) in [(1.0, &glyph_sprites[2]), (2.0, &glyph_sprites[3])] {
+        let translation = glyph.transform.translation;
+        assert_eq!(translation.x, first_line_a.x, "line {line_index}");
+        assert_eq!(
+            translation.y,
+            first_line_a.y - line_index * 36.0,
+            "line {line_index}"
+        );
+    }
+}

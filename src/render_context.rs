@@ -62,9 +62,9 @@ pub(crate) struct RenderContext<'assets> {
     /// Configuration for rendering the text, including anchor alignment,
     /// color, letter spacing, and scaling behavior.
     pub render_config: RenderConfig,
-    /// The text filtered to include only supported characters in the font
-    /// atlas.
-    filtered_text: FilteredString<'assets, &'assets String>,
+    /// The lines of the text, each filtered to include only supported
+    /// characters in the font atlas.
+    lines: Vec<FilteredString<'assets, &'assets str>>,
 
     /// Cached maximum glyph height.
     max_height: CacheCell<u32>,
@@ -115,14 +115,18 @@ impl<'assets> RenderContext<'assets> {
             }
         };
 
-        let filtered_text = image_font.filter_string(&image_font_text.text);
+        let lines = image_font_text
+            .text
+            .split('\n')
+            .map(|line| image_font.filter_string(line.strip_suffix('\r').unwrap_or(line)))
+            .collect();
 
         Some(RenderContext {
             atlas_layouts,
             image_font,
             image_font_text,
             render_config,
-            filtered_text,
+            lines,
 
             max_height: CacheCell::default(),
         })
@@ -144,7 +148,7 @@ impl<'assets> RenderContext<'assets> {
 
             let mut max_height = 1;
 
-            for character in self.filtered_text.filtered_chars() {
+            for character in self.filtered_chars() {
                 let image_font_character = &self.image_font.atlas_character_map[&character];
                 let rect = self.atlas_layouts[image_font_character.page_index].textures
                     [image_font_character.character_index];
@@ -252,14 +256,42 @@ impl<'assets> RenderContext<'assets> {
         image_font_character.kernings.get(&next_character).copied()
     }
 
-    /// Returns the filtered text, which includes only characters supported by
-    /// the font.
+    /// Returns the lines of the text, each including only characters supported
+    /// by the font.
     ///
-    /// The filtered text excludes unsupported or invalid characters, ensuring
-    /// that only renderable glyphs are processed.
+    /// The text is split at every `\n`, and a `\r` directly before it is
+    /// dropped. Each line starts at the left edge, [`Self::max_height`] below
+    /// the one before it.
     #[inline]
-    pub(crate) fn text(&self) -> &FilteredString<'_, &String> {
-        &self.filtered_text
+    pub(crate) fn lines(&self) -> &[FilteredString<'assets, &'assets str>] {
+        &self.lines
+    }
+
+    /// Returns the characters of every line that the font supports, in text
+    /// order.
+    pub(crate) fn filtered_chars(&self) -> impl Iterator<Item = char> + '_ {
+        self.lines.iter().flat_map(FilteredString::filtered_chars)
+    }
+
+    /// Checks whether no line has any character the font supports.
+    #[cfg(feature = "rendered")]
+    #[inline]
+    pub(crate) fn is_empty(&self) -> bool {
+        self.lines.iter().all(FilteredString::is_empty)
+    }
+
+    /// Calculates the height of the text block at the font's native size: the
+    /// number of lines times [`Self::max_height`].
+    ///
+    /// # Returns
+    /// The text height, in pixels.
+    #[expect(
+        clippy::cast_possible_truncation,
+        reason = "a text with more than u32::MAX lines can't be rendered anyway"
+    )]
+    #[inline]
+    pub(crate) fn text_height(&self) -> u32 {
+        self.lines.len() as u32 * self.max_height()
     }
 }
 

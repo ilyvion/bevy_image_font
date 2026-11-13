@@ -83,22 +83,23 @@ impl AnchorOffsets {
     pub(crate) fn compute_transform(self, params: ComputeTransformParams) -> Transform {
         let ComputeTransformParams {
             x_pos,
+            y_pos,
             scaled_text_width,
             scaled_width,
             scaled_height,
-            max_height,
+            text_height,
             character_offsets,
             scale,
         } = params;
 
-        // Step 1: Start with the base x_pos translation
-        let mut translation = base_translation(x_pos);
+        // Step 1: Start with the base pen position translation
+        let mut translation = base_translation(x_pos, y_pos);
 
         // Step 2: Apply the whole offset contribution
         apply_whole_offset(
             &mut translation,
             scaled_text_width,
-            max_height,
+            text_height,
             scale,
             self.whole,
         );
@@ -114,7 +115,7 @@ impl AnchorOffsets {
                 height = 0.0;
             }
 
-            translation += Vec2::new(0.0, max_height as f32 - height) * scale * 0.5;
+            translation += Vec2::new(0.0, text_height as f32 - height) * scale * 0.5;
         }
 
         // Step 5: Apply character offsets
@@ -131,16 +132,19 @@ impl AnchorOffsets {
 /// position and scaling, reducing the number of parameters passed to
 /// [`AnchorOffsets::compute_transform`].
 pub(crate) struct ComputeTransformParams {
-    /// The x-position of the glyph.
+    /// The x-position of the glyph within its line.
     pub x_pos: f32,
+    /// The y-position of the top of the glyph's line, relative to the top of
+    /// the text block.
+    pub y_pos: f32,
     /// The total width of the rendered text.
     pub scaled_text_width: f32,
     /// The width of the current glyph.
     pub scaled_width: f32,
     /// The height of the current glyph.
     pub scaled_height: f32,
-    /// The maximum height of the text block.
-    pub max_height: u32,
+    /// The height of the text block at the font's native size.
+    pub text_height: u32,
     /// The per-character offsets applied to the glyph.
     pub character_offsets: Vec2,
     /// The uniform scaling factor applied to the glyph.
@@ -151,11 +155,12 @@ pub(crate) struct ComputeTransformParams {
 ///
 /// # Parameters
 /// - `x_pos`: The x-position of the sprite.
+/// - `y_pos`: The y-position of the top of the sprite's line.
 ///
 /// # Returns
-/// A `Vec2` representing the base translation with only the x-component set.
-fn base_translation(x_pos: f32) -> Vec2 {
-    Vec2::new(x_pos, 0.0)
+/// A `Vec2` representing the base translation.
+fn base_translation(x_pos: f32, y_pos: f32) -> Vec2 {
+    Vec2::new(x_pos, y_pos)
 }
 
 /// Adjusts the translation based on the whole anchor offset.
@@ -163,7 +168,7 @@ fn base_translation(x_pos: f32) -> Vec2 {
 /// # Parameters
 /// - `translation`: A mutable reference to the translation vector to modify.
 /// - `text_width`: Total width of the text block.
-/// - `max_height`: Maximum height of the text block.
+/// - `text_height`: Height of the text block at the font's native size.
 /// - `scale_height`: Scaling factor for glyph dimensions.
 /// - `whole`: The `whole` offset vector for aligning the entire text block.
 ///
@@ -176,13 +181,13 @@ fn base_translation(x_pos: f32) -> Vec2 {
 fn apply_whole_offset(
     translation: &mut Vec2,
     text_width: f32,
-    max_height: u32,
+    text_height: u32,
     scale_height: f32,
     whole: Vec2,
 ) {
     *translation += Vec2::new(
         text_width * whole.x,
-        max_height as f32 * whole.y * scale_height,
+        text_height as f32 * whole.y * scale_height,
     );
 }
 
@@ -240,7 +245,7 @@ mod tests {
 
     #[test]
     fn base_translation_sets_right_value() {
-        assert_eq!(base_translation(10.0), Vec2::new(10.0, 0.0));
+        assert_eq!(base_translation(10.0, -36.0), Vec2::new(10.0, -36.0));
     }
 
     #[test]
@@ -330,10 +335,11 @@ mod tests {
         // Case 1: Normal parameters
         let params = ComputeTransformParams {
             x_pos: 10.0,
+            y_pos: 0.0,
             scaled_text_width: 20.0,
             scaled_width: 5.0,
             scaled_height: 20.,
-            max_height: 30,
+            text_height: 30,
             character_offsets: Vec2::ZERO,
             scale: 1.5,
         };
@@ -344,16 +350,40 @@ mod tests {
         // Case 2: Zero scaling factor
         let params = ComputeTransformParams {
             x_pos: 0.0,
+            y_pos: 0.0,
             scaled_text_width: 10.0,
             scaled_width: 2.0,
             scaled_height: 5.0,
-            max_height: 50,
+            text_height: 50,
             character_offsets: Vec2::ZERO,
             scale: 0.0,
         };
         let transform = offsets.compute_transform(params);
         assert_eq!(transform.translation, Vec3::new(11.0, 0.0, 0.0));
         assert_eq!(transform.scale, Vec3::new(0.0, 0.0, 0.0));
+    }
+
+    #[test]
+    fn compute_transform_places_lines_below_the_first() {
+        let offsets = Anchor::TOP_LEFT.to_anchor_offsets(false);
+        let params = |y_pos| ComputeTransformParams {
+            x_pos: 0.0,
+            y_pos,
+            scaled_text_width: 10.0,
+            scaled_width: 10.0,
+            scaled_height: 40.0,
+            text_height: 60,
+            character_offsets: Vec2::ZERO,
+            scale: 2.0,
+        };
+
+        let first = offsets.compute_transform(params(0.0));
+        let third = offsets.compute_transform(params(-80.0));
+
+        // A 20 tall glyph scaled by 2 at the top of the block is centered 20
+        // below it.
+        assert_eq!(first.translation, Vec3::new(5.0, -20.0, 0.0));
+        assert_eq!(third.translation, Vec3::new(5.0, -100.0, 0.0));
     }
 
     #[test]

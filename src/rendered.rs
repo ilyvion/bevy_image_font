@@ -327,7 +327,7 @@ fn render_text_to_image(
     let (image_font, textures, render_context) =
         prepare_context(image_font_text, image_fonts, images, layouts)?;
 
-    if render_context.text().is_empty() {
+    if render_context.is_empty() {
         // Can't make a 0x0 image, so make a 1x1 transparent black pixel
         return Ok(Image::new(
             Extent3d {
@@ -428,9 +428,11 @@ struct GlyphPlacement {
 
 /// Positions every glyph of the filtered text at the font's native size.
 ///
-/// Each glyph is drawn at the pen position plus its offsets, and the pen then
-/// moves by the character's advance. The image covers the line (the sum of
-/// advances by the line height) as well as any glyph that extends past it.
+/// Each line starts at the left edge, one line height below the line before
+/// it. Each glyph is drawn at the pen position plus its offsets, and the pen
+/// then moves by the character's advance. The image covers every line (the
+/// widest line's sum of advances by the line count times the line height) as
+/// well as any glyph that extends past them.
 ///
 /// # Parameters
 /// - `render_context`: The context providing the filtered text and font
@@ -440,33 +442,39 @@ struct GlyphPlacement {
 /// The glyph placements, and the size of the image that holds them.
 #[expect(
     clippy::cast_possible_truncation,
+    clippy::cast_possible_wrap,
     reason = "the magnitude of the numbers we're working on here are too small to lose anything"
 )]
 fn layout_glyphs(render_context: &RenderContext<'_>) -> (Vec<GlyphPlacement>, UVec2) {
     let mut placements = Vec::new();
+    let line_height = i64::from(render_context.max_height());
     let mut min = I64Vec2::ZERO;
-    let mut max = I64Vec2::new(0, i64::from(render_context.max_height()));
-    let mut pen = 0.0;
+    let mut max = I64Vec2::new(0, i64::from(render_context.text_height()));
 
-    let mut characters = render_context.text().filtered_chars().peekable();
-    while let Some(character) = characters.next() {
-        let offsets = render_context.character_offsets(character);
-        let position = I64Vec2::new(
-            (pen + offsets.x).round() as i64,
-            (-offsets.y).round() as i64,
-        );
-        let size = render_context.glyph_rect(character).size().as_i64vec2();
+    for (line_index, line) in render_context.lines().iter().enumerate() {
+        let line_top = line_index as i64 * line_height;
+        let mut pen = 0.0;
 
-        min = min.min(position);
-        max = max.max(position + size);
-        placements.push(GlyphPlacement {
-            character,
-            position,
-        });
+        let mut characters = line.filtered_chars().peekable();
+        while let Some(character) = characters.next() {
+            let offsets = render_context.character_offsets(character);
+            let position = I64Vec2::new(
+                (pen + offsets.x).round() as i64,
+                line_top + (-offsets.y).round() as i64,
+            );
+            let size = render_context.glyph_rect(character).size().as_i64vec2();
 
-        pen += render_context.character_advance(character, characters.peek().copied());
+            min = min.min(position);
+            max = max.max(position + size);
+            placements.push(GlyphPlacement {
+                character,
+                position,
+            });
+
+            pen += render_context.character_advance(character, characters.peek().copied());
+        }
+        max.x = max.x.max(pen.round() as i64);
     }
-    max.x = max.x.max(pen.round() as i64);
 
     for placement in &mut placements {
         placement.position -= min;
@@ -904,6 +912,54 @@ mod tests {
         let image = render(&app, &font, ".", Some(72.0)).unwrap();
 
         assert_eq!(image.dimensions(), (18, 72));
+    }
+
+    #[test]
+    fn each_line_starts_at_the_left_edge_one_line_height_below_the_previous() {
+        let (app, font) = initialize_app_with_loaded_example_font(ExampleFont::BmFont);
+        let glyph = glyph(&app, &font, '.');
+
+        let image = render(&app, &font, "Hello\n.", None).unwrap();
+
+        // "Hello" advances 71; the second line starts 36 down, and "." is
+        // offset by (2, 26) from it.
+        assert_eq!(image.dimensions(), (71, 72));
+        for (x, y, &pixel) in glyph.enumerate_pixels() {
+            assert_eq!(*image.get_pixel(2 + x, 36 + 26 + y), pixel, "({x}, {y})");
+        }
+    }
+
+    #[test]
+    fn crlf_breaks_lines_like_lf() {
+        let (app, font) = initialize_app_with_loaded_example_font(ExampleFont::BmFont);
+
+        let lf = render(&app, &font, "Hello\n.", None).unwrap();
+        let crlf = render(&app, &font, "Hello\r\n.", None).unwrap();
+
+        assert_eq!(crlf, lf);
+    }
+
+    #[test]
+    fn empty_lines_take_up_a_line_height() {
+        let (app, font) = initialize_app_with_loaded_example_font(ExampleFont::BmFont);
+
+        assert_eq!(
+            render(&app, &font, ".\n", None).unwrap().dimensions(),
+            (9, 72)
+        );
+        assert_eq!(
+            render(&app, &font, "\n\n.", None).unwrap().dimensions(),
+            (9, 108)
+        );
+    }
+
+    #[test]
+    fn font_height_scales_every_line() {
+        let (app, font) = initialize_app_with_loaded_example_font(ExampleFont::BmFont);
+
+        let image = render(&app, &font, ".\n.", Some(72.0)).unwrap();
+
+        assert_eq!(image.dimensions(), (18, 144));
     }
 
     #[test]

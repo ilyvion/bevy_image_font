@@ -29,21 +29,26 @@ impl RenderContext<'_> {
             .map_or(1.0, |font_height| font_height / max_height as f32)
     }
 
-    /// Calculates the total width of the rendered text as the sum of every
-    /// character's advance (see [`Self::character_advance`]).
+    /// Calculates the total width of the rendered text: the width of its
+    /// widest line, where a line's width is the sum of its characters'
+    /// advances (see [`Self::character_advance`]).
     ///
     /// # Returns
     /// The total width of the rendered text, in pixels, after applying the
     /// scaling factor.
     #[inline]
     pub(crate) fn text_width(&self) -> f32 {
-        let mut text_width = 0.;
-
-        let mut characters = self.filtered_text.filtered_chars().peekable();
-        while let Some(character) = characters.next() {
-            text_width += self.character_advance(character, characters.peek().copied());
-        }
-        text_width
+        self.lines()
+            .iter()
+            .map(|line| {
+                let mut line_width = 0.;
+                let mut characters = line.filtered_chars().peekable();
+                while let Some(character) = characters.next() {
+                    line_width += self.character_advance(character, characters.peek().copied());
+                }
+                line_width
+            })
+            .fold(0., f32::max)
     }
 
     /// Computes the dimensions of a glyph for a given character, applying
@@ -176,15 +181,24 @@ impl RenderContext<'_> {
     /// - The alignment offsets and scaling configuration.
     ///
     /// # Parameters
-    /// - `x_pos`: A mutable reference to the current x-position of the sprite.
-    ///   This value is updated to reflect the position of the next sprite.
+    /// - `line_index`: The index of the line the character is on.
+    /// - `x_pos`: A mutable reference to the current x-position of the sprite
+    ///   within its line. This value is updated to reflect the position of the
+    ///   next sprite.
     /// - `character`: The character associated with the sprite.
+    /// - `next_character`: The character following this one on the same line,
+    ///   used for kerning.
     ///
     /// # Returns
     /// A [`Transform`] representing the position and scale of the sprite.
+    #[expect(
+        clippy::cast_precision_loss,
+        reason = "the magnitude of the numbers we're working on here are too small to lose anything"
+    )]
     #[inline]
     pub(crate) fn transform(
         &self,
+        line_index: usize,
         x_pos: &mut f32,
         character: char,
         next_character: Option<char>,
@@ -192,15 +206,17 @@ impl RenderContext<'_> {
         let x = *x_pos;
         let (width, height) = self.character_dimensions(character);
         *x_pos += self.character_advance(character, next_character);
+        let scale = self.scale();
 
         let params = ComputeTransformParams {
             x_pos: x,
+            y_pos: -(line_index as f32 * self.max_height() as f32 * scale),
             scaled_text_width: self.text_width(),
             scaled_width: width,
             scaled_height: height,
-            max_height: self.max_height(),
+            text_height: self.text_height(),
             character_offsets: self.character_offsets(character),
-            scale: self.scale(),
+            scale,
         };
         self.anchor_offsets().compute_transform(params)
     }
@@ -213,11 +229,13 @@ impl RenderContext<'_> {
     /// stretching, and bleeding from neighboring atlas glyphs.
     ///
     /// # Parameters
-    /// - `x_pos`: A mutable reference to the current x-position of the sprite.
-    ///   This value is updated to reflect the position of the next sprite.
+    /// - `line_index`: The index of the line the character is on.
+    /// - `x_pos`: A mutable reference to the current x-position of the sprite
+    ///   within its line. This value is updated to reflect the position of the
+    ///   next sprite.
     /// - `character`: The character associated with the sprite.
-    /// - `next_character`: The character following this one, used for
-    ///   kerning.
+    /// - `next_character`: The character following this one on the same line,
+    ///   used for kerning.
     ///
     /// # Returns
     /// A [`Transform`] representing the snapped position and scale of the
@@ -225,11 +243,12 @@ impl RenderContext<'_> {
     #[inline]
     pub(crate) fn sprite_transform(
         &self,
+        line_index: usize,
         x_pos: &mut f32,
         character: char,
         next_character: Option<char>,
     ) -> Transform {
-        let transform = self.transform(x_pos, character, next_character);
+        let transform = self.transform(line_index, x_pos, character, next_character);
         let glyph_size = self.glyph_rect(character).size().as_vec2();
 
         anchors::snap_to_whole_units(transform, glyph_size * transform.scale.truncate())

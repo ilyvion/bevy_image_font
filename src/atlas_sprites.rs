@@ -332,26 +332,32 @@ fn text_sprites(
 ) -> (Vec<(Sprite, Transform)>, Vec<(Sprite, Transform)>) {
     let mut glyph_sprites = Vec::new();
     let mut outline_sprites = Vec::new();
-    let mut x_pos = 0.;
 
-    let mut characters = render_context.text().filtered_chars().peekable();
-    while let Some(character) = characters.next() {
-        let transform =
-            render_context.sprite_transform(&mut x_pos, character, characters.peek().copied());
+    for (line_index, line) in render_context.lines().iter().enumerate() {
+        let mut x_pos = 0.;
+        let mut characters = line.filtered_chars().peekable();
+        while let Some(character) = characters.next() {
+            let transform = render_context.sprite_transform(
+                line_index,
+                &mut x_pos,
+                character,
+                characters.peek().copied(),
+            );
 
-        if let Some(outline_sprite) = render_context.outline_sprite(character) {
-            let mut outline_transform = transform;
-            outline_transform.translation.z -= OUTLINE_DEPTH;
-            outline_sprites.push((outline_sprite, outline_transform));
+            if let Some(outline_sprite) = render_context.outline_sprite(character) {
+                let mut outline_transform = transform;
+                outline_transform.translation.z -= OUTLINE_DEPTH;
+                outline_sprites.push((outline_sprite, outline_transform));
+            }
+            glyph_sprites.push((render_context.glyph_sprite(character), transform));
+
+            #[cfg(feature = "gizmos")]
+            gizmos::record_character_dimensions(
+                render_context,
+                character,
+                &mut image_font_text_data.gizmo_data,
+            );
         }
-        glyph_sprites.push((render_context.glyph_sprite(character), transform));
-
-        #[cfg(feature = "gizmos")]
-        gizmos::record_character_dimensions(
-            render_context,
-            character,
-            &mut image_font_text_data.gizmo_data,
-        );
     }
 
     (glyph_sprites, outline_sprites)

@@ -115,8 +115,7 @@ fn text_width() {
         // Verify the total width is computed correctly
         assert_float_eq!(
             width,
-            render_context.filtered_text.filtered_chars().count() as f32
-                * MONOSPACE_FONT_WIDTH as f32,
+            render_context.filtered_chars().count() as f32 * MONOSPACE_FONT_WIDTH as f32,
             abs <= COMPARISON_TOLERANCE
         );
     });
@@ -176,7 +175,7 @@ fn test_mixed_character_widths() {
             );
 
             // Verify individual dimensions
-            for character in render_context.text().filtered_chars() {
+            for character in render_context.filtered_chars() {
                 let (width, height) = render_context.character_dimensions(character);
                 assert_float_eq!(
                     width,
@@ -227,9 +226,10 @@ fn transform() {
     render_context_tester.test_with_defaults(|render_context| {
         let mut x_pos = 0.0;
         let transform = render_context.transform(
+            0,
             &mut x_pos,
-            render_context.text().filtered_chars().next().unwrap(),
-            Some(render_context.text().filtered_chars().next().unwrap()),
+            render_context.filtered_chars().next().unwrap(),
+            Some(render_context.filtered_chars().next().unwrap()),
         );
 
         // Verify the transform is calculated correctly
@@ -258,13 +258,13 @@ fn sprite_transform_snaps_glyph_edges_to_whole_units() {
         },
         |render_context| {
             let render_context = render_context.unwrap();
-            let first_char = render_context.text().filtered_chars().next().unwrap();
+            let first_char = render_context.filtered_chars().next().unwrap();
 
-            let unsnapped = render_context.transform(&mut 0.0, first_char, None);
+            let unsnapped = render_context.transform(0, &mut 0.0, first_char, None);
             assert_float_eq!(unsnapped.translation.x, -5.0, abs <= COMPARISON_TOLERANCE);
 
             let mut x_pos = 0.0;
-            let snapped = render_context.sprite_transform(&mut x_pos, first_char, None);
+            let snapped = render_context.sprite_transform(0, &mut x_pos, first_char, None);
 
             // Left edge -7.5 snaps to -8.
             assert_float_eq!(snapped.translation.x, -5.5, abs <= COMPARISON_TOLERANCE);
@@ -288,7 +288,7 @@ fn glyph_sprite_draws_the_character_in_the_text_color() {
     render_context_tester.render_config.color = css::AZURE.into();
 
     render_context_tester.test_with_defaults(|render_context| {
-        let first_char = render_context.text().filtered_chars().next().unwrap();
+        let first_char = render_context.filtered_chars().next().unwrap();
         let image_font_character = &render_context.image_font.atlas_character_map[&first_char];
 
         let sprite = render_context.glyph_sprite(first_char);
@@ -314,7 +314,7 @@ fn font_without_outline_has_no_outline_sprite() {
     render_context_tester.render_config.outline_color = Some(css::RED.into());
 
     render_context_tester.test_with_defaults(|render_context| {
-        let first_char = render_context.text().filtered_chars().next().unwrap();
+        let first_char = render_context.filtered_chars().next().unwrap();
         let image_font_character = &render_context.image_font.atlas_character_map[&first_char];
 
         assert!(render_context.outline_sprite(first_char).is_none());
@@ -435,7 +435,7 @@ mod bmfont {
                 let render_context = render_context.unwrap();
 
                 let mut x_pos = 0.0;
-                render_context.transform(&mut x_pos, 'A', Some('V'));
+                render_context.transform(0, &mut x_pos, 'A', Some('V'));
                 assert_float_eq!(x_pos, 38.0, abs <= COMPARISON_TOLERANCE);
 
                 assert_float_eq!(
@@ -457,12 +457,87 @@ mod bmfont {
                 let render_context = render_context.unwrap();
 
                 let mut x_pos = 0.0;
-                render_context.transform(&mut x_pos, 'A', Some('V'));
+                render_context.transform(0, &mut x_pos, 'A', Some('V'));
                 assert_float_eq!(x_pos, 21.0, abs <= COMPARISON_TOLERANCE);
 
                 assert_float_eq!(
                     render_context.text_width(),
                     44.0,
+                    abs <= COMPARISON_TOLERANCE
+                );
+            },
+        );
+    }
+
+    #[test]
+    fn text_width_is_the_width_of_the_widest_line() {
+        let (app, handle) = initialize_app_with_loaded_example_font(ExampleFont::BmFont);
+
+        // A advance 21, kerning -2, V advance 21.
+        for text in ["AV\nA", "A\nAV", "A\nV\nA"] {
+            let expected = if text.contains("AV") { 40.0 } else { 21.0 };
+            tester(&app, handle.clone(), text).test_with_defaults(|render_context| {
+                assert_float_eq!(
+                    render_context.text_width(),
+                    expected,
+                    abs <= COMPARISON_TOLERANCE
+                );
+            });
+        }
+    }
+
+    #[test]
+    fn anchor_positions_the_block_of_lines() {
+        let (app, handle) = initialize_app_with_loaded_example_font(ExampleFont::BmFont);
+
+        // The two lines span 72 pixels; A is 23 tall with a y offset of 6.
+        for (anchor, first_line_top) in [
+            (Anchor::BOTTOM_LEFT, 72.0),
+            (Anchor::CENTER_LEFT, 36.0),
+            (Anchor::TOP_LEFT, 0.0),
+        ] {
+            tester(&app, handle.clone(), "A\nA").modify_and_then_test_with(
+                |tester| tester.render_config.text_anchor = anchor,
+                |render_context| {
+                    let render_context = render_context.unwrap();
+
+                    for line_index in 0..2 {
+                        let mut x_pos = 0.0;
+                        let transform = render_context.transform(line_index, &mut x_pos, 'A', None);
+
+                        #[expect(clippy::cast_precision_loss, reason = "the line index is tiny")]
+                        let line_top = first_line_top - line_index as f32 * 36.0;
+                        assert_float_eq!(
+                            transform.translation.y + 23.0 / 2.0,
+                            line_top - 6.0,
+                            abs <= COMPARISON_TOLERANCE
+                        );
+                        assert_float_eq!(x_pos, 21.0, abs <= COMPARISON_TOLERANCE);
+                    }
+                },
+            );
+        }
+    }
+
+    #[test]
+    fn line_spacing_scales_with_font_height() {
+        let (app, handle) = initialize_app_with_loaded_example_font(ExampleFont::BmFont);
+
+        tester(&app, handle, "A\nA").modify_and_then_test_with(
+            |tester| {
+                tester.image_font_text.font_height = Some(72.0);
+                tester.render_config.apply_scaling = true;
+                tester.render_config.text_anchor = Anchor::TOP_LEFT;
+            },
+            |render_context| {
+                let render_context = render_context.unwrap();
+
+                let first = render_context.transform(0, &mut 0.0, 'A', None);
+                let second = render_context.transform(1, &mut 0.0, 'A', None);
+
+                assert_float_eq!(
+                    first.translation.y - second.translation.y,
+                    72.0,
                     abs <= COMPARISON_TOLERANCE
                 );
             },
@@ -478,7 +553,7 @@ mod bmfont {
             |render_context| {
                 let render_context = render_context.unwrap();
 
-                let transform = render_context.transform(&mut 0.0, 'A', None);
+                let transform = render_context.transform(0, &mut 0.0, 'A', None);
 
                 // The line spans 0..36 above the anchor; A is 23 tall with a
                 // y offset of 6, so its top is at 30.

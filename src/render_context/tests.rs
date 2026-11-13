@@ -56,6 +56,47 @@ fn empty_text() {
     );
 }
 
+#[test]
+fn text_is_split_into_lines_at_newlines() {
+    let (app, handle) = initialize_app_with_loaded_example_font(ExampleFont::Monospace);
+    let render_context_tester = RenderContextTester::new(&app, handle);
+
+    render_context_tester.modify_and_then_test_with(
+        |tester| {
+            tester.image_font_text.text = String::from("Te\r\nst\n");
+        },
+        |render_context| {
+            let render_context = render_context.unwrap();
+
+            let lines: Vec<_> = render_context
+                .lines()
+                .iter()
+                .map(ToString::to_string)
+                .collect();
+            assert_eq!(lines, ["Te", "st", ""]);
+            assert_eq!(render_context.text_height(), 3 * MONOSPACE_FONT_HEIGHT);
+            #[cfg(feature = "rendered")]
+            assert!(!render_context.is_empty());
+        },
+    );
+}
+
+#[test]
+#[cfg(feature = "rendered")]
+fn text_of_only_newlines_is_empty() {
+    let (app, handle) = initialize_app_with_loaded_example_font(ExampleFont::Monospace);
+    let render_context_tester = RenderContextTester::new(&app, handle);
+
+    render_context_tester.modify_and_then_test_with(
+        |tester| {
+            tester.image_font_text.text = String::from("\n\n");
+        },
+        |render_context| {
+            assert!(render_context.unwrap().is_empty());
+        },
+    );
+}
+
 #[cfg(feature = "bmf")]
 mod bmfont {
     use super::*;

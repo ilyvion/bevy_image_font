@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `ANSI`/`DEFAULT` fonts are read as code page 1252 and `OEM` fonts as code page 437 unless `ImageFontLoaderSettings::bmf_ansi_code_page` or `bmf_oem_code_page` says otherwise.
   - `SYMBOL` fonts put their glyphs at `U+F000` plus the character code, as Windows does, so the symbol at code `0x41` is drawn with `'\u{F041}'`.
   - `JOHAB` fonts are not supported. Fonts that can't be loaded fail with the new `BmFontLoadError::UnknownCharset` or `BmFontLoadError::CodePageUnsupported` errors.
+- Multi-line text: each `\n` (or `\r\n`) in an `ImageFontText` starts a new line at the left edge, one line height below the previous one. This works for sprite text and pre-rendered text, and the text's anchor positions all its lines as one block. BMFont fonts space lines by the font's `lineHeight`; other fonts by their tallest glyph in the text. See the `newlines` example. ([#16])
 
 ### Fixed
 

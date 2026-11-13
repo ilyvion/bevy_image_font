@@ -142,6 +142,11 @@ required-features = ["atlas_sprites"]
 doc-scrape-examples = true
 
 [[example]]
+name = "newlines"
+required-features = ["atlas_sprites", "bmf", "rendered"]
+doc-scrape-examples = true
+
+[[example]]
 name = "bmf_packed"
 required-features = ["atlas_sprites", "bmf", "rendered"]
 doc-scrape-examples = true

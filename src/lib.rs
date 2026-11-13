@@ -123,8 +123,9 @@ pub struct ImageFont {
     /// `nearest`, which scales an image without blurring, keeping the text
     /// crisp and pixellated.
     pub image_sampler: ImageSampler,
-    /// The height of a line of text at the font's native size, in pixels.
-    /// Glyph vertical offsets are relative to the top of this line, and
+    /// The height of a line of text at the font's native size, in pixels, and
+    /// the distance between the lines of multi-line text. Glyph vertical
+    /// offsets are relative to the top of this line, and
     /// [`ImageFontText::font_height`] scales text relative to it.
     ///
     /// When `None`, the height of the tallest glyph in the rendered text is
@@ -313,6 +314,10 @@ pub struct ImageFontCharacter {
 pub struct ImageFontText {
     /// The string of text to be rendered. Each character in the string is
     /// mapped to a corresponding glyph in the associated [`ImageFont`].
+    ///
+    /// Each `\n` (or `\r\n`) starts a new line at the left edge of the text,
+    /// one line height (see [`ImageFont::line_height`]) below the previous
+    /// line. The text's anchor positions the block of lines as a whole.
     pub text: String,
     /// The handle to the [`ImageFont`] used to render this text. The font's
     /// texture and atlas mapping determine how characters are displayed.
