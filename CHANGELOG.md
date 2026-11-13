@@ -26,9 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - BMFont text layout ([#16]):
   - Pre-rendered text (`ImageFontPreRenderedText`, `ImageFontPreRenderedUiText`) now places glyphs at their offsets instead of aligning them all to the top, and no longer fails to render text whose character advances are wider than its glyphs. Overlapping glyphs no longer cut into each other.
   - `ImageFontSpriteText` with a `font_height` set now scales the spacing between characters along with the glyphs, so text no longer overlaps or spreads apart when scaled.
-  - Centered and right-aligned anchors now line text up correctly, because the text width is measured from character advances and kerning.
   - `letter_spacing` now affects BMFont text.
   - Text is sized and vertically anchored from the font's line height, so `font_height` gives the same size regardless of which characters the text contains, and top/bottom anchors line up with the line.
+- `ImageFontSpriteText` with a centered or right-aligned anchor now lines text up with the anchor in fonts whose characters have an `x_advance`, including BMFont fonts and fonts built by hand. The text width is measured from character advances and kerning instead of glyph widths, so the text no longer drifts away from the anchor as it gets longer. ([#16], [#29])
 - `ImageFontSpriteText` no longer draws the wrong glyphs after its text changes in fonts with more than one texture, when a character's glyph is on a different texture than the one it replaced.
 - BMFont fonts exported with the alpha channel set to "one" or "zero" no longer draw as solid boxes or invisible text; the glyphs are read from the color channels instead. Fonts exported with "glyph + outline" in a single channel draw as a white glyph with a black outline. ([#16])
 - BMFont fonts exported with 8-bit textures no longer draw as solid boxes; the grayscale texture is read as the glyph's alpha. ([#16])
@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `BmFontLoadError::PackedUnsupported`, since packed BMFont fonts are now supported.
 
 [#16]: https://github.com/ilyvion/bevy_image_font/issues/16
+[#29]: https://github.com/ilyvion/bevy_image_font/issues/29
 
 ## [0.13.0] - 2026-11-12
 

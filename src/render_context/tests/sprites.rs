@@ -374,6 +374,99 @@ fn large_text_block() {
     );
 }
 
+/// Right-anchored text in a font whose advances are narrower than its glyph
+/// cells ends at the anchor, however long the text is ([#29]).
+///
+/// [#29]: https://github.com/ilyvion/bevy_image_font/issues/29
+#[test]
+fn right_anchored_text_ends_at_the_anchor_when_advances_are_narrower_than_glyphs() {
+    use bevy::prelude::default;
+    use bevy_math::UVec2;
+    use bevy_sprite::Anchor;
+
+    use crate::ImageFontCharacter;
+
+    const GLYPH_WIDTH: f32 = 32.0;
+    const TEXT: &str = "53,920,3511231";
+
+    let (mut app, _) = initialize_app_with_loaded_example_font(ExampleFont::Monospace);
+
+    let layout = app
+        .world_mut()
+        .resource_mut::<Assets<TextureAtlasLayout>>()
+        .add(TextureAtlasLayout::from_grid(
+            UVec2::splat(32),
+            15,
+            1,
+            None,
+            Some(UVec2::new(0, 288)),
+        ));
+    let mut font = ImageFont {
+        atlas_layouts: vec![layout],
+        ..default()
+    };
+    for (character_index, character) in "0123456789/.sx,".chars().enumerate() {
+        let x_advance = if character_index <= 9 {
+            24.0
+        } else {
+            [16.0, 8.0, 20.0, 21.0, 8.0][character_index - 10]
+        };
+        let offsets = if matches!(character, ',' | '.') {
+            Vec2::new(0.0, -6.0)
+        } else {
+            Vec2::ZERO
+        };
+        font.atlas_character_map.insert(
+            character,
+            ImageFontCharacter {
+                character_index,
+                x_advance: Some(x_advance),
+                offsets,
+                ..default()
+            },
+        );
+    }
+    let handle = app
+        .world_mut()
+        .resource_mut::<Assets<ImageFont>>()
+        .add(font);
+
+    let mut render_context_tester = tester(&app, handle);
+    render_context_tester.render_config.text_anchor = Anchor::CENTER_RIGHT;
+
+    for length in 1..=TEXT.len() {
+        let text = &TEXT[..length];
+        render_context_tester.modify_and_then_test_with(
+            |tester| tester.image_font_text.text = String::from(text),
+            |render_context| {
+                let render_context = render_context.unwrap();
+
+                let mut x_pos = 0.0;
+                let mut characters = text.chars().peekable();
+                let mut last_glyph_left_edge = 0.0;
+                while let Some(character) = characters.next() {
+                    let transform = render_context.transform(
+                        0,
+                        &mut x_pos,
+                        character,
+                        characters.peek().copied(),
+                    );
+                    last_glyph_left_edge = transform.translation.x - GLYPH_WIDTH / 2.0;
+                }
+
+                let last_character = text.chars().last().unwrap();
+                let last_advance = render_context.character_advance(last_character, None);
+                assert_float_eq!(
+                    last_glyph_left_edge + last_advance,
+                    0.0,
+                    abs <= COMPARISON_TOLERANCE,
+                    "{text}"
+                );
+            },
+        );
+    }
+}
+
 #[cfg(feature = "bmf")]
 mod bmfont {
     use bevy_sprite::Anchor;
