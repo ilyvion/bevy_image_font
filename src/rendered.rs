@@ -653,7 +653,7 @@ fn prepare_context<'assets, 'image>(
     let image_font = image_fonts
         .get(&image_font_text.font)
         .ok_or(ImageFontRenderError::MissingImageFontAsset)?;
-    let textures = image_font.textures(images);
+    let textures = image_font.textures(images)?;
     let render_config = RenderConfig {
         scaling_mode: ImageFontScalingMode::Truncated,
         ..RenderConfig::default()
@@ -1004,6 +1004,28 @@ mod tests {
                 );
             }
         }
+    }
+
+    #[test]
+    fn missing_font_texture_fails_to_render() {
+        let (mut app, font) = initialize_app_with_loaded_example_font(ExampleFont::BmFont);
+        let texture = app
+            .world()
+            .resource::<Assets<ImageFont>>()
+            .get(&font)
+            .unwrap()
+            .textures[0]
+            .clone();
+        app.world_mut()
+            .resource_mut::<Assets<Image>>()
+            .remove(&texture);
+
+        let result = render(&app, &font, "Hello", None);
+
+        assert!(
+            matches!(result, Err(ImageFontRenderError::MissingTextureAsset)),
+            "{result:?}"
+        );
     }
 
     #[test]

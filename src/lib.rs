@@ -242,15 +242,21 @@ impl ImageFont {
     ///
     /// # Returns
     /// A vector of references to the images in use by this font.
+    ///
+    /// # Errors
+    /// Returns [`rendered::ImageFontRenderError::MissingTextureAsset`] if any
+    /// of the font's textures is not in `image_assets`.
     #[cfg(feature = "rendered")]
-    fn textures<'assets>(&self, image_assets: &'assets Assets<Image>) -> Vec<&'assets Image> {
+    fn textures<'assets>(
+        &self,
+        image_assets: &'assets Assets<Image>,
+    ) -> Result<Vec<&'assets Image>, rendered::ImageFontRenderError> {
         self.textures
             .iter()
             .map(|handle| {
-                #[expect(clippy::expect_used, reason = "handle is kept alive by ImageFont")]
                 image_assets
                     .get(handle)
-                    .expect("handle is kept alive by ImageFont")
+                    .ok_or(rendered::ImageFontRenderError::MissingTextureAsset)
             })
             .collect()
     }
