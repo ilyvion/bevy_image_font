@@ -51,6 +51,14 @@ pub enum BmFontLoadError {
     #[error("BmFontLoader only supports unicode fonts without the `bmf_charsets` feature")]
     CharsetUnsupported,
 
+    /// The font file's extension is not one of `txt.fnt`, `xml.fnt` or
+    /// `bin.fnt`, which [`BmFontLoader`] uses to tell the file's format.
+    #[error(
+        "BmFontLoader can't tell the format of '{0}'; its extension must be `txt.fnt`, `xml.fnt` \
+        or `bin.fnt`"
+    )]
+    UnsupportedExtension(AssetPath<'static>),
+
     /// The loaded font is not a Unicode font, and its `info.charset` is not a
     /// charset `BMFont` defines.
     #[cfg(feature = "bmf_charsets")]
@@ -213,7 +221,7 @@ fn parse_bmf_data(
         Some(BmFontExtension::Text) => bmfont_rs::text::from_bytes,
         Some(BmFontExtension::Xml) => bmfont_rs::xml::from_bytes,
         Some(BmFontExtension::Binary) => bmfont_rs::binary::from_bytes,
-        extension => unreachable!("{extension:?}"),
+        None => return Err(BmFontLoadError::UnsupportedExtension(path.clone_owned())),
     };
 
     let bm_font = from_bytes(data)?;

@@ -1,0 +1,9 @@
+(
+    meta_format_version: "1.0",
+    asset: Load(
+        loader: "bevy_image_font::loader::bmf::BmFontLoader",
+        settings: (
+            image_sampler: Default,
+        ),
+    ),
+)

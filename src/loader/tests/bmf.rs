@@ -1,5 +1,5 @@
 use bevy_app::App;
-use bevy_asset::{AssetLoadError, Assets, Handle};
+use bevy_asset::{AssetLoadError, AssetPath, Assets, Handle};
 use bevy_image::{Image, TextureAtlasLayout};
 use bevy_math::{URect, UVec2};
 
@@ -89,6 +89,31 @@ fn font_with_char_on_missing_page_fails_to_load() {
                 char_id: 66,
                 page_id: 1,
             })
+        ),
+        "{bmf_error:?}"
+    );
+}
+
+#[test]
+fn font_with_unsupported_extension_fails_to_load() {
+    // The `.meta` file routes the `.fnt` file to `BmFontLoader`.
+    let (mut app, handle): (App, Handle<ImageFont>) =
+        initialize_app_with_font("tests/unsupported_extension.fnt");
+
+    let error = wait_until_failed(&mut app, &handle);
+
+    let AssetLoadError::AssetLoaderError(ref loader_error) = error else {
+        panic!("expected a loader error, got {error}");
+    };
+    let bmf_error = loader_error
+        .error()
+        .downcast_ref::<BmFontLoadError>()
+        .expect("the loader error is a BmFontLoadError");
+    assert!(
+        matches!(
+            *bmf_error,
+            BmFontLoadError::UnsupportedExtension(ref path)
+                if *path == AssetPath::from("tests/unsupported_extension.fnt")
         ),
         "{bmf_error:?}"
     );
