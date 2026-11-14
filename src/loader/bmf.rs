@@ -423,14 +423,25 @@ fn construct_image_font(
     atlas_character_map: HashMap<char, AtlasCharacter<'_>>,
     settings: &ImageFontLoaderSettings,
 ) -> ImageFont {
+    let mut kernings_by_first: HashMap<u32, Vec<&bmfont_rs::Kerning>> = HashMap::default();
+    for kerning in &bm_font.kernings {
+        kernings_by_first
+            .entry(kerning.first)
+            .or_default()
+            .push(kerning);
+    }
+
     ImageFont {
         textures: textures.images,
         atlas_character_map: atlas_character_map
             .into_iter()
             .map(|(char, character)| {
                 let font_char = character.font_char;
-                let kernings = bm_font.kernings.iter().filter_map(|kerning| {
-                    if kerning.first == font_char.id {
+                let kernings = kernings_by_first
+                    .remove(&font_char.id)
+                    .unwrap_or_default()
+                    .into_iter()
+                    .filter_map(|kerning| {
                         if let Some(character) = char_ids.to_char(kerning.second) {
                             Some((character, f32::from(kerning.amount)))
                         } else {
@@ -440,10 +451,7 @@ fn construct_image_font(
                             );
                             None
                         }
-                    } else {
-                        None
-                    }
-                });
+                    });
 
                 (
                     char,

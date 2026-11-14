@@ -40,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pre-rendering text with a font whose texture isn't in `Assets<Image>`, such as a texture removed with `Assets::remove` or a hand-built `ImageFont` with a handle to an image that was never added, now logs an `ImageFontRenderError::MissingTextureAsset` error instead of crashing the app.
 - With the `gizmos` feature, the character bounding boxes of `ImageFontSpriteText` are drawn at each character's own size, instead of all at the size of the text's last character.
 - `ImageFontSpriteText` lays out long text much faster. The time to lay out a text grew with the square of its length; it now grows in step with it.
+- BMFont fonts with many characters and kerning pairs load much faster. The time spent on kerning grew with the number of characters times the number of kerning pairs; it now grows in step with their sum.
 - A BMFont file whose name doesn't end in `.txt.fnt`, `.xml.fnt` or `.bin.fnt`, but that is loaded with `BmFontLoader` anyway, for example through a `.meta` file, now fails to load with the new `BmFontLoadError::UnsupportedExtension` error instead of crashing the font loader.
 
 ### Removed

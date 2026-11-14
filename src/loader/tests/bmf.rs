@@ -265,6 +265,34 @@ fn fonts_without_outline_have_no_outline_layers() {
     }
 }
 
+#[test]
+fn each_character_gets_only_the_kernings_it_is_first_in() {
+    // `A` is kerned with `B` and `C`, `B` with `A` and `C`, and `C` with
+    // nothing. The kernings of `A` and `B` are interleaved in the file.
+    let (mut app, handle): (App, Handle<ImageFont>) =
+        initialize_app_with_font("tests/kernings.txt.fnt");
+    wait_until_loaded(&mut app, &handle);
+
+    let font = app
+        .world()
+        .resource::<Assets<ImageFont>>()
+        .get(&handle)
+        .expect("font is loaded");
+
+    let kernings = |character: char| {
+        let mut kernings: Vec<(char, f32)> = font.atlas_character_map[&character]
+            .kernings
+            .iter()
+            .map(|(&second, &amount)| (second, amount))
+            .collect();
+        kernings.sort_unstable_by_key(|&(second, _)| second);
+        kernings
+    };
+    assert_eq!(kernings('A'), [('B', -1.0), ('C', -2.0)]);
+    assert_eq!(kernings('B'), [('A', 3.0), ('C', 4.0)]);
+    assert_eq!(kernings('C'), []);
+}
+
 #[cfg(feature = "bmf_charsets")]
 #[test]
 fn non_unicode_font_maps_character_and_kerning_ids_through_its_charset() {
