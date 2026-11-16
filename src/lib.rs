@@ -101,7 +101,7 @@ impl Plugin for ImageFontPlugin {
 /// This can be used to group, disable, or reorder systems provided by
 /// the plugin.
 #[derive(Copy, Clone, Debug, Hash, PartialEq, Eq, SystemSet)]
-pub struct ImageFontSet;
+pub struct ImageFontSystems;
 
 /// An image font as well as the mapping of characters to regions inside it.
 #[derive(Debug, Clone, Reflect, Asset, Default)]
