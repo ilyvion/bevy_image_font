@@ -11,6 +11,7 @@ use bevy_asset::{Asset, AssetApp as _, AssetEvent, AssetId, Handle};
 use bevy_derive::{Deref, DerefMut};
 #[cfg(feature = "ui")]
 use bevy_ecs::system::Res;
+use bevy_ecs::template::FromTemplate;
 use bevy_ecs::{
     change_detection::DetectChangesMut as _,
     component::Component,
@@ -308,7 +309,7 @@ pub struct ImageFontCharacter {
 }
 
 /// Text rendered using an [`ImageFont`].
-#[derive(Debug, Clone, Reflect, Default, Component, Setters)]
+#[derive(Debug, Clone, Reflect, Default, Component, Setters, FromTemplate)]
 #[setters(into)]
 #[non_exhaustive]
 pub struct ImageFontText {
