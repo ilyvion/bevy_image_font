@@ -32,12 +32,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ImageFontSpriteText` no longer draws the wrong glyphs after its text changes in fonts with more than one texture, when a character's glyph is on a different texture than the one it replaced.
 - BMFont fonts exported with the alpha channel set to "one" or "zero" no longer draw as solid boxes or invisible text; the glyphs are read from the color channels instead. Fonts exported with "glyph + outline" in a single channel draw as a white glyph with a black outline. ([#16])
 - BMFont fonts exported with 8-bit textures no longer draw as solid boxes; the grayscale texture is read as the glyph's alpha. ([#16])
+- `ImageFontSet` renamed to `ImageFontSystems` to match Bevy's convention ([#34])
 
 ### Removed
 
 - `BmFontLoadError::PackedUnsupported`, since packed BMFont fonts are now supported.
 
 [#16]: https://github.com/ilyvion/bevy_image_font/issues/16
+[#34]: https://github.com/ilyvion/bevy_image_font/pull/34
 
 ## [0.13.0] - 2026-11-12
 
