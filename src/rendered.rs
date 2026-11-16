@@ -35,7 +35,7 @@ use thiserror::Error;
 
 use crate::render_context::{RenderConfig, RenderContext};
 use crate::{
-    ImageFont, ImageFontScalingMode, ImageFontSet, ImageFontText, sync_texts_with_font_changes,
+    ImageFont, ImageFontScalingMode, ImageFontSystems, ImageFontText, sync_texts_with_font_changes,
 };
 
 /// Internal plugin for conveniently organizing the code related to this
@@ -49,7 +49,7 @@ impl Plugin for RenderedPlugin {
             PostUpdate,
             render_text_to_sprite
                 .after(sync_texts_with_font_changes)
-                .in_set(ImageFontSet),
+                .in_set(ImageFontSystems),
         );
 
         #[cfg(feature = "ui")]
@@ -58,7 +58,7 @@ impl Plugin for RenderedPlugin {
             app.add_systems(
                 PostUpdate,
                 render_text_to_image_node
-                    .in_set(ImageFontSet)
+                    .in_set(ImageFontSystems)
                     .before(update_image_content_size_system)
                     .after(sync_texts_with_font_changes),
             );

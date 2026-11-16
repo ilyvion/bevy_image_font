@@ -43,7 +43,7 @@ use derive_setters::Setters;
 use crate::atlas_sprites::gizmos::ImageFontTextGizmoData;
 use crate::render_context::{RenderConfig, RenderContext};
 use crate::{
-    ImageFont, ImageFontScalingMode, ImageFontSet, ImageFontText, LetterSpacing,
+    ImageFont, ImageFontScalingMode, ImageFontSystems, ImageFontText, LetterSpacing,
     sync_texts_with_font_changes,
 };
 
@@ -60,9 +60,9 @@ impl Plugin for AtlasSpritesPlugin {
                 set_up_sprites
                     .after(sync_texts_with_font_changes)
                     .before(TransformSystems::Propagate)
-                    .in_set(ImageFontSet),
+                    .in_set(ImageFontSystems),
             )
-            .add_systems(Last, despawn_excess_sprites.in_set(ImageFontSet));
+            .add_systems(Last, despawn_excess_sprites.in_set(ImageFontSystems));
 
         #[cfg(feature = "gizmos")]
         {

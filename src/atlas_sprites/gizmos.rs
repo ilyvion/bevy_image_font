@@ -32,7 +32,7 @@ use bevy_transform::components::GlobalTransform;
 
 use crate::atlas_sprites::ImageFontTextData;
 use crate::render_context::RenderContext;
-use crate::{ImageFontSet, ImageFontText};
+use crate::{ImageFontSystems, ImageFontText};
 
 /// Initializes the debug gizmo system for `ImageFontSpriteText` components.
 ///
@@ -54,7 +54,7 @@ pub fn build(app: &mut App) {
     app.init_gizmo_group::<AtlasSpritesGizmoConfigGroup>()
         .add_systems(
             Update,
-            (render_all_sprite_gizmos, render_sprite_gizmos).in_set(ImageFontSet),
+            (render_all_sprite_gizmos, render_sprite_gizmos).in_set(ImageFontSystems),
         );
 }
 
