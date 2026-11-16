@@ -50,8 +50,9 @@ struct VowsNode;
 /// Spawns the UI layout for the example.
 ///
 /// This system creates:
-/// 1. A root node with a prompt instructing the user to press SPACE.
-/// 2. A dynamically updating node that displays the number of vows judged.
+/// 1. A 2D camera with default settings.
+/// 2. A root node with a prompt instructing the user to press SPACE.
+/// 3. A dynamically updating node that displays the number of vows judged.
 fn spawn_ui(mut commands: Commands, assets: Res<DemoAssets>) {
     commands.spawn(Camera2d);
 
