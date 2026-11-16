@@ -9,6 +9,7 @@ use bevy_app::{App, Plugin, PostUpdate};
 use bevy_asset::Assets;
 use bevy_asset::{Asset, AssetApp as _, AssetEvent, AssetId, Handle};
 use bevy_derive::{Deref, DerefMut};
+use bevy_ecs::template::FromTemplate;
 use bevy_ecs::{
     change_detection::DetectChangesMut as _,
     component::Component,
@@ -313,7 +314,7 @@ pub struct ImageFontCharacter {
 }
 
 /// Text rendered using an [`ImageFont`].
-#[derive(Debug, Clone, Reflect, Default, Component, Setters)]
+#[derive(Debug, Clone, Reflect, Default, Component, Setters, FromTemplate)]
 #[setters(into)]
 #[non_exhaustive]
 pub struct ImageFontText {
