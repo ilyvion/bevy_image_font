@@ -117,6 +117,9 @@ fn setup_plugins(app: &mut App, bindless: bool) {
                     disabled_features,
                     ..default()
                 })),
+                // With asynchronous compilation, frames captured before the pipelines are
+                // ready are blank. The capture doesn't wait any frames for them.
+                synchronous_pipeline_compilation: true,
                 ..default()
             })
             .set(WindowPlugin {
@@ -138,7 +141,7 @@ fn setup_asset_loading(app: &mut App) {
                 .load_collection::<TestAssets>()
                 .continue_to_state(AssetLoadState::Done),
         )
-        .add_systems(OnEnter(AssetLoadState::Done), transition_to_preroll);
+        .add_systems(OnEnter(AssetLoadState::Done), transition_to_assets_loaded);
 }
 
 const FRAME_RATE: f64 = 1.0 / 60.0;
@@ -159,8 +162,8 @@ enum AssetLoadState {
     Done,
 }
 
-fn transition_to_preroll(mut scene_controller: ResMut<SceneController>) {
-    scene_controller.state = SceneState::PreRoll(30);
+fn transition_to_assets_loaded(mut scene_controller: ResMut<SceneController>) {
+    scene_controller.state = SceneState::AssetsLoaded;
 }
 
 /// Capture image settings and state
@@ -193,8 +196,8 @@ enum SceneState {
     #[default]
     // State before any rendering takes place
     BuildScene,
-    // Pre-roll state, stores the number of frames remaining before saving the image
-    PreRoll(u32),
+    // Assets are loaded; frames captured before this point are discarded
+    AssetsLoaded,
     // Render the scene and save to image
     Render,
 }
@@ -503,13 +506,9 @@ fn update(
 ) {
     match scene_controller.state {
         SceneState::BuildScene => {}
-        SceneState::PreRoll(frames_left) => {
+        SceneState::AssetsLoaded => {
             clear_receiver(&receiver);
-            if frames_left > 0 {
-                scene_controller.state = SceneState::PreRoll(frames_left - 1);
-            } else {
-                scene_controller.state = SceneState::Render;
-            }
+            scene_controller.state = SceneState::Render;
         }
         SceneState::Render => render_scene(
             images_to_save,
