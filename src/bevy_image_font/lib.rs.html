@@ -81,7 +81,7 @@
 <a href=#81 id=81 data-nosnippet>81</a>            .register_type::&lt;ImageFontText&gt;()
 <a href=#82 id=82 data-nosnippet>82</a>            .add_systems(
 <a href=#83 id=83 data-nosnippet>83</a>                PostUpdate,
-<a href=#84 id=84 data-nosnippet>84</a>                sync_texts_with_font_changes.in_set(ImageFontSet),
+<a href=#84 id=84 data-nosnippet>84</a>                sync_texts_with_font_changes.in_set(ImageFontSystems),
 <a href=#85 id=85 data-nosnippet>85</a>            );
 <a href=#86 id=86 data-nosnippet>86</a>
 <a href=#87 id=87 data-nosnippet>87</a>        <span class="attr">#[cfg(feature = <span class="string">"rendered"</span>)]
@@ -100,7 +100,7 @@
 <a href=#100 id=100 data-nosnippet>100</a>/// This can be used to group, disable, or reorder systems provided by
 <a href=#101 id=101 data-nosnippet>101</a>/// the plugin.
 <a href=#102 id=102 data-nosnippet>102</a></span><span class="attr">#[derive(Copy, Clone, Debug, Hash, PartialEq, Eq, SystemSet)]
-<a href=#103 id=103 data-nosnippet>103</a></span><span class="kw">pub struct </span>ImageFontSet;
+<a href=#103 id=103 data-nosnippet>103</a></span><span class="kw">pub struct </span>ImageFontSystems;
 <a href=#104 id=104 data-nosnippet>104</a>
 <a href=#105 id=105 data-nosnippet>105</a><span class="doccomment">/// An image font as well as the mapping of characters to regions inside it.
 <a href=#106 id=106 data-nosnippet>106</a></span><span class="attr">#[derive(Debug, Clone, Reflect, Asset, Default)]
