@@ -108,7 +108,7 @@ pub(crate) fn initialize_app_with_font(
 }
 
 /// Asserts that `app` runs `system` in its `schedule`, as part of
-/// [`ImageFontSet`].
+/// [`ImageFontSystems`].
 pub(crate) fn assert_in_image_font_set<Marker, S: IntoSystem<(), (), Marker>>(
     app: &mut App,
     schedule: impl ScheduleLabel,
@@ -131,11 +131,11 @@ pub(crate) fn assert_in_image_font_set<Marker, S: IntoSystem<(), (), Marker>>(
         );
         let systems_in_set = schedule
             .graph()
-            .systems_in_set(ImageFontSet.intern())
+            .systems_in_set(ImageFontSystems.intern())
             .unwrap();
         assert!(
             systems_in_set.contains(&matching_systems[0]),
-            "Expected `{system_name}` to be in `ImageFontSet`"
+            "Expected `{system_name}` to be in `ImageFontSystems`"
         );
     });
 }
