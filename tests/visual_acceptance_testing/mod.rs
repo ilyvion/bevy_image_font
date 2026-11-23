@@ -9,7 +9,6 @@ use bevy_image_font::rendered::ImageFontPreRenderedText;
 use bevy_image_font::{ImageFont, ImageFontText, LetterSpacing};
 use itertools::Itertools as _;
 
-#[expect(unused_macro_rules, reason = "only one rule is used per test file")]
 macro_rules! test_case {
     ($category:ident, $name:ident) => {
         paste::paste! {
