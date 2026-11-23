@@ -141,12 +141,13 @@ struct ImageFontTextData {
     /// This flag prevents repeated error messages when an `ImageFontText`
     /// component references a font asset that has not been loaded. Once an
     /// error is logged for a missing font, subsequent frames will not log
-    /// additional errors for the same entity.
+    /// additional errors for the same entity until its font is found again.
     ///
     /// # Default Behavior
     /// - Initially set to `false`, meaning no missing font error has been
     ///   reported.
     /// - Set to `true` after the first error message is logged.
+    /// - Set back to `false` whenever the font is found.
     has_reported_missing_font: bool,
 
     /// Stores debugging information for visualizing `ImageFontSpriteText` in
@@ -249,8 +250,14 @@ pub fn set_up_sprites(
                 );
                 image_font_text_data.has_reported_missing_font = true;
             }
+            maybe_insert_new_image_font_text_data(
+                &mut commands,
+                entity,
+                maybe_new_image_font_text_data,
+            );
             continue;
         };
+        image_font_text_data.has_reported_missing_font = false;
 
         let Some(render_context) = RenderContext::new(
             image_font,

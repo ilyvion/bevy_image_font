@@ -283,6 +283,47 @@ mod gizmos {
     }
 }
 
+/// Whether a missing font has been reported for the text entity, or `None`
+/// if it has no `ImageFontTextData`.
+fn has_reported_missing_font(app: &App, entity: Entity) -> Option<bool> {
+    app.world()
+        .get::<ImageFontTextData>(entity)
+        .map(|data| data.has_reported_missing_font)
+}
+
+#[test]
+fn a_missing_font_is_reported_once_until_the_font_is_found_again() {
+    let (mut app, font): (App, Handle<ImageFont>) = initialize_app_with_font("bmf.txt.fnt");
+    wait_until_loaded(&mut app, &font);
+    let missing_font = Handle::<ImageFont>::default();
+
+    let entity = app
+        .world_mut()
+        .spawn((
+            ImageFontText::default()
+                .text("A")
+                .font(missing_font.clone()),
+            ImageFontSpriteText::default(),
+        ))
+        .id();
+    app.update();
+    assert_eq!(has_reported_missing_font(&app, entity), Some(true));
+
+    app.world_mut()
+        .get_mut::<ImageFontText>(entity)
+        .unwrap()
+        .font = font;
+    app.update();
+    assert_eq!(has_reported_missing_font(&app, entity), Some(false));
+
+    app.world_mut()
+        .get_mut::<ImageFontText>(entity)
+        .unwrap()
+        .font = missing_font;
+    app.update();
+    assert_eq!(has_reported_missing_font(&app, entity), Some(true));
+}
+
 #[test]
 fn each_line_starts_at_the_left_edge_one_line_height_below_the_previous() {
     let (app, entity) = spawn_text(
