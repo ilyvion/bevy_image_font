@@ -1,7 +1,7 @@
 use bevy_app::App;
 use bevy_asset::{AssetLoadError, AssetPath, Assets, Handle};
 use bevy_image::{Image, TextureAtlasLayout};
-use bevy_math::{URect, UVec2};
+use bevy_math::{URect, UVec2, Vec2};
 
 use crate::ImageFont;
 use crate::loader::BmFontLoadError;
@@ -117,6 +117,58 @@ fn font_with_unsupported_extension_fails_to_load() {
         ),
         "{bmf_error:?}"
     );
+}
+
+/// Loads the font at `path` and returns its glyphs: each character's page,
+/// rectangle on that page, offsets, advance and kernings, sorted by character.
+fn glyphs(path: &str) -> Vec<(char, usize, URect, Vec2, Option<f32>, Vec<(char, f32)>)> {
+    let (mut app, handle): (App, Handle<ImageFont>) = initialize_app_with_font(path);
+    wait_until_loaded(&mut app, &handle);
+
+    let world = app.world();
+    let font = world.resource::<Assets<ImageFont>>().get(&handle).unwrap();
+    let layouts = world.resource::<Assets<TextureAtlasLayout>>();
+    let mut glyphs: Vec<_> = font
+        .atlas_character_map
+        .iter()
+        .map(|(&character, glyph)| {
+            let layout = layouts.get(&font.atlas_layouts[glyph.page_index]).unwrap();
+            let mut kernings: Vec<_> = glyph
+                .kernings
+                .iter()
+                .map(|(&next, &kerning)| (next, kerning))
+                .collect();
+            kernings.sort_by_key(|&(next, _)| next);
+            (
+                character,
+                glyph.page_index,
+                layout.textures[glyph.character_index],
+                glyph.offsets,
+                glyph.x_advance,
+                kernings,
+            )
+        })
+        .collect();
+    glyphs.sort_by_key(|&(character, ..)| character);
+    glyphs
+}
+
+#[test]
+fn xml_and_binary_fonts_load_the_same_glyphs_as_the_text_font() {
+    let text_glyphs = glyphs("bmf.txt.fnt");
+    assert_ne!(text_glyphs.len(), 0);
+
+    assert_eq!(glyphs("bmf.xml.fnt"), text_glyphs);
+    assert_eq!(glyphs("bmf.bin.fnt"), text_glyphs);
+}
+
+#[test]
+fn characters_with_invalid_ids_are_skipped() {
+    // Character id 55296 (U+D800) is a surrogate, which is not a `char`.
+    let glyphs = glyphs("tests/invalid_char_id.txt.fnt");
+
+    let characters: Vec<_> = glyphs.iter().map(|&(character, ..)| character).collect();
+    assert_eq!(characters, ['A']);
 }
 
 #[test]

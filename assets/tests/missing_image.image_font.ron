@@ -1,0 +1,4 @@
+(
+    layout: Automatic("A"),
+    image: "missing.png"
+)

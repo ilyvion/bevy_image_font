@@ -1066,6 +1066,38 @@ mod tests {
         );
     }
 
+    #[test]
+    fn empty_text_renders_one_transparent_pixel() {
+        let (app, font) = initialize_app_with_loaded_example_font(ExampleFont::BmFont);
+
+        let image = render(&app, &font, "", None).unwrap();
+
+        assert_eq!(image.dimensions(), (1, 1));
+        assert_eq!(image.get_pixel(0, 0).0, [0, 0, 0, 0]);
+    }
+
+    #[test]
+    fn missing_font_atlas_layout_fails_to_render() {
+        let (mut app, font) = initialize_app_with_loaded_example_font(ExampleFont::BmFont);
+        let layout = app
+            .world()
+            .resource::<Assets<ImageFont>>()
+            .get(&font)
+            .unwrap()
+            .atlas_layouts[0]
+            .clone();
+        app.world_mut()
+            .resource_mut::<Assets<TextureAtlasLayout>>()
+            .remove(&layout);
+
+        let result = render(&app, &font, "Hello", None);
+
+        assert!(
+            matches!(result, Err(ImageFontRenderError::MissingTextureAsset)),
+            "{result:?}"
+        );
+    }
+
     /// Converts the image behind `handle` to 16-bit RGBA, with each 8-bit
     /// value `v` stored as `v * 257`.
     fn convert_to_16_bit(app: &mut App, handle: &Handle<Image>) {

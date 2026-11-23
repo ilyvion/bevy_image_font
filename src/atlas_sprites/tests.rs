@@ -4,6 +4,7 @@
 use bevy_app::App;
 use bevy_asset::Handle;
 use bevy_color::palettes::css;
+use bevy_ecs::hierarchy::Children;
 use bevy_ecs::query::Added;
 use bevy_transform::components::GlobalTransform;
 
@@ -221,6 +222,36 @@ fn removing_a_new_sprite_does_not_break_other_systems_inserting_on_it() {
 }
 
 #[test]
+fn text_with_a_missing_atlas_layout_gets_no_sprites() {
+    let (mut app, font): (App, Handle<ImageFont>) = initialize_app_with_font("bmf.txt.fnt");
+    wait_until_loaded(&mut app, &font);
+    let layout = app
+        .world()
+        .resource::<Assets<ImageFont>>()
+        .get(&font)
+        .unwrap()
+        .atlas_layouts[0]
+        .clone();
+    app.world_mut()
+        .resource_mut::<Assets<TextureAtlasLayout>>()
+        .remove(&layout);
+
+    let entity = app
+        .world_mut()
+        .spawn((
+            ImageFontText::default().text("AB").font(font),
+            ImageFontSpriteText::default(),
+        ))
+        .id();
+    app.update();
+
+    let (glyph_sprites, outline_sprites) = sprites(&app, entity);
+    assert!(glyph_sprites.is_empty());
+    assert!(outline_sprites.is_empty());
+    assert!(app.world().get::<Children>(entity).is_none());
+}
+
+#[test]
 fn glyph_global_transforms_are_up_to_date_in_the_frame_they_are_set_up() {
     let (mut app, font): (App, Handle<ImageFont>) = initialize_app_with_font("bmf.txt.fnt");
     app.add_plugins(bevy_transform::TransformPlugin);
@@ -260,14 +291,21 @@ fn atlas_sprites_systems_are_in_image_font_set() {
 
 #[cfg(feature = "gizmos")]
 mod gizmos {
+    use std::any::TypeId;
+
+    use bevy_color::LinearRgba;
     use bevy_ecs::hierarchy::Children;
     use bevy_ecs::query::Without;
     use bevy_ecs::system::RunSystemOnce as _;
+    use bevy_gizmos::config::GizmoConfigStore;
+    use bevy_gizmos::{GizmoAsset, GizmoHandles};
     use bevy_math::Vec2;
     use bevy_transform::components::GlobalTransform;
 
     use super::*;
-    use crate::atlas_sprites::gizmos::glyph_boxes;
+    use crate::atlas_sprites::gizmos::{
+        AtlasSpritesGizmoConfigGroup, ShowAtlasSpritesGizmos, glyph_boxes,
+    };
 
     /// The position and size of each glyph box the gizmos draw for the text
     /// entity.
@@ -319,6 +357,195 @@ mod gizmos {
         assert_eq!(app.world().get::<Children>(entity).unwrap().len(), 4);
 
         assert_eq!(glyph_boxes_of(&mut app, entity).len(), 2);
+    }
+
+    /// Loads the font at `path` in an app that propagates transforms.
+    fn initialize_app_with_transforms(path: &str) -> (App, Handle<ImageFont>) {
+        let (mut app, font): (App, Handle<ImageFont>) = initialize_app_with_font(path);
+        app.add_plugins(bevy_transform::TransformPlugin);
+        wait_until_loaded(&mut app, &font);
+        (app, font)
+    }
+
+    /// The global configuration of the atlas sprites gizmos.
+    fn gizmo_config(app: &mut App) -> &mut AtlasSpritesGizmoConfigGroup {
+        app.world_mut()
+            .resource_mut::<GizmoConfigStore>()
+            .into_inner()
+            .config_mut::<AtlasSpritesGizmoConfigGroup>()
+            .1
+    }
+
+    /// The vertices of the lines the atlas sprites gizmos drew in the last
+    /// frame, with the color of each vertex.
+    fn drawn_vertices(app: &App) -> Vec<(Vec2, LinearRgba)> {
+        let world = app.world();
+        let Some(handle) = world
+            .resource::<GizmoHandles>()
+            .handles()
+            .get(&TypeId::of::<AtlasSpritesGizmoConfigGroup>())
+            .and_then(Option::as_ref)
+        else {
+            return Vec::new();
+        };
+        let buffer = world
+            .resource::<Assets<GizmoAsset>>()
+            .get(handle)
+            .unwrap()
+            .buffer();
+        buffer
+            .list_positions
+            .iter()
+            .zip(&buffer.list_colors)
+            .chain(buffer.strip_positions.iter().zip(&buffer.strip_colors))
+            .filter(|&(position, _)| !position.is_nan())
+            .map(|(position, &color)| (position.truncate(), color))
+            .collect()
+    }
+
+    /// Sorts the points and removes duplicates.
+    fn point_set(points: impl IntoIterator<Item = Vec2>) -> Vec<Vec2> {
+        let mut points: Vec<_> = points.into_iter().collect();
+        points.sort_by(|left, right| left.x.total_cmp(&right.x).then(left.y.total_cmp(&right.y)));
+        points.dedup();
+        points
+    }
+
+    /// The distinct points of the lines the atlas sprites gizmos drew in
+    /// `color` in the last frame.
+    fn points_drawn_in(app: &App, color: impl Into<Color>) -> Vec<Vec2> {
+        let color = LinearRgba::from(color.into());
+        point_set(
+            drawn_vertices(app)
+                .into_iter()
+                .filter(|&(_, vertex_color)| vertex_color == color)
+                .map(|(position, _)| position),
+        )
+    }
+
+    /// The end points of a cross gizmo.
+    fn cross_points(center: Vec2, half_size: f32) -> [Vec2; 4] {
+        [
+            center + Vec2::new(half_size, 0.),
+            center + Vec2::new(-half_size, 0.),
+            center + Vec2::new(0., half_size),
+            center + Vec2::new(0., -half_size),
+        ]
+    }
+
+    /// The corners of a rectangle gizmo.
+    fn rect_corners(center: Vec2, size: Vec2) -> [Vec2; 4] {
+        let half = size / 2.;
+        [
+            center + Vec2::new(-half.x, half.y),
+            center + Vec2::new(half.x, half.y),
+            center + Vec2::new(half.x, -half.y),
+            center + Vec2::new(-half.x, -half.y),
+        ]
+    }
+
+    #[test]
+    fn gizmo_config_draws_glyph_boxes_and_anchor_points() {
+        let (mut app, font) = initialize_app_with_transforms("bmf.txt.fnt");
+        let entity = app
+            .world_mut()
+            .spawn((
+                ImageFontText::default().text("#'").font(font),
+                ImageFontSpriteText::default(),
+                Transform::from_xyz(100., 50., 0.),
+            ))
+            .id();
+        app.update();
+        assert_eq!(drawn_vertices(&app), []);
+
+        let config = gizmo_config(&mut app);
+        config.render_text_anchor_point = true;
+        config.render_character_anchor_point = true;
+        config.render_character_box = true;
+        app.update();
+
+        let boxes = glyph_boxes_of(&mut app, entity);
+        assert_eq!(boxes.len(), 2);
+        assert_eq!(
+            points_drawn_in(&app, css::PURPLE),
+            point_set(
+                boxes
+                    .iter()
+                    .flat_map(|&(position, size)| rect_corners(position, size))
+            )
+        );
+        assert_eq!(
+            points_drawn_in(&app, css::GREEN),
+            point_set(
+                boxes
+                    .iter()
+                    .flat_map(|&(position, _)| cross_points(position, 5.))
+            )
+        );
+        assert_eq!(
+            points_drawn_in(&app, css::RED),
+            point_set(cross_points(Vec2::new(100., 50.), 10.))
+        );
+    }
+
+    #[test]
+    fn show_atlas_sprites_gizmos_overrides_the_gizmo_config() {
+        let (mut app, font) = initialize_app_with_transforms("bmf.txt.fnt");
+        let config = gizmo_config(&mut app);
+        config.render_text_anchor_point = true;
+        config.render_character_box = true;
+
+        let overridden = app
+            .world_mut()
+            .spawn((
+                ImageFontText::default().text("#'").font(font.clone()),
+                ImageFontSpriteText::default(),
+                Transform::from_xyz(100., 50., 0.),
+                ShowAtlasSpritesGizmos {
+                    render_text_anchor_point: Some(false),
+                    render_character_anchor_point: Some(true),
+                    character_anchor_point_color: Some(css::YELLOW.into()),
+                    ..Default::default()
+                },
+            ))
+            .id();
+        let configured = app
+            .world_mut()
+            .spawn((
+                ImageFontText::default().text("'").font(font),
+                ImageFontSpriteText::default(),
+                Transform::from_xyz(-100., -50., 0.),
+            ))
+            .id();
+        app.update();
+        app.update();
+
+        let overridden_boxes = glyph_boxes_of(&mut app, overridden);
+        let configured_boxes = glyph_boxes_of(&mut app, configured);
+        assert_eq!(overridden_boxes.len(), 2);
+        assert_eq!(configured_boxes.len(), 1);
+        assert_eq!(
+            points_drawn_in(&app, css::RED),
+            point_set(cross_points(Vec2::new(-100., -50.), 10.))
+        );
+        assert_eq!(
+            points_drawn_in(&app, css::YELLOW),
+            point_set(
+                overridden_boxes
+                    .iter()
+                    .flat_map(|&(position, _)| cross_points(position, 5.))
+            )
+        );
+        assert_eq!(points_drawn_in(&app, css::GREEN), []);
+        assert_eq!(
+            points_drawn_in(&app, css::PURPLE),
+            point_set(
+                overridden_boxes
+                    .iter()
+                    .chain(&configured_boxes)
+                    .flat_map(|&(position, size)| rect_corners(position, size))
+            )
+        );
     }
 }
 

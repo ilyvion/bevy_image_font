@@ -1,6 +1,7 @@
 use bevy::asset::io::VecReader;
 
 use super::*;
+use crate::tests::utils::{initialize_app_with_font, wait_until_failed};
 
 #[test]
 fn test_image_font_loader_extensions() {
@@ -73,5 +74,25 @@ fn descriptor_to_character_map_and_layout_fails_on_invalid_layout() {
     assert!(
         matches!(result, Err(ImageFontLoadError::LayoutValidationError(_))),
         "{result:?}"
+    );
+}
+
+#[test]
+fn font_with_missing_image_fails_to_load() {
+    let (mut app, handle): (bevy_app::App, bevy_asset::Handle<ImageFont>) =
+        initialize_app_with_font("tests/missing_image.image_font.ron");
+
+    let error = wait_until_failed(&mut app, &handle);
+
+    let bevy_asset::AssetLoadError::AssetLoaderError(ref loader_error) = error else {
+        panic!("expected a loader error, got {error}");
+    };
+    let load_error = loader_error
+        .error()
+        .downcast_ref::<ImageFontLoadError>()
+        .expect("the loader error is an ImageFontLoadError");
+    assert!(
+        matches!(*load_error, ImageFontLoadError::LoadDirect(_)),
+        "{load_error:?}"
     );
 }

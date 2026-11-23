@@ -400,3 +400,76 @@ fn eight_bit_page_is_decoded_from_alpha_content_only() {
         );
     }
 }
+
+#[test]
+fn eight_bit_page_of_packed_font_keeps_the_packed_content() {
+    let settings = ChannelSettings::new(&common(
+        true,
+        Packing::Outline,
+        Packing::Glyph,
+        Packing::Glyph,
+        Packing::Glyph,
+    ));
+    for alpha in [
+        ChannelContent::Glyph,
+        ChannelContent::Outline,
+        ChannelContent::GlyphOutline,
+    ] {
+        assert!(
+            matches!(
+                settings.for_8_bit_page(alpha),
+                ChannelSettings::Packed(ChannelContent::Outline)
+            ),
+            "alpha {alpha:?}"
+        );
+    }
+}
+
+/// A decoding that changes every pixel it decodes.
+const RED_GLYPH: PageDecoding = PageDecoding::Channel {
+    channel: RED,
+    content: ChannelContent::Glyph,
+};
+
+#[test]
+fn decoding_leaves_an_image_that_is_not_8_bit_rgba_as_is() {
+    let mut image = two_pixel_image(vec![0, 200], TextureFormat::R8Unorm);
+
+    RED_GLYPH.decode_image(&mut image);
+
+    assert_eq!(image.texture_descriptor.format, TextureFormat::R8Unorm);
+    assert_eq!(image.data.unwrap(), [0, 200]);
+}
+
+#[test]
+fn decoding_leaves_an_image_without_data_as_is() {
+    let mut image = two_pixel_image(vec![0; 8], TextureFormat::Rgba8UnormSrgb);
+    image.data = None;
+
+    RED_GLYPH.decode_image(&mut image);
+
+    assert_eq!(
+        image.texture_descriptor.format,
+        TextureFormat::Rgba8UnormSrgb
+    );
+    assert_eq!(image.data, None);
+}
+
+#[test]
+fn decoding_an_8_bit_rgba_image_decodes_every_pixel() {
+    let mut image = two_pixel_image(
+        vec![200, 0, 0, 255, 50, 0, 0, 255],
+        TextureFormat::Rgba8UnormSrgb,
+    );
+
+    RED_GLYPH.decode_image(&mut image);
+
+    assert_eq!(
+        image.data.unwrap(),
+        [
+            ChannelContent::Glyph.decode(200),
+            ChannelContent::Glyph.decode(50)
+        ]
+        .concat()
+    );
+}
