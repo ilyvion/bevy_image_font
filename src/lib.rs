@@ -9,8 +9,6 @@ use bevy_app::{App, Plugin, PostUpdate};
 use bevy_asset::Assets;
 use bevy_asset::{Asset, AssetApp as _, AssetEvent, AssetId, Handle};
 use bevy_derive::{Deref, DerefMut};
-#[cfg(feature = "ui")]
-use bevy_ecs::system::Res;
 use bevy_ecs::{
     change_detection::DetectChangesMut as _,
     component::Component,
@@ -22,8 +20,6 @@ use bevy_image::{Image, ImageSampler, TextureAtlasLayout};
 use bevy_math::{URect, UVec2, Vec2};
 use bevy_platform::collections::{HashMap, HashSet};
 use bevy_reflect::Reflect;
-#[cfg(feature = "ui")]
-use bevy_ui::UiScale;
 use derive_setters::Setters;
 
 mod letter_spacing;
@@ -348,25 +344,7 @@ pub fn sync_texts_with_font_changes(
     mut events: MessageReader<AssetEvent<ImageFont>>,
     mut query: Query<&mut ImageFontText>,
     mut changed_fonts: Local<CachedHashSet>,
-    #[cfg(feature = "ui")] ui_scale: Option<Res<UiScale>>,
 ) {
-    #[cfg(feature = "ui")]
-    {
-        // If the UI scale changed, mark all texts as changed. `UiScale` only
-        // exists in apps with `UiPlugin`.
-
-        use bevy_ecs::change_detection::DetectChanges as _;
-        if ui_scale.is_some_and(|ui_scale| ui_scale.is_changed() && !ui_scale.is_added()) {
-            for mut image_font_text in &mut query {
-                use bevy_ecs::change_detection::DetectChangesMut as _;
-
-                image_font_text.set_changed();
-            }
-            changed_fonts.clear();
-            return;
-        }
-    }
-
     // Extract relevant IDs from events
     for id in events.read().filter_map(extract_asset_id) {
         bevy_log::info!("Image font {id} finished loading; marking as dirty");

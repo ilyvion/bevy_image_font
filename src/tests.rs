@@ -11,6 +11,8 @@ use super::*;
 use crate::tests::utils::{ExampleFont, initialize_app_with_example_font};
 
 mod sync_texts_with_font_changes;
+#[cfg(feature = "ui")]
+mod ui_scale;
 pub(crate) mod utils;
 
 #[test]

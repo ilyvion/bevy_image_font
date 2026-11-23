@@ -140,32 +140,21 @@ fn not_changed_on_irrelevant_events() {
     });
 }
 
-/// Test for issue #17: Text rendering doesn't update when `UiScale` changes
+/// Bevy re-measures image nodes when `UiScale` changes, and pre-rendered text
+/// doesn't depend on it, so a `UiScale` change doesn't re-render text.
 #[test]
 #[cfg(feature = "ui")]
-fn text_changed_when_ui_scale_changes() {
-    use bevy::ui::UiScale;
+fn not_changed_when_ui_scale_changes() {
+    let (mut app, mut system_state, _) = setup_app_system_state_and_entity();
 
-    let (mut app, mut system_state, _font_handle) = setup_app_system_state_and_entity();
-
-    // Insert UiScale resource
-    app.world_mut().insert_resource(UiScale(1.0));
     clear_query_state(&mut app, &mut system_state);
     app.update();
 
-    // Change UiScale (simulate user zooming UI)
-    app.world_mut().insert_resource(UiScale(2.0));
+    app.world_mut().resource_mut::<UiScale>().0 = 2.0;
     app.update();
 
-    // The bug: text is NOT marked as changed, even though UI scale changed
-    // This should fail if the bug is present
     with_image_font_text(&mut app, &mut system_state, |image_font_text| {
-        use bevy_ecs::change_detection::DetectChanges as _;
-
-        assert!(
-            image_font_text.is_changed(),
-            "ImageFontText should be marked as changed when UiScale changes"
-        );
+        assert!(!image_font_text.is_changed());
     });
 }
 
