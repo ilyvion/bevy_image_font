@@ -8,11 +8,11 @@
 //! 5. Exit if `single_image` setting is set
 
 use std::fs::{self, create_dir_all, remove_file};
-use std::io::Cursor;
+use std::io::{Cursor, ErrorKind};
 use std::iter;
 use std::num::NonZero;
 use std::path::Path;
-use std::process::Command;
+use std::process::{self, Command};
 use std::{
     path::PathBuf,
     sync::{
@@ -546,43 +546,39 @@ fn render_scene(
     let mut img_bytes = images.get_mut(image.id()).unwrap();
     let img = prepare_image_buffer(image_data, &mut img_bytes);
 
-    let image_paths = generate_image_paths(&scene_controller);
-    let ImagePaths {
-        new: ref new_image_path,
-        accepted: ref accepted_image_path,
-        diff: _,
-    } = image_paths;
+    let image_paths = ImagePaths::new(
+        &scene_controller.test_category,
+        &scene_controller.test_name,
+        process::id(),
+    );
+    image_paths.create_dirs();
 
-    // write_optimized_png(img, &new_image_path);
-    if let Err(error) = img.save(new_image_path) {
+    // write_optimized_png(img, &image_paths.work_new);
+    if let Err(error) = img.save(&image_paths.work_new) {
         panic!("Failed to save image: {error}");
     }
 
     // If this is a new test, we're done, panic to indicate what to do next.
-    assert!(
-        accepted_image_path.exists(),
-        "Visual acceptance test `{}` has no accepted image to compare against. \
-                If this is the first time running this test, inspect {} and rename it to {} if \
-                it passes initial inspection.",
-        scene_controller.test_name,
-        new_image_path.display(),
-        accepted_image_path.display(),
-    );
+    if !image_paths.accepted.exists() {
+        image_paths.publish_failure_images();
+        panic!(
+            "Visual acceptance test `{}` has no accepted image to compare against. \
+             If this is the first time running this test, inspect {} and rename it to {} if \
+             it passes initial inspection.",
+            scene_controller.test_name,
+            image_paths.new.display(),
+            image_paths.accepted.display(),
+        );
+    }
 
-    compare_images(image_paths, app_exit_writer);
+    compare_images(&image_paths, app_exit_writer);
 }
 
 #[expect(
     clippy::expect_used,
     reason = "we want to panic if any of these go wrong"
 )]
-fn compare_images(paths: ImagePaths, mut app_exit_writer: MessageWriter<AppExit>) {
-    let ImagePaths {
-        new: new_image_path,
-        accepted: accepted_image_path,
-        diff: diff_image_path,
-    } = paths;
-
+fn compare_images(paths: &ImagePaths, mut app_exit_writer: MessageWriter<AppExit>) {
     // Invoke ImageMagick Compare to check if the output has changed
     let output = Command::new("magick")
         .args([
@@ -590,14 +586,16 @@ fn compare_images(paths: ImagePaths, mut app_exit_writer: MessageWriter<AppExit>
             "-verbose".as_ref(),
             "-metric".as_ref(),
             "psnr".as_ref(),
-            accepted_image_path.as_os_str(),
-            new_image_path.as_os_str(),
-            diff_image_path.as_os_str(),
+            paths.accepted.as_os_str(),
+            paths.work_new.as_os_str(),
+            paths.work_diff.as_os_str(),
         ])
         .output()
         .expect("Failed to run ImageMagick Compare");
 
     if !output.status.success() {
+        paths.publish_failure_images();
+
         let stdout = String::from_utf8_lossy(&output.stdout);
         let stderr = String::from_utf8_lossy(&output.stderr);
 
@@ -606,16 +604,14 @@ fn compare_images(paths: ImagePaths, mut app_exit_writer: MessageWriter<AppExit>
              See {} for the diff image and {} for the newly generated output.\n\n\
              ImageMagick standard output:\n{}\n\n\
              ImageMagick standard error:\n{}",
-            diff_image_path.display(),
-            new_image_path.display(),
+            paths.diff.display(),
+            paths.new.display(),
             stdout,
             stderr
         );
     }
 
-    // Remove the new and diff files
-    remove_file(new_image_path).expect("Failed to remove .new.png");
-    remove_file(diff_image_path).expect("Failed to remove .diff.png");
+    paths.clean_up_after_pass();
 
     // Once we're done producing and comparing our images and we got this far, it's
     // time to exit with success to indicate nothing needs doing.
@@ -668,26 +664,116 @@ fn prepare_image_buffer(
     )
 }
 
-fn generate_image_paths(scene_controller: &SceneController) -> ImagePaths {
-    let base_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("tests")
-        .join("images")
-        .join(&scene_controller.test_category);
+/// The files a visual test reads and writes.
+///
+/// The test saves and compares its output in `work_new` and `work_diff`, which
+/// are private to the test process, so test runs that overlap on the same
+/// checkout don't touch each other's files. Only a failing test copies them to
+/// `new` and `diff` next to the accepted image.
+#[derive(Debug)]
+struct ImagePaths {
+    accepted: PathBuf,
+    new: PathBuf,
+    diff: PathBuf,
+    work_new: PathBuf,
+    work_diff: PathBuf,
+}
 
-    create_dir_all(&base_dir)
-        .unwrap_or_else(|_| panic!("Failed to create image directory: {}", base_dir.display()));
+impl ImagePaths {
+    fn new(category: &str, test_name: &str, process_id: u32) -> ImagePaths {
+        let images_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("tests")
+            .join("images")
+            .join(category);
+        let work_dir = PathBuf::from(env!("CARGO_TARGET_TMPDIR"))
+            .join("visual")
+            .join(process_id.to_string())
+            .join(category);
 
-    ImagePaths {
-        new: base_dir.join(format!("{}.new.png", scene_controller.test_name)),
-        accepted: base_dir.join(format!("{}.accepted.png", scene_controller.test_name)),
-        diff: base_dir.join(format!("{}.diff.png", scene_controller.test_name)),
+        ImagePaths {
+            accepted: images_dir.join(format!("{test_name}.accepted.png")),
+            new: images_dir.join(format!("{test_name}.new.png")),
+            diff: images_dir.join(format!("{test_name}.diff.png")),
+            work_new: work_dir.join(format!("{test_name}.new.png")),
+            work_diff: work_dir.join(format!("{test_name}.diff.png")),
+        }
+    }
+
+    fn create_dirs(&self) {
+        for path in [&self.new, &self.work_new] {
+            if let Some(dir) = path.parent() {
+                create_dir_all(dir).unwrap_or_else(|error| {
+                    panic!(
+                        "Failed to create image directory {}: {error}",
+                        dir.display()
+                    )
+                });
+            }
+        }
+    }
+
+    /// Copies the work images that exist to `new` and `diff`, then removes the
+    /// work images.
+    fn publish_failure_images(&self) {
+        for (work, published) in [(&self.work_new, &self.new), (&self.work_diff, &self.diff)] {
+            if work.exists() {
+                copy_replacing(work, published);
+            }
+            remove_if_exists(work);
+        }
+        self.remove_empty_work_dirs();
+    }
+
+    /// Removes the work images and any `new` and `diff` images left by an
+    /// earlier failed run.
+    fn clean_up_after_pass(&self) {
+        for path in [&self.work_new, &self.work_diff, &self.new, &self.diff] {
+            remove_if_exists(path);
+        }
+        self.remove_empty_work_dirs();
+    }
+
+    /// Removes the work image directory and its parent, leaving any that still
+    /// hold another test's files.
+    fn remove_empty_work_dirs(&self) {
+        for dir in self.work_new.ancestors().skip(1).take(2) {
+            if fs::remove_dir(dir).is_err() {
+                break;
+            }
+        }
     }
 }
 
-struct ImagePaths {
-    new: PathBuf,
-    accepted: PathBuf,
-    diff: PathBuf,
+/// Copies `from` to `to` through a temporary file in `to`'s directory, so a
+/// concurrent copy to the same `to` can't interleave with this one.
+fn copy_replacing(from: &Path, to: &Path) {
+    let file_name = to
+        .file_name()
+        .map_or_else(Default::default, |name| name.to_string_lossy().into_owned());
+    let temporary = to.with_file_name(format!(".{file_name}.{}.tmp", process::id()));
+
+    if let Err(error) = fs::copy(from, &temporary) {
+        panic!(
+            "Failed to copy {} to {}: {error}",
+            from.display(),
+            temporary.display()
+        );
+    }
+    if let Err(error) = fs::rename(&temporary, to) {
+        panic!(
+            "Failed to rename {} to {}: {error}",
+            temporary.display(),
+            to.display()
+        );
+    }
+}
+
+fn remove_if_exists(path: &Path) {
+    match remove_file(path) {
+        Ok(()) => {}
+        Err(error) if error.kind() == ErrorKind::NotFound => {}
+        Err(error) => panic!("Failed to remove {}: {error}", path.display()),
+    }
 }
 
 #[expect(
@@ -709,5 +795,144 @@ fn write_optimized_png(img: image::ImageBuffer<image::Rgba<u8>, Vec<u8>>, new_im
 
     if let Err(error) = fs::write(new_image_path, new_image) {
         panic!("Failed to save image: {error}");
+    }
+}
+
+#[cfg(test)]
+#[expect(
+    clippy::unwrap_used,
+    reason = "we want to panic if any of these go wrong"
+)]
+mod tests {
+    use super::*;
+
+    fn images_dir() -> PathBuf {
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("tests")
+            .join("images")
+    }
+
+    #[test]
+    fn test_processes_save_and_compare_in_separate_directories() {
+        let first = ImagePaths::new("rendered", "sizes", 1);
+        let second = ImagePaths::new("rendered", "sizes", 2);
+
+        let first_work = [&first.work_new, &first.work_diff];
+        let second_work = [&second.work_new, &second.work_diff];
+
+        for path in first_work.iter().chain(&second_work) {
+            assert!(
+                !path.starts_with(images_dir()),
+                "{} is shared by every test run on the checkout",
+                path.display()
+            );
+        }
+        for path in first_work {
+            assert!(
+                !second_work.contains(&path),
+                "{} is used by two test processes",
+                path.display()
+            );
+        }
+    }
+
+    #[test]
+    fn failure_images_are_published_next_to_the_accepted_image() {
+        let paths = ImagePaths::new("rendered", "sizes", 1);
+
+        assert_eq!(paths.new.parent(), paths.accepted.parent());
+        assert_eq!(paths.diff.parent(), paths.accepted.parent());
+        assert!(paths.accepted.starts_with(images_dir()));
+    }
+
+    /// `ImagePaths` in a scratch directory that is removed on drop.
+    #[derive(Debug, Deref)]
+    struct ScratchPaths {
+        root: PathBuf,
+        #[deref]
+        paths: ImagePaths,
+    }
+
+    impl Drop for ScratchPaths {
+        fn drop(&mut self) {
+            drop(fs::remove_dir_all(&self.root));
+        }
+    }
+
+    fn scratch_paths(test: &str) -> ScratchPaths {
+        let root = PathBuf::from(env!("CARGO_TARGET_TMPDIR"))
+            .join("visual-setup-tests")
+            .join(format!("{test}-{}", process::id()));
+        drop(fs::remove_dir_all(&root));
+
+        let paths = ImagePaths {
+            accepted: root.join("published").join("a.accepted.png"),
+            new: root.join("published").join("a.new.png"),
+            diff: root.join("published").join("a.diff.png"),
+            work_new: root.join("work").join("a.new.png"),
+            work_diff: root.join("work").join("a.diff.png"),
+        };
+        paths.create_dirs();
+        ScratchPaths { root, paths }
+    }
+
+    #[test]
+    fn publishing_failure_images_copies_them_and_removes_the_work_images() {
+        let paths = scratch_paths("publish");
+        fs::write(&paths.work_new, "new").unwrap();
+        fs::write(&paths.work_diff, "diff").unwrap();
+
+        paths.publish_failure_images();
+
+        assert_eq!(fs::read_to_string(&paths.new).unwrap(), "new");
+        assert_eq!(fs::read_to_string(&paths.diff).unwrap(), "diff");
+        assert!(!paths.work_new.exists());
+        assert!(!paths.work_diff.exists());
+    }
+
+    #[test]
+    fn publishing_failure_images_without_a_diff_publishes_only_the_new_image() {
+        let paths = scratch_paths("publish-no-diff");
+        fs::write(&paths.work_new, "new").unwrap();
+
+        paths.publish_failure_images();
+
+        assert_eq!(fs::read_to_string(&paths.new).unwrap(), "new");
+        assert!(!paths.diff.exists());
+        assert!(!paths.work_new.exists());
+    }
+
+    #[test]
+    fn passing_removes_work_images_and_leftover_failure_images() {
+        let paths = scratch_paths("pass");
+        for path in [&paths.work_new, &paths.work_diff, &paths.new, &paths.diff] {
+            fs::write(path, "x").unwrap();
+        }
+
+        paths.clean_up_after_pass();
+
+        for path in [&paths.work_new, &paths.work_diff, &paths.new, &paths.diff] {
+            assert!(!path.exists(), "{} was not removed", path.display());
+        }
+    }
+
+    #[test]
+    fn finishing_removes_the_emptied_work_directory() {
+        let passed = scratch_paths("pass-work-dir");
+        fs::write(&passed.work_new, "x").unwrap();
+        passed.clean_up_after_pass();
+        assert!(!passed.work_new.parent().unwrap().exists());
+
+        let failed = scratch_paths("fail-work-dir");
+        fs::write(&failed.work_new, "x").unwrap();
+        failed.publish_failure_images();
+        assert!(!failed.work_new.parent().unwrap().exists());
+    }
+
+    #[test]
+    fn passing_tolerates_files_already_removed() {
+        let paths = scratch_paths("pass-missing");
+
+        paths.clean_up_after_pass();
     }
 }
