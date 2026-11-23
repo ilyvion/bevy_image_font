@@ -35,6 +35,7 @@ use bevy_ecs::system::{Commands, Query, Res, ResMut};
 use bevy_image::TextureAtlasLayout;
 use bevy_reflect::Reflect;
 use bevy_sprite::{Anchor, Sprite};
+use bevy_transform::TransformSystems;
 use bevy_transform::components::Transform;
 use derive_setters::Setters;
 
@@ -58,6 +59,7 @@ impl Plugin for AtlasSpritesPlugin {
                 PostUpdate,
                 set_up_sprites
                     .after(sync_texts_with_font_changes)
+                    .before(TransformSystems::Propagate)
                     .in_set(ImageFontSet),
             )
             .add_systems(Last, despawn_excess_sprites.in_set(ImageFontSet));

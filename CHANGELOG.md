@@ -46,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ImageFontSpriteText` logs the "ImageFont asset … is not loaded" error once per text while its font is missing. A new text whose font was still loading used to log it again every time the text changed. If the text's font goes missing again after it has rendered, for example when the text switches to a font that isn't loaded yet, the error is logged again.
 - Pre-rendered text (`ImageFontPreRenderedText`, `ImageFontPreRenderedUiText`) with a font whose texture isn't 8-bit RGBA, such as a 16-bit PNG, now logs the new `ImageFontRenderError::UnsupportedTextureFormat` error and keeps the text's previous image, instead of drawing garbled glyphs.
 - `ImageFontSet` now contains all of the plugin's systems, so configuring the set, such as disabling it with a run condition or ordering your systems around it, also applies to the system that updates texts when their font changes and to the `gizmos` feature's drawing systems.
+- `ImageFontSpriteText` characters are drawn at their new position in the same frame the text is set up or changed. They used to sometimes show at their old position, or at the origin, for one frame.
 
 ### Removed
 

@@ -5,6 +5,7 @@ use bevy_app::App;
 use bevy_asset::Handle;
 use bevy_color::palettes::css;
 use bevy_ecs::query::Added;
+use bevy_transform::components::GlobalTransform;
 
 use super::*;
 use crate::tests::utils::{assert_in_image_font_set, initialize_app_with_font, wait_until_loaded};
@@ -217,6 +218,36 @@ fn removing_a_new_sprite_does_not_break_other_systems_inserting_on_it() {
     assert!(app.world().get_entity(removed_sprite).is_err());
     let (glyph_sprites, _) = sprites(&app, entity);
     assert_eq!(glyph_sprites.len(), 1);
+}
+
+#[test]
+fn glyph_global_transforms_are_up_to_date_in_the_frame_they_are_set_up() {
+    let (mut app, font): (App, Handle<ImageFont>) = initialize_app_with_font("bmf.txt.fnt");
+    app.add_plugins(bevy_transform::TransformPlugin);
+    wait_until_loaded(&mut app, &font);
+
+    let parent_transform = Transform::from_xyz(100.0, 50.0, 0.0);
+    let entity = app
+        .world_mut()
+        .spawn((
+            ImageFontText::default().text("AV").font(font),
+            ImageFontSpriteText::default(),
+            parent_transform,
+        ))
+        .id();
+    app.update();
+
+    let world = app.world();
+    let sprites = &world.get::<ImageFontTextData>(entity).unwrap().sprites;
+    assert_eq!(sprites.len(), 2);
+    for &sprite in sprites {
+        let transform = world.get::<Transform>(sprite).unwrap();
+        let global_transform = world.get::<GlobalTransform>(sprite).unwrap();
+        assert_eq!(
+            *global_transform,
+            GlobalTransform::from(parent_transform) * *transform
+        );
+    }
 }
 
 #[test]
