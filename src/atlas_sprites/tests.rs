@@ -9,7 +9,9 @@ use bevy_ecs::query::Added;
 use bevy_transform::components::GlobalTransform;
 
 use super::*;
-use crate::tests::utils::{assert_in_image_font_set, initialize_app_with_font, wait_until_loaded};
+use crate::tests::utils::{
+    assert_in_image_font_set, initialize_app_with_font, wait_until_failed, wait_until_loaded,
+};
 
 /// Loads the font at `path` and spawns sprite text using it.
 fn spawn_text(path: &str, text: &str, sprite_text: ImageFontSpriteText) -> (App, Entity) {
@@ -588,6 +590,56 @@ fn a_missing_font_is_reported_once_until_the_font_is_found_again() {
         .font = missing_font;
     app.update();
     assert_eq!(has_reported_missing_font(&app, entity), Some(true));
+}
+
+#[test]
+fn a_font_that_failed_to_load_is_reported_as_missing() {
+    let (mut app, missing_font): (App, Handle<ImageFont>) =
+        initialize_app_with_font("does_not_exist.fnt");
+    wait_until_failed(&mut app, &missing_font);
+    assert!(missing_font.path().is_some());
+
+    let entity = app
+        .world_mut()
+        .spawn((
+            ImageFontText::default().text("A").font(missing_font),
+            ImageFontSpriteText::default(),
+        ))
+        .id();
+    app.update();
+
+    assert_eq!(has_reported_missing_font(&app, entity), Some(true));
+}
+
+#[test]
+fn a_despawned_glyph_sprite_does_not_stop_the_other_sprites_from_updating() {
+    let (mut app, entity) = spawn_text("bmf.txt.fnt", "AV", ImageFontSpriteText::default());
+    let despawned_sprite = app
+        .world()
+        .get::<ImageFontTextData>(entity)
+        .unwrap()
+        .sprites[0];
+    app.world_mut().despawn(despawned_sprite);
+
+    app.world_mut()
+        .get_mut::<ImageFontText>(entity)
+        .unwrap()
+        .text = String::from("VA");
+    app.update();
+
+    let world = app.world();
+    let remaining_sprite = world.get::<ImageFontTextData>(entity).unwrap().sprites[1];
+    let character_index = font(&app, entity).atlas_character_map[&'A'].character_index;
+    assert_eq!(
+        world
+            .get::<Sprite>(remaining_sprite)
+            .unwrap()
+            .texture_atlas
+            .as_ref()
+            .unwrap()
+            .index,
+        character_index
+    );
 }
 
 #[test]

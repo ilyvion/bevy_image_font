@@ -1,0 +1,13 @@
+# Tarpaulin runs each configuration and merges their coverage into one report,
+# so code that is only compiled without some features is measured too.
+
+[all_features]
+all-features = true
+workspace = true
+timeout = "120s"
+engine = "Llvm"
+
+[default_features]
+workspace = true
+timeout = "120s"
+engine = "Llvm"

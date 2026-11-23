@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Measures test coverage with the tarpaulin Docker image the CI coverage job
 # uses, with the CI job's tarpaulin arguments and `--cfg ci`, which ignores the
-# visual tests because the container has no GPU.
+# visual tests because the container has no GPU. Tarpaulin runs every
+# configuration in .tarpaulin.toml and merges them into one report.
 #
 # Usage: ./coverage.sh [extra tarpaulin arguments...]
 #
@@ -34,8 +35,8 @@ docker run --rm \
     "$image" \
     bash -c '
         status=0
-        cargo +nightly tarpaulin --verbose --all-features --workspace --timeout 120 --engine llvm \
-            --out xml --out html --output-dir target/tarpaulin "$@" || status=$?
+        cargo +nightly tarpaulin --verbose --out xml --out html --output-dir target/tarpaulin "$@" \
+            || status=$?
         # The container runs as root; give the build output back to the host user.
         chown -R "$HOST_UID:$HOST_GID" target/tarpaulin
         exit "$status"
