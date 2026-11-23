@@ -348,8 +348,10 @@ impl ImageFontDescriptor {
     /// are populated.
     ///
     /// # Errors
-    ///   - `ImageFontLoadError::EmptyImagePath` if the `image` path is empty.
-    ///   - `ImageFontLoadError::EmptyLayoutString` if the `layout` string for
+    ///   - [`ImageFontDescriptorValidationError::EmptyImagePath`] if the
+    ///     `image` path is empty.
+    ///   - [`ImageFontDescriptorValidationError::EmptyLayoutString`] if the
+    ///     `layout` string for
     ///     `Automatic` is empty.
     fn validate(&self) -> Result<(), ImageFontDescriptorValidationError> {
         if self.image.as_str().trim().is_empty() {
@@ -577,7 +579,7 @@ async fn read_and_validate_font_descriptor(
 /// layout.
 ///
 /// This function processes the given `ImageFontDescriptor` to generate a
-/// character-to-index map and a [`TextureAtlasLayout`], based on the provided
+/// character map and a [`TextureAtlasLayout`], based on the provided
 /// image size. It uses the descriptor's layout information to map characters to
 /// specific regions within the texture atlas.
 ///
@@ -588,8 +590,9 @@ async fn read_and_validate_font_descriptor(
 ///
 /// # Returns
 /// A tuple where
-/// - the first element is a `HashMap<char, usize>` mapping characters to
-///   indices in the texture atlas.
+/// - the first element is a `HashMap<char, ImageFontCharacter>` mapping
+///   characters to their [`ImageFontCharacter`] entries, which hold each
+///   glyph's index in the texture atlas.
 /// - the second element is a [`TextureAtlasLayout`] describing the texture
 ///   atlas layout.
 ///
