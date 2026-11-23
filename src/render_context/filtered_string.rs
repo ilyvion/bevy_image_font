@@ -113,8 +113,7 @@ impl ImageFont {
     /// Filters a string to include only characters present in the font's
     /// character map.
     ///
-    /// This function returns a
-    /// [`FilteredString`](filtered_string::FilteredString) containing only the
+    /// This function returns a [`FilteredString`] containing only the
     /// characters from the input string that exist in the font's
     /// `atlas_character_map`. It ensures that unsupported characters are
     /// excluded during rendering.
