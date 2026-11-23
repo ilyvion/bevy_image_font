@@ -7,7 +7,7 @@ use bevy_color::palettes::css;
 use bevy_ecs::query::Added;
 
 use super::*;
-use crate::tests::utils::{initialize_app_with_font, wait_until_loaded};
+use crate::tests::utils::{assert_in_image_font_set, initialize_app_with_font, wait_until_loaded};
 
 /// Loads the font at `path` and spawns sprite text using it.
 fn spawn_text(path: &str, text: &str, sprite_text: ImageFontSpriteText) -> (App, Entity) {
@@ -217,6 +217,14 @@ fn removing_a_new_sprite_does_not_break_other_systems_inserting_on_it() {
     assert!(app.world().get_entity(removed_sprite).is_err());
     let (glyph_sprites, _) = sprites(&app, entity);
     assert_eq!(glyph_sprites.len(), 1);
+}
+
+#[test]
+fn atlas_sprites_systems_are_in_image_font_set() {
+    let (mut app, _) = initialize_app_with_font("bmf.txt.fnt");
+
+    assert_in_image_font_set(&mut app, PostUpdate, set_up_sprites);
+    assert_in_image_font_set(&mut app, Last, despawn_excess_sprites);
 }
 
 #[cfg(feature = "gizmos")]

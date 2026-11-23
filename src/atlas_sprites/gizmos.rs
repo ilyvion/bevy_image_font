@@ -21,6 +21,7 @@ use bevy_color::palettes::css;
 use bevy_ecs::component::Component;
 use bevy_ecs::query::{With, Without};
 use bevy_ecs::resource::Resource;
+use bevy_ecs::schedule::IntoScheduleConfigs as _;
 use bevy_ecs::system::Query;
 use bevy_gizmos::AppGizmoBuilder as _;
 use bevy_gizmos::config::GizmoConfigGroup;
@@ -29,9 +30,9 @@ use bevy_math::Vec2;
 use bevy_reflect::Reflect;
 use bevy_transform::components::GlobalTransform;
 
-use crate::ImageFontText;
 use crate::atlas_sprites::ImageFontTextData;
 use crate::render_context::RenderContext;
+use crate::{ImageFontSet, ImageFontText};
 
 /// Initializes the debug gizmo system for `ImageFontSpriteText` components.
 ///
@@ -51,7 +52,10 @@ use crate::render_context::RenderContext;
 ///   the update schedule, enabling debug visualization.
 pub fn build(app: &mut App) {
     app.init_gizmo_group::<AtlasSpritesGizmoConfigGroup>()
-        .add_systems(Update, (render_all_sprite_gizmos, render_sprite_gizmos));
+        .add_systems(
+            Update,
+            (render_all_sprite_gizmos, render_sprite_gizmos).in_set(ImageFontSet),
+        );
 }
 
 /// The [`GizmoConfigGroup`] used for debug visualizations of
@@ -339,6 +343,18 @@ mod tests {
     use bevy::DefaultPlugins;
     use bevy::app::PluginGroup as _;
     use bevy::gizmos_render::GizmoRenderPlugin;
+    use bevy_app::Update;
+
+    use super::{render_all_sprite_gizmos, render_sprite_gizmos};
+    use crate::tests::utils::{assert_in_image_font_set, initialize_app_with_font};
+
+    #[test]
+    fn gizmo_systems_are_in_image_font_set() {
+        let (mut app, _) = initialize_app_with_font("example_font.image_font.ron");
+
+        assert_in_image_font_set(&mut app, Update, render_all_sprite_gizmos);
+        assert_in_image_font_set(&mut app, Update, render_sprite_gizmos);
+    }
 
     /// The examples draw gizmos through `DefaultPlugins`, which only renders
     /// them when the `gizmos` feature enables Bevy's gizmo rendering.

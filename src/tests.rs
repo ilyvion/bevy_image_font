@@ -8,7 +8,9 @@ use bevy_ecs::reflect::AppTypeRegistry;
 use bevy_math::{URect, UVec2};
 
 use super::*;
-use crate::tests::utils::{ExampleFont, initialize_app_with_example_font};
+use crate::tests::utils::{
+    ExampleFont, assert_in_image_font_set, initialize_app_with_example_font,
+};
 
 mod sync_texts_with_font_changes;
 #[cfg(feature = "ui")]
@@ -71,6 +73,17 @@ fn image_font_plugin_initialization() {
     // Verify that the app updates without errors (systems from the plugin are
     // functional)
     app.update();
+}
+
+#[test]
+fn plugin_systems_are_in_image_font_set() {
+    let (mut app, _) = initialize_app_with_example_font(ExampleFont::Monospace);
+
+    assert_in_image_font_set(&mut app, PostUpdate, sync_texts_with_font_changes);
+    #[cfg(feature = "rendered")]
+    assert_in_image_font_set(&mut app, PostUpdate, rendered::render_text_to_sprite);
+    #[cfg(all(feature = "rendered", feature = "ui"))]
+    assert_in_image_font_set(&mut app, PostUpdate, rendered::render_text_to_image_node);
 }
 
 // This is mostly here for the sake of coverage.

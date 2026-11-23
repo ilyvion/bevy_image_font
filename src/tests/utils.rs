@@ -3,9 +3,12 @@
     reason = "private utility code that, depending on the activated feature set, will sometimes be missing uses"
 )]
 
+use std::any::type_name;
 use std::sync::LazyLock;
 
 use bevy_asset::{AssetLoadError, AssetPlugin, AssetServer, LoadState};
+use bevy_ecs::schedule::ScheduleLabel;
+use bevy_ecs::system::IntoSystem;
 use bevy_image::{CompressedImageFormats, ImageLoader};
 use bevy_log::LogPlugin;
 use bevy_platform::collections::HashMap;
@@ -102,6 +105,39 @@ pub(crate) fn initialize_app_with_font(
         asset_server.load(font_path.as_ref().to_owned().into_std_path_buf());
 
     (app, handle)
+}
+
+/// Asserts that `app` runs `system` in its `schedule`, as part of
+/// [`ImageFontSet`].
+pub(crate) fn assert_in_image_font_set<Marker, S: IntoSystem<(), (), Marker>>(
+    app: &mut App,
+    schedule: impl ScheduleLabel,
+    system: S,
+) {
+    let system_name = type_name::<S>();
+    let system_type = system.system_type_id();
+    app.world_mut().schedule_scope(schedule, |world, schedule| {
+        schedule.initialize(world).unwrap();
+        let matching_systems: Vec<_> = schedule
+            .systems()
+            .unwrap()
+            .filter(|&(_, schedule_system)| schedule_system.system_type() == system_type)
+            .map(|(key, _)| key)
+            .collect();
+        assert_eq!(
+            matching_systems.len(),
+            1,
+            "Expected `{system_name}` to be in the schedule exactly once"
+        );
+        let systems_in_set = schedule
+            .graph()
+            .systems_in_set(ImageFontSet.intern())
+            .unwrap();
+        assert!(
+            systems_in_set.contains(&matching_systems[0]),
+            "Expected `{system_name}` to be in `ImageFontSet`"
+        );
+    });
 }
 
 /// The standard width of characters in the monospace font.

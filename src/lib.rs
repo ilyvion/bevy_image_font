@@ -13,7 +13,7 @@ use bevy_ecs::{
     change_detection::DetectChangesMut as _,
     component::Component,
     message::MessageReader,
-    schedule::SystemSet,
+    schedule::{IntoScheduleConfigs as _, SystemSet},
     system::{Local, Query},
 };
 use bevy_image::{Image, ImageSampler, TextureAtlasLayout};
@@ -79,7 +79,10 @@ impl Plugin for ImageFontPlugin {
             .init_asset_loader::<loader::ImageFontLoader>()
             .register_type::<ImageFont>()
             .register_type::<ImageFontText>()
-            .add_systems(PostUpdate, sync_texts_with_font_changes);
+            .add_systems(
+                PostUpdate,
+                sync_texts_with_font_changes.in_set(ImageFontSet),
+            );
 
         #[cfg(feature = "rendered")]
         app.add_plugins(rendered::RenderedPlugin);
