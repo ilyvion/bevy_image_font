@@ -319,6 +319,8 @@ fn render_text_to_image_holder<'borrow>(
 ///   [`ImageFontRenderError::InvalidFontHeight`]. A font height small enough
 ///   to scale the image below 1 pixel gives an image at least 1 pixel wide and
 ///   tall.
+/// - Text whose glyphs take up no space gives an image at least 1 pixel wide
+///   and tall.
 /// - The function leverages [`RenderContext`] to compute character positions
 ///   and generate the image.
 fn render_text_to_image(
@@ -353,6 +355,8 @@ fn render_text_to_image(
     }
 
     let (placements, size) = layout_glyphs(&render_context);
+    // A texture must be at least 1×1.
+    let size = size.max(UVec2::ONE);
     let mut output_image = image::RgbaImage::new(size.x, size.y);
     let pages = textures
         .iter()
@@ -1005,6 +1009,20 @@ mod tests {
         let image = render(&app, &font, ".", Some(1e-6)).unwrap();
 
         assert_eq!(image.dimensions(), (1, 1));
+    }
+
+    #[test]
+    fn text_without_width_renders_at_least_one_pixel() {
+        // `A` is 0 pixels wide and advances 0, in a font 2 pixels tall.
+        let (mut app, font) = initialize_app_with_font("tests/zero_width.txt.fnt");
+        wait_until_loaded(&mut app, &font);
+
+        let image = render(&app, &font, "AA", None).unwrap();
+        assert_eq!(image.dimensions(), (1, 2));
+        assert!(image.pixels().all(|pixel| pixel[3] == 0), "{image:?}");
+
+        let image = render(&app, &font, "AA", Some(4.0)).unwrap();
+        assert_eq!(image.dimensions(), (2, 4));
     }
 
     #[test]

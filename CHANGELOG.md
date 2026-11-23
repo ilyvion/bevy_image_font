@@ -47,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pre-rendered text (`ImageFontPreRenderedText`, `ImageFontPreRenderedUiText`) with a font whose texture isn't 8-bit RGBA, such as a 16-bit PNG, now logs the new `ImageFontRenderError::UnsupportedTextureFormat` error and keeps the text's previous image, instead of drawing garbled glyphs.
 - `ImageFontSet` now contains all of the plugin's systems, so configuring the set, such as disabling it with a run condition or ordering your systems around it, also applies to the system that updates texts when their font changes and to the `gizmos` feature's drawing systems.
 - `ImageFontSpriteText` characters are drawn at their new position in the same frame the text is set up or changed. They used to sometimes show at their old position, or at the origin, for one frame.
+- Pre-rendered text made only of characters with no width and no advance now renders as a transparent image at least 1 pixel wide, instead of an empty image the GPU rejects.
 
 ### Removed
 
