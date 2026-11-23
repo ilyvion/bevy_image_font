@@ -358,7 +358,7 @@ fn render_text_to_image(
         .iter()
         .enumerate()
         .map(|(page_index, texture)| {
-            let texture = image_buffer(texture).ok_or(ImageFontRenderError::UnknownError)?;
+            let texture = image_buffer(texture)?;
             let outline_layers = colors
                 .outline_color
                 .and_then(|_| image_font.page_outline_layers(page_index))
@@ -367,7 +367,7 @@ fn render_text_to_image(
                         let image = images
                             .get(handle)
                             .ok_or(ImageFontRenderError::MissingTextureAsset)?;
-                        image_buffer(image).ok_or(ImageFontRenderError::UnknownError)
+                        image_buffer(image)
                     };
                     Ok::<_, ImageFontRenderError>(OutlineLayerBuffers {
                         outline: layer(&layers.outline)?,
@@ -499,11 +499,26 @@ fn layout_glyphs(render_context: &RenderContext<'_>) -> (Vec<GlyphPlacement>, UV
 /// A font image's pixel data, borrowed from its [`Image`].
 type ImageBufferRef<'image> = ImageBuffer<Rgba<u8>, &'image [u8]>;
 
-/// Borrows the pixel data of an 8-bit RGBA image, or returns `None` if it has
-/// no data.
-fn image_buffer(image: &Image) -> Option<ImageBufferRef<'_>> {
-    let data = image.data.as_ref()?;
+/// Borrows the pixel data of an 8-bit RGBA image.
+///
+/// # Errors
+/// Returns [`ImageFontRenderError::UnsupportedTextureFormat`] if the image is
+/// not 8-bit RGBA, and [`ImageFontRenderError::UnknownError`] if it has no
+/// data or too little of it.
+fn image_buffer(image: &Image) -> Result<ImageBufferRef<'_>, ImageFontRenderError> {
+    let format = image.texture_descriptor.format;
+    if !matches!(
+        format,
+        TextureFormat::Rgba8Unorm | TextureFormat::Rgba8UnormSrgb
+    ) {
+        return Err(ImageFontRenderError::UnsupportedTextureFormat(format));
+    }
+    let data = image
+        .data
+        .as_ref()
+        .ok_or(ImageFontRenderError::UnknownError)?;
     ImageBuffer::from_raw(image.width(), image.height(), data.as_slice())
+        .ok_or(ImageFontRenderError::UnknownError)
 }
 
 /// The images glyphs on one font texture are drawn from.
@@ -701,6 +716,11 @@ pub enum ImageFontRenderError {
     /// greater than zero.
     #[error("font height {0} is not a finite number greater than zero")]
     InvalidFontHeight(f32),
+
+    /// A font texture is not in an 8-bit RGBA format, the only formats text
+    /// can be pre-rendered from.
+    #[error("font texture format {0:?} is not 8-bit RGBA")]
+    UnsupportedTextureFormat(TextureFormat),
 }
 
 /// A helper trait that represents types that can hold an image handle.
@@ -1024,6 +1044,77 @@ mod tests {
 
         assert!(
             matches!(result, Err(ImageFontRenderError::MissingTextureAsset)),
+            "{result:?}"
+        );
+    }
+
+    /// Converts the image behind `handle` to 16-bit RGBA, with each 8-bit
+    /// value `v` stored as `v * 257`.
+    fn convert_to_16_bit(app: &mut App, handle: &Handle<Image>) {
+        let mut images = app.world_mut().resource_mut::<Assets<Image>>();
+        let mut image = images.get_mut(handle).unwrap();
+        let data = image.data.as_mut().unwrap();
+        *data = data.iter().flat_map(|&value| [value, value]).collect();
+        image.texture_descriptor.format = TextureFormat::Rgba16Unorm;
+    }
+
+    #[test]
+    fn non_8_bit_rgba_font_texture_fails_to_render() {
+        let (mut app, font) = initialize_app_with_loaded_example_font(ExampleFont::BmFont);
+        let texture = app
+            .world()
+            .resource::<Assets<ImageFont>>()
+            .get(&font)
+            .unwrap()
+            .textures[0]
+            .clone();
+        convert_to_16_bit(&mut app, &texture);
+
+        let result = render(&app, &font, "Hello", None);
+
+        assert!(
+            matches!(
+                result,
+                Err(ImageFontRenderError::UnsupportedTextureFormat(
+                    TextureFormat::Rgba16Unorm
+                ))
+            ),
+            "{result:?}"
+        );
+    }
+
+    #[test]
+    fn non_8_bit_rgba_outline_layer_fails_to_render() {
+        let (mut app, font) = outline_font();
+        let outline = app
+            .world()
+            .resource::<Assets<ImageFont>>()
+            .get(&font)
+            .unwrap()
+            .page_outline_layers(0)
+            .unwrap()
+            .outline
+            .clone();
+        convert_to_16_bit(&mut app, &outline);
+
+        let result = render_with_colors(
+            &app,
+            &font,
+            "A",
+            None,
+            TextColors {
+                color: css::BLUE.into(),
+                outline_color: Some(css::RED.into()),
+            },
+        );
+
+        assert!(
+            matches!(
+                result,
+                Err(ImageFontRenderError::UnsupportedTextureFormat(
+                    TextureFormat::Rgba16Unorm
+                ))
+            ),
             "{result:?}"
         );
     }

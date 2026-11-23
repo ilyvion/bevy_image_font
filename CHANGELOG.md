@@ -43,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - BMFont fonts with many characters and kerning pairs load much faster. The time spent on kerning grew with the number of characters times the number of kerning pairs; it now grows in step with their sum.
 - A BMFont file whose name doesn't end in `.txt.fnt`, `.xml.fnt` or `.bin.fnt`, but that is loaded with `BmFontLoader` anyway, for example through a `.meta` file, now fails to load with the new `BmFontLoadError::UnsupportedExtension` error instead of crashing the font loader.
 - `ImageFontSpriteText` logs the "ImageFont asset … is not loaded" error once per text while its font is missing. A new text whose font was still loading used to log it again every time the text changed. If the text's font goes missing again after it has rendered, for example when the text switches to a font that isn't loaded yet, the error is logged again.
+- Pre-rendered text (`ImageFontPreRenderedText`, `ImageFontPreRenderedUiText`) with a font whose texture isn't 8-bit RGBA, such as a 16-bit PNG, now logs the new `ImageFontRenderError::UnsupportedTextureFormat` error and keeps the text's previous image, instead of drawing garbled glyphs.
 
 ### Removed
 
